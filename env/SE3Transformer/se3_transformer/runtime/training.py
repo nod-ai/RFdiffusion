@@ -67,7 +67,7 @@ def save_state(model: nn.Module, optimizer: Optimizer, epoch: int, path: pathlib
 
 def load_state(model: nn.Module, optimizer: Optimizer, path: pathlib.Path, callbacks: List[BaseCallback]):
     """ Loads model, optimizer and epoch states from path """
-    checkpoint = torch.load(str(path), map_location={'cuda:0': f'cuda:{get_local_rank()}'})
+    checkpoint = torch.load(str(path), map_location={'cuda:0': f'cuda:{get_local_rank()}'}, weights_only=True)
     if isinstance(model, DistributedDataParallel):
         model.module.load_state_dict(checkpoint['state_dict'])
     else:
@@ -90,7 +90,7 @@ def train_epoch(model, train_dataloader, loss_fn, epoch_idx, grad_scaler, optimi
         for callback in callbacks:
             callback.on_batch_start()
 
-        with torch.cuda.amp.autocast(enabled=args.amp):
+        with torch.amp.autocast('cuda', enabled=args.amp):
             pred = model(*inputs)
             loss = loss_fn(pred, target) / args.accumulate_grad_batches
 
@@ -127,7 +127,7 @@ def train(model: nn.Module,
         model._set_static_graph()
 
     model.train()
-    grad_scaler = torch.cuda.amp.GradScaler(enabled=args.amp)
+    grad_scaler = torch.amp.GradScaler('cuda', enabled=args.amp)
     if args.optimizer == 'adam':
         optimizer = FusedAdam(model.parameters(), lr=args.learning_rate, betas=(args.momentum, 0.999),
                               weight_decay=args.weight_decay)

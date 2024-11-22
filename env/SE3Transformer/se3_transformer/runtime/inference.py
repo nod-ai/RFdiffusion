@@ -49,7 +49,7 @@ def evaluate(model: nn.Module,
         for callback in callbacks:
             callback.on_batch_start()
 
-        with torch.cuda.amp.autocast(enabled=args.amp):
+        with torch.amp.autocast('cuda', enabled=args.amp):
             pred = model(*input)
 
             for callback in callbacks:
@@ -104,7 +104,7 @@ if __name__ == '__main__':
 
     model.to(device=torch.cuda.current_device())
     if args.load_ckpt_path is not None:
-        checkpoint = torch.load(str(args.load_ckpt_path), map_location={'cuda:0': f'cuda:{local_rank}'})
+        checkpoint = torch.load(str(args.load_ckpt_path), map_location={'cuda:0': f'cuda:{local_rank}'}, weights_only=True)
         model.load_state_dict(checkpoint['state_dict'])
 
     if is_distributed:

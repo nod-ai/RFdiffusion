@@ -771,9 +771,9 @@ class BlockAdjacency:
         """
         Given at item, get the ss tensor and block adjacency matrix for that item
         """
-        ss = torch.load(os.path.join(self.scaffold_dir, f'{item.split(".")[0]}_ss.pt'))
+        ss = torch.load(os.path.join(self.scaffold_dir, f'{item.split(".")[0]}_ss.pt'), weights_only=True)
         adj = torch.load(
-            os.path.join(self.scaffold_dir, f'{item.split(".")[0]}_adj.pt')
+            os.path.join(self.scaffold_dir, f'{item.split(".")[0]}_adj.pt'), weights_only=True
         )
 
         return ss, adj
