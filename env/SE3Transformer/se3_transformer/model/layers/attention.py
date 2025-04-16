@@ -1,4 +1,4 @@
-# Copyright (c) 2021, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# Copyright (c) 2021-2022, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -18,7 +18,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 #
-# SPDX-FileCopyrightText: Copyright (c) 2021 NVIDIA CORPORATION & AFFILIATES
+# SPDX-FileCopyrightText: Copyright (c) 2021-2022 NVIDIA CORPORATION & AFFILIATES
 # SPDX-License-Identifier: MIT
 
 import dgl
@@ -79,7 +79,7 @@ class AttentionSE3(nn.Module):
             with nvtx_range('attention dot product + softmax'):
                 # Compute attention weights (softmax of inner product between key and query)
                 edge_weights = dgl.ops.e_dot_v(graph, key, query).squeeze(-1)
-                edge_weights /= np.sqrt(self.key_fiber.num_features)
+                edge_weights = edge_weights / np.sqrt(self.key_fiber.num_features)
                 edge_weights = edge_softmax(graph, edge_weights)
                 edge_weights = edge_weights[..., None, None]
 
@@ -116,6 +116,7 @@ class AttentionBlockSE3(nn.Module):
             use_layer_norm: bool = False,
             max_degree: bool = 4,
             fuse_level: ConvSE3FuseLevel = ConvSE3FuseLevel.FULL,
+            low_memory: bool = False,
             **kwargs
     ):
         """
@@ -140,7 +141,7 @@ class AttentionBlockSE3(nn.Module):
 
         self.to_key_value = ConvSE3(fiber_in, value_fiber + key_query_fiber, pool=False, fiber_edge=fiber_edge,
                                     use_layer_norm=use_layer_norm, max_degree=max_degree, fuse_level=fuse_level,
-                                    allow_fused_output=True)
+                                    allow_fused_output=True, low_memory=low_memory)
         self.to_query = LinearSE3(fiber_in, key_query_fiber)
         self.attention = AttentionSE3(num_heads, key_query_fiber, value_fiber)
         self.project = LinearSE3(value_fiber + fiber_in, fiber_out)
@@ -159,7 +160,7 @@ class AttentionBlockSE3(nn.Module):
 
             with nvtx_range('queries'):
                 query = self.to_query(node_features)
-            
+
             z = self.attention(value, key, query, graph)
             z_concat = aggregate_residual(node_features, z, 'cat')
             return self.project(z_concat)
