@@ -179,7 +179,7 @@ class Sampler:
         print('This is inf_conf.ckpt_path')
         print(self.ckpt_path)
         self.ckpt  = torch.load(
-            self.ckpt_path, map_location=self.device)
+            self.ckpt_path, map_location=self.device, weights_only=True)
 
     def assemble_config_from_chk(self) -> None:
         """
@@ -759,12 +759,12 @@ class ScaffoldedSampler(SelfConditioning):
             self.target = iu.Target(conf.scaffoldguided, conf.ppi.hotspot_res)
             self.target_pdb = self.target.get_target()
             if conf.scaffoldguided.target_ss is not None:
-                self.target_ss = torch.load(conf.scaffoldguided.target_ss).long()
+                self.target_ss = torch.load(conf.scaffoldguided.target_ss, weights_only=True).long()
                 self.target_ss = torch.nn.functional.one_hot(self.target_ss, num_classes=4)
                 if self._conf.scaffoldguided.contig_crop is not None:
                     self.target_ss=self.target_ss[self.target_pdb['crop_mask']]
             if conf.scaffoldguided.target_adj is not None:
-                self.target_adj = torch.load(conf.scaffoldguided.target_adj).long()
+                self.target_adj = torch.load(conf.scaffoldguided.target_adj, weights_only=True).long()
                 self.target_adj=torch.nn.functional.one_hot(self.target_adj, num_classes=3)
                 if self._conf.scaffoldguided.contig_crop is not None:
                         self.target_adj=self.target_adj[self.target_pdb['crop_mask']]
