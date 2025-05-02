@@ -118,13 +118,41 @@ def make_full_graph(xyz, pair, idx, top_k=64, kmin=9):
     B, L = xyz.shape[:2]
     device = xyz.device
 
-    # seq sep
-    sep = idx[:,None,:] - idx[:,:,None]
-    b,i,j = torch.where(sep.abs() > 0)
+    # We do some fancy math here to avoid the original implementation which
+    # forces a device-host sync and has siginificant negative impact on
+    # performance. The goal is to get the indices of the off-diagonal elements:
+    # every node's connection to every other node (hence "full graph").
+
+    # The original implementation is similar to the one used for topk:
+    # sep = idx[:,None,:] - idx[:,:,None]
+    # b,i,j = torch.where(sep.abs() > 0)
+
+    # If B is 2 and L is 4, we have 2*4*(4-1) = 24 indices:
+
+    # b = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    # i = [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3]
+    # j = [1, 2, 3, 0, 2, 3, 0, 1, 3, 0, 1, 2, 1, 2, 3, 0, 2, 3, 0, 1, 3, 0, 1, 2]
+
+    b = torch.arange(B, device=device).reshape(-1, 1, 1).expand(-1, L, L-1).flatten()
+    i = torch.arange(L, device=device).reshape(1, -1, 1).expand(B, -1, L-1).flatten()
+
+    # L x L matrix: [0 ... L] repeated L times
+    full = torch.arange(L, device=device).reshape(1, -1).expand(L, -1)
+
+    # Extract only the off-diagonal elements of the matrix. We strip off the
+    # first entry (which is the first diagonal entry) and then create rows that
+    # go from the first non-diagonal entry to the next diagonal entry. These
+    # rows are one longer that of the original square matrix. Note that this
+    # works because n*n - 1 = (n+1)*(n-1) (i.e. the length of the square matrix
+    # with the first element stripped off is the length of our new matrix). Then
+    # we strip off this last column that is now all diagonal entries. Finally,
+    # we repeat B times as the indices for each batch are identical. See
+    # https://discuss.pytorch.org/t/keep-off-diagonal-elements-only-from-square-matrix/54379
+    j = full.flatten()[1:].reshape(L-1, L+1)[:, :-1].unsqueeze(0).expand(B, -1, -1).flatten()
 
     src = b*L+i
     tgt = b*L+j
-    G = dgl.graph((src, tgt), num_nodes=B*L).to(device)
+    G = dgl.graph((src, tgt), num_nodes=B*L, device=device)
     G.edata['rel_pos'] = (xyz[b,j,:] - xyz[b,i,:]).detach() # no gradient through basis function
 
     return G, pair[b,i,j][...,None]
