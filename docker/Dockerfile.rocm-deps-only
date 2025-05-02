@@ -1,0 +1,14 @@
+# A Docker image for running RFDiffusion using DGL on ROCm. Does not include
+# RFdiffusion itself. You can mount a docker volume into the container with the
+# RFdiffusion source.
+
+FROM gcmn/dgl:rocm-complete
+
+WORKDIR /pip
+# RFdiffusion deps
+RUN pip install hydra-core pyrsistent e3nn==0.3.3 decorator==5.1.0 \
+    && rm -rf /pip
+
+ENV PYTHONWARNINGS="ignore::UserWarning,ignore::DeprecationWarning,ignore::PendingDeprecationWarning,ignore::ImportWarning,ignore::ResourceWarning,ignore::FutureWarning"
+
+WORKDIR /
