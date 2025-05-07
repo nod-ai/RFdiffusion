@@ -570,7 +570,7 @@ class Sampler:
         pair_prev = None
         state_prev = None
 
-        with torch.no_grad():
+        with torch.inference_mode():
             msa_prev, pair_prev, px0, state_prev, alpha, logits, plddt = self.model(msa_masked,
                                 msa_full,
                                 seq_in,
@@ -660,7 +660,7 @@ class SelfConditioning(Sampler):
         ### Forward Pass ###
         ####################
 
-        with torch.no_grad():
+        with torch.inference_mode():
             msa_prev, pair_prev, px0, state_prev, alpha, logits, plddt = self.model(msa_masked,
                                 msa_full,
                                 seq_in,
