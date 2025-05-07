@@ -17,7 +17,7 @@ def hat(v):
 
 # Logarithmic map from SO(3) to R^3 (i.e. rotation vector)
 def Log(R): return torch.tensor(Rotation.from_matrix(R.numpy()).as_rotvec())
-    
+
 # logarithmic map from SO(3) to so(3), this is the matrix logarithm
 def log(R): return hat(Log(R))
 
@@ -62,7 +62,7 @@ def d_logf_d_omega(omega, t, L=L_default):
 def igso3_density(Rt, t, L=L_default):
     return f_igso3(torch.tensor(Omega(Rt)), t, L).numpy()
 
-def igso3_density_angle(omega, t, L=L_default): 
+def igso3_density_angle(omega, t, L=L_default):
     return f_igso3(torch.tensor(omega), t, L).numpy()*(1-np.cos(omega))/np.pi
 
 # grad_R log IGSO3(R; I_3, t)

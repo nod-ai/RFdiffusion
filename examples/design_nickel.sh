@@ -5,7 +5,7 @@
 # We then apply potentials to promote compact structures
 # This external potential promotes contacts both within (with a relative weight of 1) and between chains (relative weight 0.06)
 # We specify that we want to apply these potentials to all chains, with a guide scale of 2.0 (a sensible starting point)
-# We decay this potential with quadratic form, so that it is applied more strongly initially 
+# We decay this potential with quadratic form, so that it is applied more strongly initially
 # We then describe the protein we want to make, with a contig input
 # The input pdb contains four copies of the motif, arranged in a C4 symmetric arrangement around the symmetry (Z) axis
 # These four copies are residues A2-4, A7-9, A12-14, and A17-19

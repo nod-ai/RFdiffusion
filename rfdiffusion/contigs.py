@@ -138,13 +138,13 @@ class ContigMap:
         This is for the case that e.g. you have a sequence, but don't know the structure (like an IDR), but
         want to specify the secondary structure of this sequence.
         Making this compatible with the contigmap object allows all the variable length stuff to be handled.
-        
+
         The logic:
         Secondary structure is provided at the command line, using the following three flags:
             inpaint_str_helix
             inpaint_str_strand
             inpaint_str_loop
-        
+
         These are so named because they pertain to the region of the input pdb that you have applied inpaint_str to
         In other words, any part of the input protein you are masking the structure of, you can specify the secondary structure of.
         However, you can't specify the secondary structure of a region you're not applying inpaint_str to, as this doesn't make sense.

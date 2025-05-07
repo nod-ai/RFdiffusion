@@ -13,7 +13,7 @@ PARAMS = {
 # ============================================================
 def get_pair_dist(a, b):
     """calculate pair distances between two sets of points
-    
+
     Parameters
     ----------
     a,b : pytorch tensors of shape [batch,nres,3]
@@ -30,7 +30,7 @@ def get_pair_dist(a, b):
 # ============================================================
 def get_ang(a, b, c):
     """calculate planar angles for all consecutive triples (a[i],b[i],c[i])
-    from Cartesian coordinates of three sets of atoms a,b,c 
+    from Cartesian coordinates of three sets of atoms a,b,c
 
     Parameters
     ----------
@@ -86,9 +86,9 @@ def get_dih(a, b, c, d):
 
 # ============================================================
 def xyz_to_c6d(xyz, params=PARAMS):
-    """convert cartesian coordinates into 2d distance 
+    """convert cartesian coordinates into 2d distance
     and orientation maps
-    
+
     Parameters
     ----------
     xyz : pytorch tensor of shape [batch,nres,3,3]
@@ -96,9 +96,9 @@ def xyz_to_c6d(xyz, params=PARAMS):
     Returns
     -------
     c6d : pytorch tensor of shape [batch,nres,nres,4]
-          stores stacked dist,omega,theta,phi 2D maps 
+          stores stacked dist,omega,theta,phi 2D maps
     """
-    
+
     batch = xyz.shape[0]
     nres = xyz.shape[1]
 
@@ -122,15 +122,15 @@ def xyz_to_c6d(xyz, params=PARAMS):
 
     # fix long-range distances
     c6d[...,0][c6d[...,0]>=params['DMAX']] = 999.9
-    
+
     mask = torch.zeros((batch, nres,nres), dtype=xyz.dtype, device=xyz.device)
     mask[b,i,j] = 1.0
     return c6d, mask
-    
+
 def xyz_to_t2d(xyz_t, params=PARAMS):
-    """convert template cartesian coordinates into 2d distance 
+    """convert template cartesian coordinates into 2d distance
     and orientation maps
-    
+
     Parameters
     ----------
     xyz_t : pytorch tensor of shape [batch,templ,nres,3,3]
@@ -139,7 +139,7 @@ def xyz_to_t2d(xyz_t, params=PARAMS):
     Returns
     -------
     t2d : pytorch tensor of shape [batch,nres,nres,37+6+3]
-          stores stacked dist,omega,theta,phi 2D maps 
+          stores stacked dist,omega,theta,phi 2D maps
     """
     B, T, L = xyz_t.shape[:3]
     c6d, mask = xyz_to_c6d(xyz_t[:,:,:,:3].view(B*T,L,3,3), params=params)
@@ -170,7 +170,7 @@ def xyz_to_chi1(xyz_t):
     '''
     B, T, L = xyz_t.shape[:3]
     xyz_t = xyz_t.reshape(B*T, L, 14, 3)
-        
+
     # chi1 angle: N, CA, CB, CG
     chi1 = get_dih(xyz_t[:,:,0], xyz_t[:,:,1], xyz_t[:,:,4], xyz_t[:,:,5]) # (B*T, L)
     cos_chi1 = torch.cos(chi1)
@@ -246,7 +246,7 @@ def dist_to_bins(dist,params=PARAMS):
 
     db[db<0] = 0
     db[db>params['DBINS']] = params['DBINS']
-    
+
     return db.long()
 
 
@@ -265,19 +265,19 @@ def c6d_to_bins2(c6d, same_chain, negative=False, params=PARAMS):
 
     # put all d<dmin into one bin
     db[db<0] = 0
-    
+
     # synchronize no-contact bins
     db[db>params['DBINS']] = params['DBINS']
     ob[db==params['DBINS']] = params['ABINS']
     tb[db==params['DBINS']] = params['ABINS']
     pb[db==params['DBINS']] = params['ABINS']//2
-    
+
     if negative:
         db = torch.where(same_chain.bool(), db.long(), params['DBINS'])
         ob = torch.where(same_chain.bool(), ob.long(), params['ABINS'])
         tb = torch.where(same_chain.bool(), tb.long(), params['ABINS'])
         pb = torch.where(same_chain.bool(), pb.long(), params['ABINS']//2)
-    
+
     return torch.stack([db,ob,tb,pb],axis=-1).long()
 
 def get_init_xyz(xyz_t):

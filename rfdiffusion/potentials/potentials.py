@@ -1,5 +1,5 @@
 import torch
-import numpy as np 
+import numpy as np
 from rfdiffusion.util import generate_Cbeta
 
 class Potential:
@@ -14,7 +14,7 @@ class Potential:
 
             Args:
                 xyz (torch.tensor, size: [L,27,3]: The current coordinates of the sample
-            
+
             Returns:
                 potential (torch.tensor, size: [1]): A potential whose value will be MAXIMIZED
                                                      by taking a step along it's gradient
@@ -60,7 +60,7 @@ class binder_ROG(Potential):
         self.weight    = weight
 
     def compute(self, xyz):
-        
+
         # Only look at binder residues
         Ca = xyz[:self.binderlen,1] # [Lb,3]
 
@@ -93,7 +93,7 @@ class dimer_ROG(Potential):
 
         # Only look at monomer 1 residues
         Ca_m1 = xyz[:self.binderlen,1] # [Lb,3]
-        
+
         # Only look at monomer 2 residues
         Ca_m2 = xyz[self.binderlen:,1] # [Lb,3]
 
@@ -118,7 +118,7 @@ class dimer_ROG(Potential):
 class binder_ncontacts(Potential):
     '''
         Differentiable way to maximise number of contacts within a protein
-        
+
         Motivation is given here: https://www.plumed.org/doc-v2.7/user-doc/html/_c_o_o_r_d_i_n_a_t_i_o_n.html
 
     '''
@@ -134,14 +134,14 @@ class binder_ncontacts(Potential):
 
         # Only look at binder Ca residues
         Ca = xyz[:self.binderlen,1] # [Lb,3]
-        
+
         #cdist needs a batch dimension - NRB
         dgram = torch.cdist(Ca[None,...].contiguous(), Ca[None,...].contiguous(), p=2) # [1,Lb,Lb]
         divide_by_r_0 = (dgram - self.d_0) / self.r_0
         numerator = torch.pow(divide_by_r_0,6)
         denominator = torch.pow(divide_by_r_0,12)
         binder_ncontacts = (1 - numerator) / (1 - denominator)
-        
+
         print("BINDER CONTACTS:", binder_ncontacts.sum())
         #Potential value is the average of both radii of gyration (is avg. the best way to do this?)
         return self.weight * binder_ncontacts.sum()
@@ -150,7 +150,7 @@ class interface_ncontacts(Potential):
 
     '''
         Differentiable way to maximise number of contacts between binder and target
-        
+
         Motivation is given here: https://www.plumed.org/doc-v2.7/user-doc/html/_c_o_o_r_d_i_n_a_t_i_o_n.html
 
         Author: PV
@@ -222,45 +222,45 @@ class monomer_contacts(Potential):
 
 class olig_contacts(Potential):
     """
-    Applies PV's num contacts potential within/between chains in symmetric oligomers 
+    Applies PV's num contacts potential within/between chains in symmetric oligomers
 
-    Author: DJ 
+    Author: DJ
     """
 
-    def __init__(self, 
-                 contact_matrix, 
-                 weight_intra=1, 
+    def __init__(self,
+                 contact_matrix,
+                 weight_intra=1,
                  weight_inter=1,
                  r_0=8, d_0=2):
         """
         Parameters:
             chain_lengths (list, required): List of chain lengths, length is (Nchains)
 
-            contact_matrix (torch.tensor/np.array, required): 
-                square matrix of shape (Nchains,Nchains) whose (i,j) enry represents 
-                attractive (1), repulsive (-1), or non-existent (0) contact potentials 
+            contact_matrix (torch.tensor/np.array, required):
+                square matrix of shape (Nchains,Nchains) whose (i,j) enry represents
+                attractive (1), repulsive (-1), or non-existent (0) contact potentials
                 between chains in the complex
 
             weight (int/float, optional): Scaling/weighting factor
         """
         self.contact_matrix = contact_matrix
-        self.weight_intra = weight_intra 
-        self.weight_inter = weight_inter 
+        self.weight_intra = weight_intra
+        self.weight_inter = weight_inter
         self.r_0 = r_0
         self.d_0 = d_0
 
-        # check contact matrix only contains valid entries 
+        # check contact matrix only contains valid entries
         assert all([i in [-1,0,1] for i in contact_matrix.flatten()]), 'Contact matrix must contain only 0, 1, or -1 in entries'
-        # assert the matrix is square and symmetric 
-        shape = contact_matrix.shape 
-        assert len(shape) == 2 
+        # assert the matrix is square and symmetric
+        shape = contact_matrix.shape
+        assert len(shape) == 2
         assert shape[0] == shape[1]
         for i in range(shape[0]):
             for j in range(shape[1]):
                 assert contact_matrix[i,j] == contact_matrix[j,i]
         self.nchain=shape[0]
 
-         
+
     def _get_idx(self,i,L):
         """
         Returns the zero-indexed indices of the residues in chain i
@@ -273,7 +273,7 @@ class olig_contacts(Potential):
     def compute(self, xyz):
         """
         Iterate through the contact matrix, compute contact potentials between chains that need it,
-        and negate contacts for any 
+        and negate contacts for any
         """
         L = xyz.shape[0]
 
@@ -281,15 +281,15 @@ class olig_contacts(Potential):
         start = 0
         for i in range(self.nchain):
             for j in range(self.nchain):
-                # only compute for upper triangle, disregard zeros in contact matrix 
+                # only compute for upper triangle, disregard zeros in contact matrix
                 if (i <= j) and (self.contact_matrix[i,j] != 0):
 
-                    # get the indices for these two chains 
+                    # get the indices for these two chains
                     idx_i = self._get_idx(i,L)
                     idx_j = self._get_idx(j,L)
 
-                    Ca_i = xyz[idx_i,1]  # slice out crds for this chain 
-                    Ca_j = xyz[idx_j,1]  # slice out crds for that chain 
+                    Ca_i = xyz[idx_i,1]  # slice out crds for this chain
+                    Ca_j = xyz[idx_j,1]  # slice out crds for that chain
                     dgram           = torch.cdist(Ca_i[None,...].contiguous(), Ca_j[None,...].contiguous(), p=2) # [1,Lb,Lb]
 
                     divide_by_r_0   = (dgram - self.d_0) / self.r_0
@@ -297,19 +297,19 @@ class olig_contacts(Potential):
                     denominator     = torch.pow(divide_by_r_0,12)
                     ncontacts       = (1 - numerator) / (1 - denominator)
 
-                    # weight, don't double count intra 
+                    # weight, don't double count intra
                     scalar = (i==j)*self.weight_intra/2 + (i!=j)*self.weight_inter
 
-                    #                 contacts              attr/repuls          relative weights 
-                    all_contacts += ncontacts.sum() * self.contact_matrix[i,j] * scalar 
+                    #                 contacts              attr/repuls          relative weights
+                    all_contacts += ncontacts.sum() * self.contact_matrix[i,j] * scalar
 
-        return all_contacts 
-                    
+        return all_contacts
+
 def get_damped_lj(r_min, r_lin,p1=6,p2=12):
-    
+
     y_at_r_lin = lj(r_lin, r_min, p1, p2)
     ydot_at_r_lin = lj_grad(r_lin, r_min,p1,p2)
-    
+
     def inner(dgram):
         return (dgram < r_lin) * (ydot_at_r_lin * (dgram - r_lin) + y_at_r_lin) + (dgram >= r_lin) * lj(dgram, r_min, p1, p2)
     return inner
@@ -333,7 +333,7 @@ def contact_energy(dgram, d_0, r_0):
     divide_by_r_0 = (dgram - d_0) / r_0
     numerator = torch.pow(divide_by_r_0,6)
     denominator = torch.pow(divide_by_r_0,12)
-    
+
     ncontacts = (1 - numerator) / ((1 - denominator)).float()
     return - ncontacts
 
@@ -356,7 +356,7 @@ class substrate_contacts(Potential):
         self.weight    = weight
         self.d_0       = d_0
         self.eps       = eps
-        
+
         # motif frame coordinates
         # NOTE: these probably need to be set after sample_init() call, because the motif sequence position in design must be known
         self.motif_frame = None # [4,3] xyz coordinates from 4 atoms of input motif
@@ -372,13 +372,13 @@ class substrate_contacts(Potential):
 
 
     def compute(self, xyz):
-        
+
         # First, get random set of atoms
         # This operates on self.xyz_motif, which is assigned to this class in the model runner (for horrible plumbing reasons)
         self._grab_motif_residues(self.xyz_motif)
-        
+
         # for checking affine transformation is corect
-        first_distance = torch.sqrt(torch.sqrt(torch.sum(torch.square(self.motif_substrate_atoms[0] - self.motif_frame[0]), dim=-1))) 
+        first_distance = torch.sqrt(torch.sqrt(torch.sum(torch.square(self.motif_substrate_atoms[0] - self.motif_frame[0]), dim=-1)))
 
         # grab the coordinates of the corresponding atoms in the new frame using mapping
         res = torch.tensor([k[0] for k in self.motif_mapping])
@@ -389,7 +389,7 @@ class substrate_contacts(Potential):
         # apply affine transformation to substrate atoms
         substrate_atoms = torch.mm(A, self.motif_substrate_atoms.transpose(0,1)).transpose(0,1) + t
         second_distance = torch.sqrt(torch.sqrt(torch.sum(torch.square(new_frame[0] - substrate_atoms[0]), dim=-1)))
-        assert abs(first_distance - second_distance) < 0.01, "Alignment seems to be bad" 
+        assert abs(first_distance - second_distance) < 0.01, "Alignment seems to be bad"
         diffusion_mask = mask_expand(self.diffusion_mask, 1)
         Ca = xyz[~diffusion_mask, 1]
 
@@ -410,10 +410,10 @@ class substrate_contacts(Potential):
         Uses Simplex Affine Matrix (SAM) formula to recover affine transform between two sets of 4 xyz coordinates
         See: https://www.researchgate.net/publication/332410209_Beginner%27s_guide_to_mapping_simplexes_affinely
 
-        Args: 
+        Args:
         frame1 - 4 coordinates from starting frame [4,3]
         frame2 - 4 coordinates from ending frame [4,3]
-        
+
         Outputs:
         A - affine transformation matrix from frame1->frame2
         t - affine translation vector from frame1->frame2

@@ -3,7 +3,7 @@
 # Specifically, we're scaffolding site 5 from RSV-F protein
 # This is equivalent to the example in design_motifscaffolding.sh, except that we're adding the contigmap.inpaint_seq flag
 # The logic here is that only some of the amino acids are important for the function of the motif, and others can be redesigned.
-# This can promote better packing, as RFdiffusion is not forced to pack against specific (but unimportant) residues on the back-side of the motif  
+# This can promote better packing, as RFdiffusion is not forced to pack against specific (but unimportant) residues on the back-side of the motif
 # We specify the output path and input pdb (the RSV-F protein)
 # We specify the protein we want to build, with the contig input:
 #   - 10-40 residues (randomly sampled)
