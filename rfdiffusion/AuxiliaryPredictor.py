@@ -7,9 +7,9 @@ class DistanceNetwork(nn.Module):
         #
         self.proj_symm = nn.Linear(n_feat, 37*2)
         self.proj_asymm = nn.Linear(n_feat, 37+19)
-    
+
         self.reset_parameter()
-    
+
     def reset_parameter(self):
         # initialize linear layer for final logit prediction
         nn.init.zeros_(self.proj_symm.weight)
@@ -37,9 +37,9 @@ class MaskedTokenNetwork(nn.Module):
     def __init__(self, n_feat):
         super(MaskedTokenNetwork, self).__init__()
         self.proj = nn.Linear(n_feat, 21)
-        
+
         self.reset_parameter()
-    
+
     def reset_parameter(self):
         nn.init.zeros_(self.proj.weight)
         nn.init.zeros_(self.proj.bias)
@@ -81,7 +81,7 @@ class ExpResolvedNetwork(nn.Module):
 
     def forward(self, seq, state):
         B, L = seq.shape[:2]
-        
+
         seq = self.norm_msa(seq)
         state = self.norm_state(state)
         feat = torch.cat((seq, state), dim=-1)

@@ -168,7 +168,7 @@ To those who have used RFjoint inpainting, this might look familiar, but a littl
 The contig string allows you to specify a length range, but here, we just want a protein of 150aa in length, so you just specify [150-150]
 This will then run 10 diffusion trajectories, saving the outputs to your specified output folder.
 
-NB the first time you run RFdiffusion, it will take a while 'Calculating IGSO3'. Once it has done this, it'll be cached for future reference though! For an additional example of unconditional monomer generation, take a look at `./examples/design_unconditional.sh` in the repo! 
+NB the first time you run RFdiffusion, it will take a while 'Calculating IGSO3'. Once it has done this, it'll be cached for future reference though! For an additional example of unconditional monomer generation, take a look at `./examples/design_unconditional.sh` in the repo!
 
 ---
 ### Motif Scaffolding
@@ -185,7 +185,7 @@ RFdiffusion can be used to scaffold motifs, in a manner akin to [Constrained Hal
 When scaffolding protein motifs, we need a way of specifying that we want to scaffold some particular protein input (one or more segments from a `.pdb` file), and to be able to specify how we want these connected, and by how many residues, in the new scaffolded protein. What's more, we want to be able to sample different lengths of connecting protein, as we generally don't know *a priori* precisely how many residues we'll need to best scaffold a motif. This job of specifying inputs is handled by contigs, governed by the contigmap config in the hydra config. For those familiar with Constrained Hallucination or RFjoint Inpainting, the logic is very similar.
 Briefly:
 - Anything prefixed by a letter indicates that this is a motif, with the letter corresponding to the chain letter in the input pdb files. E.g. A10-25 pertains to residues ('A',10),('A',11)...('A',25) in the corresponding input pdb
-- Anything not prefixed by a letter indicates protein *to be built*. This can be input as a length range. These length ranges are randomly sampled each iteration of RFdiffusion inference. 
+- Anything not prefixed by a letter indicates protein *to be built*. This can be input as a length range. These length ranges are randomly sampled each iteration of RFdiffusion inference.
 - To specify chain breaks, we use `/0 `.
 
 In more detail, if we want to scaffold a motif, the input is just like RFjoint Inpainting, except needing to navigate the hydra config input. If we want to scaffold residues 10-25 on chain A a pdb, this would be done with `'contigmap.contigs=[5-15/A10-25/30-40]'`. This asks RFdiffusion to build 5-15 residues (randomly sampled at each inference cycle) N-terminally of A10-25 from the input pdb, followed by 30-40 residues (again, randomly sampled) to its C-terminus. If we wanted to ensure the length was always e.g. 55 residues, this can be specified with `contigmap.length=55-55`. You need to obviously also provide a path to your pdb file: `inference.input_pdb=path/to/file.pdb`. It doesn't matter if your input pdb has residues you *don't* want to scaffold - the contig map defines which residues in the pdb are actually used as the "motif". In other words, even if your pdb files has a B chain, and other residues on the A chain, *only* A10-25 will be provided to RFdiffusion.
@@ -200,7 +200,7 @@ Look at this carefully. `/0 ` is the indicator that we want a chain break. NOTE,
 An example of motif scaffolding can be found in `./examples/design_motifscaffolding.sh`.
 
 ### The "active site" model holds very small motifs in place
-In the RFdiffusion preprint we noted that for very small motifs, RFdiffusion has the tendency to not keep them perfectly fixed in the output. Therefore, for scaffolding minimalist sites such as enzyme active sites, we fine-tuned RFdiffusion on examples similar to these tasks, allowing it to hold smaller motifs better in place, and better generate *in silico* successes. If your input functional motif is very small, we reccomend using this model, which can easily be specified using the following syntax: 
+In the RFdiffusion preprint we noted that for very small motifs, RFdiffusion has the tendency to not keep them perfectly fixed in the output. Therefore, for scaffolding minimalist sites such as enzyme active sites, we fine-tuned RFdiffusion on examples similar to these tasks, allowing it to hold smaller motifs better in place, and better generate *in silico* successes. If your input functional motif is very small, we reccomend using this model, which can easily be specified using the following syntax:
 `inference.ckpt_override_path=models/ActiveSite_ckpt.pt`
 
 ### The `inpaint_seq` flag
@@ -210,18 +210,18 @@ To specify amino acids whose sequence should be hidden, use the following syntax
 ```
 'contigmap.inpaint_seq=[A1/A30-40]'
 ```
-Here, we're masking the residue identity of residue A1, and all residues between A30 and A40 (inclusive). 
+Here, we're masking the residue identity of residue A1, and all residues between A30 and A40 (inclusive).
 
 An example of executing motif scaffolding with the `contigmap.inpaint_seq` flag is located in `./examples/design_motifscaffolding_inpaintseq.sh`
 
 ### A note on `diffuser.T`
-RFdiffusion was originally trained with 200 discrete timesteps. However, recent improvements have allowed us to reduce the number of timesteps we need to use at inference time. In many cases, running with as few as approximately 20 steps provides outputs of equivalent *in silico* quality to running with 200 steps (providing a 10X speedup). The default is now set to 50 steps. Noting this is important for understanding the partial diffusion, described below. 
+RFdiffusion was originally trained with 200 discrete timesteps. However, recent improvements have allowed us to reduce the number of timesteps we need to use at inference time. In many cases, running with as few as approximately 20 steps provides outputs of equivalent *in silico* quality to running with 200 steps (providing a 10X speedup). The default is now set to 50 steps. Noting this is important for understanding the partial diffusion, described below.
 
 ---
 ### Partial diffusion
 
 Something we can do with diffusion is to partially noise and de-noise a structure, to get some diversity around a general fold. This can work really nicely (see [Vazquez-Torres et al., BioRxiv 2022](https://www.biorxiv.org/content/10.1101/2022.12.10.519862v4.abstract)).
-This is specified by using the diffuser.parial_T input, and setting a timestep to 'noise' to. 
+This is specified by using the diffuser.parial_T input, and setting a timestep to 'noise' to.
 <p align="center">
   <img src="./img/partial.png" alt="alt text" width="800px" align="middle"/>
 </p>
@@ -234,7 +234,7 @@ When doing partial diffusion, because we are now diffusing from a known structur
 ```
 The reason for this is that, if your input protein was only 80 amino acids, but you've specified a desired length of 100, we don't know where to diffuse those extra 20 amino acids from, and hence, they will not lie in the distribution that RFdiffusion has learned to denoise from.
 
-An example of partial diffusion can be found in `./examples/design_partialdiffusion.sh`! 
+An example of partial diffusion can be found in `./examples/design_partialdiffusion.sh`!
 
 You can also keep parts of the sequence of the diffused chain fixed, if you want. An example of why you might want to do this is in the context of helical peptide binding. If you've threaded a helical peptide sequence onto an ideal helix, and now want to diversify the complex, allowing the helix to be predicted now not as an ideal helix, you might do something like:
 
@@ -248,8 +248,8 @@ Note that the provide_seq option requires using a different model checkpoint, bu
 An example of partial diffusion with providing sequence in diffused regions can be found in `./examples/design_partialdiffusion_withseq.sh`. The same example specifying multiple sequence ranges can be found in `./examples/design_partialdiffusion_multipleseq.sh`.
 
 ---
-### Binder Design 
-Hopefully, it's now obvious how you might make a binder with diffusion! Indeed, RFdiffusion shows excellent *in silico* and experimental ability to design *de novo* binders. 
+### Binder Design
+Hopefully, it's now obvious how you might make a binder with diffusion! Indeed, RFdiffusion shows excellent *in silico* and experimental ability to design *de novo* binders.
 
 <p align="center">
   <img src="./img/binder.png" alt="alt text" width="950px" align="middle"/>
@@ -305,8 +305,8 @@ One of the most important parts of the binder design pipeline is a filtering ste
 
 ---
 
-### Fold Conditioning 
-Something that works really well is conditioning binder design (or monomer generation) on particular topologies. This is achieved by providing (partial) secondary structure and block adjacency information (to a model that has been trained to condition on this). 
+### Fold Conditioning
+Something that works really well is conditioning binder design (or monomer generation) on particular topologies. This is achieved by providing (partial) secondary structure and block adjacency information (to a model that has been trained to condition on this).
 <p align="center">
   <img src="./img/fold_cond.png" alt="alt text" width="950px" align="middle"/>
 </p>
@@ -336,7 +336,7 @@ scaffoldguided.target_pdb=True scaffoldguided.target_path=input_pdbs/insulin_tar
 
 To generate these block adjacency and secondary structure inputs, you can use the helper script.
 
-This will now generate 3-helix bundles to the insulin target. 
+This will now generate 3-helix bundles to the insulin target.
 
 For ppi, it's probably also worth adding this flag:
 
@@ -389,7 +389,7 @@ See the example in `examples/design_ppi_flexible_peptide_with_secondarystructure
 
 ---
 
-### Generation of Symmetric Oligomers 
+### Generation of Symmetric Oligomers
 We're going to switch gears from discussing PPI and look at another task at which RFdiffusion performs well on: symmetric oligomer design. This is done by symmetrising the noise we sample at t=T, and symmetrising the input at every timestep. We have currently implemented the following for use (with the others coming soon!):
 - Cyclic symmetry
 - Dihedral symmetry
@@ -414,7 +414,7 @@ More examples of designing oligomers can be found here: `./examples/design_cycli
 
 ---
 
-### Using Auxiliary Potentials 
+### Using Auxiliary Potentials
 Performing diffusion with symmetrized noise may give you the idea that we could use other external interventions during the denoising process to guide diffusion. One such intervention that we have implemented is auxiliary potentials. Auxiliary potentials can be very useful for guiding the inference process. E.g. whereas in RFjoint inpainting, we have little/no control over the final shape of an output, in diffusion we can readily force the network to make, for example, a well-packed protein.
 This is achieved in the updates we make at each step.
 
@@ -424,7 +424,7 @@ But, we want to be able to bias this update, to *push* the trajectory towards so
 
 The exact parameters used when applying these potentials matter. If you weight them too strongly, you're not going to end up with a good protein. Too weak, and they'll have little effect. We've explored these potentials in a few different scenarios, and have set sensible defaults, if you want to use them. But, if you feel like they're too weak/strong, or you just fancy exploring, do play with the parameters (in the `potentials` part of the config file).
 
-Potentials are specified as a list of strings with each string corresponding to a potential. The argument for potentials is `potentials.guiding_potentials`. Within the string per-potential arguments may be specified in the following syntax: `arg_name1:arg_value1,arg_name2:arg_value2,...,arg_nameN:arg_valueN`. The only argument that is required for each potential is the name of the potential that you wish to apply, the name of this argument is `type` as-in the type of potential you wish to use. Some potentials such as `olig_contacts` and `substrate_contacts` take global options such as `potentials.substrate`, see `config/inference/base.yml` for all the global arguments associated with potentials. Additionally, it is useful to have the effect of the potential "decay" throughout the trajectory, such that in the beginning the effect of the potential is 1x strength, and by the end is much weaker. These decays (`constant`,`linear`,`quadratic`,`cubic`) can be set with the `potentials.guide_decay` argument. 
+Potentials are specified as a list of strings with each string corresponding to a potential. The argument for potentials is `potentials.guiding_potentials`. Within the string per-potential arguments may be specified in the following syntax: `arg_name1:arg_value1,arg_name2:arg_value2,...,arg_nameN:arg_valueN`. The only argument that is required for each potential is the name of the potential that you wish to apply, the name of this argument is `type` as-in the type of potential you wish to use. Some potentials such as `olig_contacts` and `substrate_contacts` take global options such as `potentials.substrate`, see `config/inference/base.yml` for all the global arguments associated with potentials. Additionally, it is useful to have the effect of the potential "decay" throughout the trajectory, such that in the beginning the effect of the potential is 1x strength, and by the end is much weaker. These decays (`constant`,`linear`,`quadratic`,`cubic`) can be set with the `potentials.guide_decay` argument.
 
 Here's an example of how to specify a potential:
 
@@ -434,13 +434,13 @@ potentials.guiding_potentials=[\"type:olig_contacts,weight_intra:1,weight_inter:
 
 We are still fully characterising how/when to use potentials, and we strongly recommend exploring different parameters yourself, as they are clearly somewhat case-dependent. So far, it is clear that they can be helpful for motif scaffolding and symmetric oligomer generation. However, they seem to interact weirdly with hotspot residues in PPI. We think we know why this is, and will work in the coming months to write better potentials for PPI. And please note, it is often good practice to start with *no potentials* as a baseline, then slowly increase their strength. For the oligomer contacts potentials, start with the ones provided in the examples, and note that the `intra` chain potential often should be higher than the `inter` chain potential.
 
-We have already implemented several potentials but it is relatively straightforward to add more, if you want to push your designs towards some specified goal. The *only* condition is that, whatever potential you write, it is differentiable. Take a look at `potentials.potentials.py` for examples of the potentials we have implemented so far. 
+We have already implemented several potentials but it is relatively straightforward to add more, if you want to push your designs towards some specified goal. The *only* condition is that, whatever potential you write, it is differentiable. Take a look at `potentials.potentials.py` for examples of the potentials we have implemented so far.
 
 ---
 
-### Symmetric Motif Scaffolding.  
+### Symmetric Motif Scaffolding.
 We can also combine symmetric diffusion with motif scaffolding to scaffold motifs symmetrically.
-Currently, we have one way for performing symmetric motif scaffolding. That is by specifying the position of the motif specified w.r.t. the symmetry axes.  
+Currently, we have one way for performing symmetric motif scaffolding. That is by specifying the position of the motif specified w.r.t. the symmetry axes.
 
 <p align="center">
   <img src="./img/sym_motif.png" alt="alt text" width="1000px" align="middle"/>
@@ -450,8 +450,8 @@ Currently, we have one way for performing symmetric motif scaffolding. That is b
 
 For now, we require that a user have a symmetrized version of their motif in their input pdb for symmetric motif scaffolding. There are two main reasons for this. First, the model is trained by centering any motif at the origin, and thus the code also centers motifs at the origin automatically. Therefore, if your motif is not symmetrized, this centering action will result in an asymmetric unit that now has the origin and axes of symmetry running right through it (bad). Secondly, the diffusion code uses a canonical set of symmetry axes (rotation matrices) to propogate the asymmetric unit of a motif. In order to prevent accidentally running diffusion trajectories which are propogating your motif in ways you don't intend, we require that a user symmetrize an input using the RFdiffusion canonical symmetry axes.
 
-**RFdiffusion canonical symmetry axes** 
-| Group      |      Axis     | 
+**RFdiffusion canonical symmetry axes**
+| Group      |      Axis     |
 |:----------:|:-------------:|
 | Cyclic     |  Z |
 | Dihedral (cyclic) |    Z   |
@@ -462,7 +462,7 @@ For now, we require that a user have a symmetrized version of their motif in the
 
 This example script `examples/design_nickel.sh` can be used to scaffold the C4 symmetric Nickel binding domains shown in the RFdiffusion paper. It combines many concepts discussed earlier, including symmetric oligomer generation, motif scaffolding, and use of guiding potentials.
 
-Note that the contigs should specify something that is precisely symmetric. Things will break if this is not the case. 
+Note that the contigs should specify something that is precisely symmetric. Things will break if this is not the case.
 
 ---
 
@@ -521,15 +521,15 @@ docker run -it --rm --gpus all \
 
 ### Conclusion
 
-We are extremely excited to share RFdiffusion with the wider scientific community. We expect to push some updates as and when we make sizeable improvements in the coming months, so do stay tuned. We realize it may take some time to get used to executing RFdiffusion with perfect syntax (sometimes Hydra is hard), so please don't hesitate to create GitHub issues if you need help, we will respond as often as we can. 
+We are extremely excited to share RFdiffusion with the wider scientific community. We expect to push some updates as and when we make sizeable improvements in the coming months, so do stay tuned. We realize it may take some time to get used to executing RFdiffusion with perfect syntax (sometimes Hydra is hard), so please don't hesitate to create GitHub issues if you need help, we will respond as often as we can.
 
-Now, let's go make some proteins. Have fun! 
+Now, let's go make some proteins. Have fun!
 
-\- Joe, David, Nate, Brian, Jason, and the RFdiffusion team. 
+\- Joe, David, Nate, Brian, Jason, and the RFdiffusion team.
 
 ---
 
 RFdiffusion builds directly on the architecture and trained parameters of RoseTTAFold. We therefore thank Frank DiMaio and Minkyung Baek, who developed RoseTTAFold.
-RFdiffusion is released under an open source BSD License (see LICENSE file). It is free for both non-profit and for-profit use. 
+RFdiffusion is released under an open source BSD License (see LICENSE file). It is free for both non-profit and for-profit use.
 
 

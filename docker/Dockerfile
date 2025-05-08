@@ -1,4 +1,4 @@
-# Usage: 
+# Usage:
 # git clone https://github.com/RosettaCommons/RFdiffusion.git
 # cd RFdiffusion
 # docker build -f docker/Dockerfile -t rfdiffusion .
@@ -21,7 +21,7 @@ FROM nvcr.io/nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
 
 COPY . /app/RFdiffusion/
 
-RUN apt-get -q update \ 
+RUN apt-get -q update \
   && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
   git \
   python3.9 \
@@ -42,7 +42,7 @@ RUN apt-get -q update \
   pyrsistent==0.19.3 \
   /app/RFdiffusion/env/SE3Transformer \
   && pip install --no-cache-dir /app/RFdiffusion --no-deps
-  
+
 WORKDIR /app/RFdiffusion
 
 ENV DGLBACKEND="pytorch"

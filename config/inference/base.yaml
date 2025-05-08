@@ -78,7 +78,7 @@ diffuser:
   schedule_type: linear
   so3_type: igso3
   crd_scale: 0.25
-  partial_T: null    
+  partial_T: null
   so3_schedule_type: linear
   min_b: 1.5
   max_b: 2.5
@@ -97,7 +97,7 @@ ppi:
   hotspot_res: null
 
 potentials:
-  guiding_potentials: null 
+  guiding_potentials: null
   guide_scale: 10
   guide_decay: constant
   olig_inter_all : null
@@ -119,7 +119,7 @@ preprocess:
   prob_self_cond: 0.0
   str_self_cond: False
   predict_previous: False
-  
+
 logging:
   inputs: False
 

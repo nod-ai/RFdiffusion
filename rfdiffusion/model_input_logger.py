@@ -26,13 +26,13 @@ def pickle_function_call_wrapper(func, output_dir='pickled_inputs'):
         path = os.path.join(output_dir, f'{i:05d}.pkl')
         print(f"logging {func.__name__} arguments: {[k for k in argument_map]} to {path}")
         argument_map['stack'] = traceback.format_stack()
-        
+
         for k, v in argument_map.items():
             if hasattr(v, 'detach'):
                 argument_map[k] = v.cpu().detach()
         with open(path, 'wb') as fh:
             pickle.dump(argument_map, fh)
-        
+
         return func(*args, **kwargs)
 
     return wrapper

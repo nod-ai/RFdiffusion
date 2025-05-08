@@ -118,11 +118,11 @@ def make_full_graph(xyz, pair, idx, top_k=64, kmin=9):
 
     B, L = xyz.shape[:2]
     device = xyz.device
-    
+
     # seq sep
     sep = idx[:,None,:] - idx[:,:,None]
     b,i,j = torch.where(sep.abs() > 0)
-   
+
     src = b*L+i
     tgt = b*L+j
     G = dgl.graph((src, tgt), num_nodes=B*L).to(device)
@@ -142,14 +142,14 @@ def make_topk_graph(xyz, pair, idx, top_k=64, kmin=32, eps=1e-6):
 
     B, L = xyz.shape[:2]
     device = xyz.device
-    
+
     # distance map from current CA coordinates
     D = torch.cdist(xyz, xyz) + torch.eye(L, device=device).unsqueeze(0)*999.9  # (B, L, L)
     # seq sep
     sep = idx[:,None,:] - idx[:,:,None]
     sep = sep.abs() + torch.eye(L, device=device).unsqueeze(0)*999.9
     D = D + sep*eps
-    
+
     # get top_k neighbors
     D_neigh, E_idx = torch.topk(D, min(top_k, L), largest=False) # shape of E_idx: (B, L, top_k)
     topk_matrix = torch.zeros((B, L, L), device=device)
@@ -160,7 +160,7 @@ def make_topk_graph(xyz, pair, idx, top_k=64, kmin=32, eps=1e-6):
     #   2) top_k neighbors
     cond = torch.logical_or(topk_matrix > 0.0, sep < kmin)
     b,i,j = torch.where(cond)
-   
+
     src = b*L+i
     tgt = b*L+j
     G = dgl.graph((src, tgt), num_nodes=B*L).to(device)
@@ -243,12 +243,12 @@ class ComputeAllAtomCoords(nn.Module):
 
         # phi
         RTF2 = torch.einsum(
-            'brij,brjk,brkl->bril', 
+            'brij,brjk,brkl->bril',
             RTF0, self.RTs_in_base_frame[seq,1,:], make_rotX(alphas[:,:,1,:]))
 
         # psi
         RTF3 = torch.einsum(
-            'brij,brjk,brkl->bril', 
+            'brij,brjk,brkl->bril',
             RTF0, self.RTs_in_base_frame[seq,2,:], make_rotX(alphas[:,:,2,:]))
 
         # CB bend
@@ -258,41 +258,41 @@ class ComputeAllAtomCoords(nn.Module):
         CBr = (basexyzs[:,:,4,:3])
         CBrotaxis1 = (CBr-CAr).cross(NCr-CAr, dim=-1)
         CBrotaxis1 /= torch.linalg.norm(CBrotaxis1, dim=-1, keepdim=True)+1e-8
-        
+
         # CB twist
         NCp = basexyzs[:,:,2,:3] - basexyzs[:,:,0,:3]
         NCpp = NCp - torch.sum(NCp*NCr, dim=-1, keepdim=True)/ torch.sum(NCr*NCr, dim=-1, keepdim=True) * NCr
         CBrotaxis2 = (CBr-CAr).cross(NCpp, dim=-1)
         CBrotaxis2 /= torch.linalg.norm(CBrotaxis2, dim=-1, keepdim=True)+1e-8
-        
+
         CBrot1 = make_rot_axis(alphas[:,:,7,:], CBrotaxis1 )
         CBrot2 = make_rot_axis(alphas[:,:,8,:], CBrotaxis2 )
-        
+
         RTF8 = torch.einsum(
-            'brij,brjk,brkl->bril', 
+            'brij,brjk,brkl->bril',
             RTF0, CBrot1,CBrot2)
-        
+
         # chi1 + CG bend
         RTF4 = torch.einsum(
-            'brij,brjk,brkl,brlm->brim', 
-            RTF8, 
-            self.RTs_in_base_frame[seq,3,:], 
-            make_rotX(alphas[:,:,3,:]), 
+            'brij,brjk,brkl,brlm->brim',
+            RTF8,
+            self.RTs_in_base_frame[seq,3,:],
+            make_rotX(alphas[:,:,3,:]),
             make_rotZ(alphas[:,:,9,:]))
 
         # chi2
         RTF5 = torch.einsum(
-            'brij,brjk,brkl->bril', 
+            'brij,brjk,brkl->bril',
             RTF4, self.RTs_in_base_frame[seq,4,:],make_rotX(alphas[:,:,4,:]))
 
         # chi3
         RTF6 = torch.einsum(
-            'brij,brjk,brkl->bril', 
+            'brij,brjk,brkl->bril',
             RTF5,self.RTs_in_base_frame[seq,5,:],make_rotX(alphas[:,:,5,:]))
 
         # chi4
         RTF7 = torch.einsum(
-            'brij,brjk,brkl->bril', 
+            'brij,brjk,brkl->bril',
             RTF6,self.RTs_in_base_frame[seq,6,:],make_rotX(alphas[:,:,6,:]))
 
         RTframes = torch.stack((
@@ -300,7 +300,7 @@ class ComputeAllAtomCoords(nn.Module):
         ),dim=2)
 
         xyzs = torch.einsum(
-            'brtij,brtj->brti', 
+            'brtij,brtj->brti',
             RTframes.gather(2,self.base_indices[seq][...,None,None].repeat(1,1,1,4,4)), basexyzs
         )
 

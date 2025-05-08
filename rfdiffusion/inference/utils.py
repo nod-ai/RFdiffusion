@@ -688,8 +688,8 @@ class BlockAdjacency:
              conf.scaffold_list as conf
              conf.inference.num_designs for sanity checking
         """
-       
-        self.conf=conf 
+
+        self.conf=conf
         # either list or path to .txt file with list of scaffolds
         if self.conf.scaffoldguided.scaffold_list is not None:
             if type(self.conf.scaffoldguided.scaffold_list) == list:
@@ -874,13 +874,13 @@ class BlockAdjacency:
         """
         Wrapper method for pulling an item from the list, and preparing ss and block adj features
         """
-        
+
         # Handle determinism. Useful for integration tests
         if self.conf.inference.deterministic:
             torch.manual_seed(self.num_completed)
             np.random.seed(self.num_completed)
             random.seed(self.num_completed)
-  
+
         if self.systematic:
             # reset if num designs > num_scaffolds
             if self.item_n >= len(self.scaffold_list):
@@ -1003,7 +1003,7 @@ class Target:
         return self.pdb
 
 def ss_from_contig(ss_masks: dict):
-    """  
+    """
     Function for taking 1D masks for each of the ss types, and outputting a secondary structure input
     """
     L=len(ss_masks['helix'])

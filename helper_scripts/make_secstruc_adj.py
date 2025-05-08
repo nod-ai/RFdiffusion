@@ -94,7 +94,7 @@ def mask_ss(ss, idx, min_mask = 0, max_mask = 1.0):
 
 def generate_Cbeta(N,Ca,C):
     # recreate Cb given N,Ca,C
-    b = Ca - N 
+    b = Ca - N
     c = C - Ca
     a = torch.cross(b, c, dim=-1)
     #Cb = -0.58273431*a + 0.56802827*b - 0.54067466*c + Ca
@@ -103,9 +103,9 @@ def generate_Cbeta(N,Ca,C):
 
     return Cb
 
-def get_pair_dist(a, b): 
+def get_pair_dist(a, b):
     """calculate pair distances between two sets of points
-    
+
     Parameters
     ----------
     a,b : pytorch tensors of shape [batch,nres,3]
@@ -121,11 +121,11 @@ def get_pair_dist(a, b):
 
 
 def construct_block_adj_matrix( sstruct, xyz, cutoff=6, include_loops=False ):
-    ''' 
+    '''
     Given a sstruct specification and backbone coordinates, build a block adjacency matrix.
 
     Input:
-    
+
         sstruct (torch.FloatTensor): (L) length tensor with numeric encoding of sstruct at each position
 
         xyz (torch.FloatTensor): (L,3,3) tensor of Cartesian coordinates of backbone N,Ca,C atoms
@@ -139,15 +139,15 @@ def construct_block_adj_matrix( sstruct, xyz, cutoff=6, include_loops=False ):
     '''
 
     L = xyz.shape[0]
-    
+
     # three anchor atoms
     N  = xyz[:,0]
     Ca = xyz[:,1]
     C  = xyz[:,2]
-    
+
     # recreate Cb given N,Ca,C
     Cb = generate_Cbeta(N,Ca,C)
-    
+
     # May need a batch dimension - NRB
     dist = get_pair_dist(Cb,Cb) # [L,L]
     dist[torch.isnan(dist)] = 999.9
@@ -155,7 +155,7 @@ def construct_block_adj_matrix( sstruct, xyz, cutoff=6, include_loops=False ):
     dist += 999.9*torch.eye(L,device=xyz.device)
     # Now we have dist matrix and sstruct specification, turn this into a block adjacency matrix
     # There is probably a way to do this in closed-form with a beautiful einsum but I am going to do the loop approach
-    
+
     # First: Construct a list of segments and the index at which they begin and end
     in_segment = True
     segments = []
@@ -166,11 +166,11 @@ def construct_block_adj_matrix( sstruct, xyz, cutoff=6, include_loops=False ):
     for i in range(sstruct.shape[0]):
         # Starting edge case
         if i == 0:
-            begin = 0 
+            begin = 0
             continue
 
         if not sstruct[i] == sstruct[i-1]:
-            end = i 
+            end = i
             segments.append( (sstruct[i-1], begin, end) )
 
             begin = i
@@ -216,7 +216,7 @@ def parse_pdb_lines_torch(lines):
         idx = ( l[21:22].strip(), int(l[22:26].strip()) )
         if idx not in pdb_idx:
           pdb_idx.append(idx)
- 
+
     # 4 BB + up to 10 SC atoms
     xyz = np.full((len(pdb_idx), 27, 3), np.nan, dtype=np.float32)
     for l in lines:
@@ -244,7 +244,7 @@ def parse_pdb_lines(lines, parse_hetatom=False, ignore_het_h=True):
     res = [(l[22:26],l[17:20]) for l in lines if l[:4]=="ATOM" and l[12:16].strip()=="CA"]
     seq = [aa2num[r[1]] if r[1] in aa2num.keys() else 20 for r in res]
     pdb_idx = [( l[21:22].strip(), int(l[22:26].strip()) ) for l in lines if l[:4]=="ATOM" and l[12:16].strip()=="CA"]  # chain letter, res num
-    
+
     # 4 BB + up to 10 SC atoms
     xyz = np.full((len(res), 27, 3), np.nan, dtype=np.float32)
     for l in lines:
@@ -256,10 +256,10 @@ def parse_pdb_lines(lines, parse_hetatom=False, ignore_het_h=True):
             if tgtatm is not None and tgtatm.strip() == atom.strip(): # ignore whitespace
                 xyz[idx,i_atm,:] = [float(l[30:38]), float(l[38:46]), float(l[46:54])]
                 break
-        
+
     # save atom mask
     mask = np.logical_not(np.isnan(xyz[...,0]))
-    xyz[np.isnan(xyz[...,0])] = 0.0 
+    xyz[np.isnan(xyz[...,0])] = 0.0
     # remove duplicated (chain, resi)
     new_idx = []
     i_unique = []
@@ -267,7 +267,7 @@ def parse_pdb_lines(lines, parse_hetatom=False, ignore_het_h=True):
         if idx not in new_idx:
             new_idx.append(idx)
             i_unique.append(i)
-    
+
     pdb_idx = new_idx
     xyz = xyz[i_unique]
     mask = mask[i_unique]
@@ -303,7 +303,7 @@ num2aa=[
     'LEU','LYS','MET','PHE','PRO',
     'SER','THR','TRP','TYR','VAL',
     'UNK','MAS',
-    ]   
+    ]
 
 aa2num= {x:i for i,x in enumerate(num2aa)}
 # full sc atom representation (Nx14)
@@ -360,11 +360,11 @@ def get_sse(ca_coord):
     v1 = norm_vector(displacement(atoms1, atoms2))
     v2 = norm_vector(displacement(atoms2, atoms3))
     v3 = norm_vector(displacement(atoms3, atoms4))
-    
+
     n1 = np.cross(v1, v2)
     n2 = np.cross(v2, v3)
-    
-    # Calculation using atan2, to ensure the correct sign of the angle 
+
+    # Calculation using atan2, to ensure the correct sign of the angle
     x = vector_dot(n1,n2)
     y = vector_dot(np.cross(n1,n2), v2)
     return np.arctan2(y,x)
@@ -391,7 +391,7 @@ def get_sse(ca_coord):
   d4i_coord = np.full(( len(ca_coord), 2, 3 ), np.nan)
   ri_coord = np.full(( len(ca_coord), 3, 3 ), np.nan)
   ai_coord = np.full(( len(ca_coord), 4, 3 ), np.nan)
-  
+
   # The distances and angles are not defined for the entire interval,
   # therefore the indices do not have the full range
   # Values that are not defined are NaN
@@ -400,15 +400,15 @@ def get_sse(ca_coord):
   for i in range(1, len(ca_coord)-3): d4i_coord[i] = (ca_coord[i-1], ca_coord[i+3])
   for i in range(1, len(ca_coord)-1): ri_coord[i]  = (ca_coord[i-1], ca_coord[i], ca_coord[i+1])
   for i in range(1, len(ca_coord)-2): ai_coord[i]  = (ca_coord[i-1], ca_coord[i], ca_coord[i+1], ca_coord[i+2])
-  
+
   d2i = distance(d2i_coord[:,0], d2i_coord[:,1])
   d3i = distance(d3i_coord[:,0], d3i_coord[:,1])
   d4i = distance(d4i_coord[:,0], d4i_coord[:,1])
   ri = angle(ri_coord[:,0], ri_coord[:,1], ri_coord[:,2])
   ai = dihedral(ai_coord[:,0], ai_coord[:,1], ai_coord[:,2], ai_coord[:,3])
-  
+
   sse = ["L"] * len(ca_coord)
-  
+
   # Annotate helices
   # Find CA that meet criteria for potential helices
   is_pot_helix = np.zeros(len(sse), dtype=bool)
@@ -450,7 +450,7 @@ def get_sse(ca_coord):
           ):
             sse[i+1] = "H"
     i += 1
-  
+
   # Annotate sheets
   # Find CA that meet criteria for potential strands
   is_pot_strand = np.zeros(len(sse), dtype=bool)
