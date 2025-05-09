@@ -61,6 +61,7 @@ def get_spherical_harmonics(relative_pos: Tensor, max_degree: int) -> List[Tenso
     return torch.split(sh, [degree_to_dim(d) for d in all_degrees], dim=1)
 
 
+@torch.compile
 def get_basis_script(max_degree: int,
                      use_pad_trick: bool,
                      spherical_harmonics: List[Tensor],
@@ -158,6 +159,7 @@ def update_basis_with_fused(basis: Dict[str, Tensor],
     return basis
 
 
+@torch.compiler.disable
 def get_basis(relative_pos: Tensor,
               max_degree: int = 4,
               compute_gradients: bool = False,
