@@ -1,8 +1,13 @@
-*.py[cod]
+**/*.git/
+.github/
+docker/
+img/
+examples/ppi_scaffolds/
+
+**/*.py[cod]
 rfdiffusion.egg-info
 __pycache__/
 
-models/
 schedules/
 outputs/
 test_outputs/
