@@ -681,7 +681,7 @@ class BlockAdjacency:
         - adj: block adjacency with equivalent masking as ss (L,L)
     """
 
-    def __init__(self, conf, num_designs):
+    def __init__(self, conf):
         """
         Parameters:
           inputs:
@@ -692,8 +692,8 @@ class BlockAdjacency:
         self.conf=conf
         # either list or path to .txt file with list of scaffolds
         if self.conf.scaffoldguided.scaffold_list is not None:
-            if type(self.conf.scaffoldguided.scaffold_list) == list:
-                self.scaffold_list = scaffold_list
+            if isinstance(self.conf.scaffoldguided.scaffold_list, list):
+                self.scaffold_list = self.conf.scaffoldguided.scaffold_list
             elif self.conf.scaffoldguided.scaffold_list[-4:] == ".txt":
                 # txt file with list of ids
                 list_from_file = []
@@ -702,7 +702,7 @@ class BlockAdjacency:
                         list_from_file.append(line.strip())
                 self.scaffold_list = list_from_file
             else:
-                raise NotImplementedError
+                raise NotImplementedError()
         else:
             self.scaffold_list = [
                 os.path.split(i)[1][:-6]
@@ -746,7 +746,7 @@ class BlockAdjacency:
         # whether or not to work systematically through the list
         self.systematic = self.conf.scaffoldguided.systematic
 
-        self.num_designs = num_designs
+        self.num_designs = conf.inference.num_designs
 
         if len(self.scaffold_list) > self.num_designs:
             print(

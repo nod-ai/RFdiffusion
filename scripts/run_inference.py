@@ -30,6 +30,9 @@ import glob
 
 
 def make_deterministic(seed=0):
+    print(f"WARNING: making deterministic with seed {seed}. Determinsitc algorithms may affect performance")
+    # Consider controlling this with a different flag so we can set a seed without a perf hit.
+    torch.use_deterministic_algorithms(True)
     torch.manual_seed(seed)
     np.random.seed(seed)
     random.seed(seed)
