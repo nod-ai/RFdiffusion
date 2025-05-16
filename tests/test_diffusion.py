@@ -82,26 +82,28 @@ def _write_command(bash_file, output_dir):
     with open(bash_file, "r") as f:
         lines = f.readlines()
         for line in lines:
-            if not (line.startswith("python") or line.startswith("../")):
-                out_lines.append(line)
+            if line.startswith("python") or line.startswith("../"):
+                command = line.rstrip()
+                if "partial_T" in command:
+                    final_step = int(command.split("partial_T=")[1].split(" ")[0]) - 2
+                else:
+                    final_step = 48
+
+                test_name = bash_file.stem
+
+                # Override these. It's ok if they're already specified, as last one wins
+                command = (
+                    f"{command}"
+                    f" inference.num_designs=1"
+                    f" inference.output_prefix={output_dir}/example_outputs/{test_name}/{test_name}"
+                    f" inference.deterministic=True"
+                    f" inference.final_step={final_step}"
+                )
+
+                out_lines.append(command)
             else:
-                command = line.strip()
-        if not command.startswith("python"):
-            command = f"python {command}"
-    # get the partial_T
-    if "partial_T" in command:
-        final_step = int(command.split("partial_T=")[1].split(" ")[0]) - 2
-    else:
-        final_step = 48
+                out_lines.append(line)
 
-    test_name = bash_file.stem
-
-    # Override these. It's ok if they're already specified, as last one wins
-    command = f"{command} inference.num_designs=1 inference.output_prefix={output_dir}/example_outputs/{test_name}/{test_name} inference.deterministic=True inference.final_step={final_step}"
-
-    out_lines.append(command)
-
-    # write the new command
     output_script = output_dir / bash_file.name
     output_script.write_text(''.join(out_lines))
 
