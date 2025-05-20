@@ -60,8 +60,14 @@ class MSAPairStr2MSA(nn.Module):
         # update query sequence feature (first sequence in the MSA) with feedbacks (state) from SE3
         state = self.norm_state(state)
         state = self.proj_state(state).reshape(B, 1, L, -1)
-        msa = msa.index_add(1, torch.tensor([0,], device=state.device), state)
-        #
+
+        # This was previously and `index_add` (the out of place version even
+        # though it's inplace), but it's exactly equivalent to the below,
+        # according to the docs. But the simple version doesn't force
+        # device/host synchronization.
+        # msa = msa.index_add(1, torch.tensor([0,], device=state.device), state)
+        msa = msa + state[:, 0, :]
+
         # Apply row/column attention to msa & transform
         msa = msa + self.drop_row(self.row_attn(msa, pair))
         msa = msa + self.col_attn(msa)
