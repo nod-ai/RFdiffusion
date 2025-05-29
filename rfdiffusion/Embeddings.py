@@ -12,12 +12,12 @@ import math
 
 class PositionalEncoding2D(nn.Module):
     # Add relative positional encoding to pair features
-    def __init__(self, d_model, minpos=-32, maxpos=32, p_drop=0.1):
+    def __init__(self, d_model, minpos=-32, maxpos=32, p_drop=0.1, device=None):
         super(PositionalEncoding2D, self).__init__()
         self.minpos = minpos
         self.maxpos = maxpos
         self.nbin = abs(minpos)+maxpos+1
-        self.emb = nn.Embedding(self.nbin, d_model)
+        self.emb = nn.Embedding(self.nbin, d_model, device=device)
         self.drop = nn.Dropout(p_drop)
 
     def forward(self, x, idx):
@@ -32,26 +32,26 @@ class PositionalEncoding2D(nn.Module):
 class MSA_emb(nn.Module):
     # Get initial seed MSA embedding
     def __init__(self, d_msa=256, d_pair=128, d_state=32, d_init=22+22+2+2,
-                 minpos=-32, maxpos=32, p_drop=0.1, input_seq_onehot=False):
+                 minpos=-32, maxpos=32, p_drop=0.1, input_seq_onehot=False, device=None):
         super(MSA_emb, self).__init__()
-        self.emb = nn.Linear(d_init, d_msa) # embedding for general MSA
-        self.emb_q = nn.Embedding(22, d_msa) # embedding for query sequence -- used for MSA embedding
-        self.emb_left = nn.Embedding(22, d_pair) # embedding for query sequence -- used for pair embedding
-        self.emb_right = nn.Embedding(22, d_pair) # embedding for query sequence -- used for pair embedding
-        self.emb_state = nn.Embedding(22, d_state)
+        self.emb = nn.Linear(d_init, d_msa, device=device) # embedding for general MSA
+        self.emb_q = nn.Embedding(22, d_msa, device=device) # embedding for query sequence -- used for MSA embedding
+        self.emb_left = nn.Embedding(22, d_pair, device=device) # embedding for query sequence -- used for pair embedding
+        self.emb_right = nn.Embedding(22, d_pair, device=device) # embedding for query sequence -- used for pair embedding
+        self.emb_state = nn.Embedding(22, d_state, device=device)
         self.drop = nn.Dropout(p_drop)
-        self.pos = PositionalEncoding2D(d_pair, minpos=minpos, maxpos=maxpos, p_drop=p_drop)
+        self.pos = PositionalEncoding2D(d_pair, minpos=minpos, maxpos=maxpos, p_drop=p_drop, device=device)
 
         self.input_seq_onehot=input_seq_onehot
 
-        self.reset_parameter()
+        self.reset_parameter(device)
 
-    def reset_parameter(self):
-        self.emb = init_lecun_normal(self.emb)
-        self.emb_q = init_lecun_normal(self.emb_q)
-        self.emb_left = init_lecun_normal(self.emb_left)
-        self.emb_right = init_lecun_normal(self.emb_right)
-        self.emb_state = init_lecun_normal(self.emb_state)
+    def reset_parameter(self, device=None):
+        self.emb = init_lecun_normal(self.emb, device=device)
+        self.emb_q = init_lecun_normal(self.emb_q, device=device)
+        self.emb_left = init_lecun_normal(self.emb_left, device=device)
+        self.emb_right = init_lecun_normal(self.emb_right, device=device)
+        self.emb_state = init_lecun_normal(self.emb_state, device=device)
 
         nn.init.zeros_(self.emb.bias)
 
@@ -90,18 +90,18 @@ class MSA_emb(nn.Module):
 
 class Extra_emb(nn.Module):
     # Get initial seed MSA embedding
-    def __init__(self, d_msa=256, d_init=22+1+2, p_drop=0.1, input_seq_onehot=False):
+    def __init__(self, d_msa=256, d_init=22+1+2, p_drop=0.1, input_seq_onehot=False, device=None):
         super(Extra_emb, self).__init__()
-        self.emb = nn.Linear(d_init, d_msa) # embedding for general MSA
-        self.emb_q = nn.Embedding(22, d_msa) # embedding for query sequence
+        self.emb = nn.Linear(d_init, d_msa, device=device) # embedding for general MSA
+        self.emb_q = nn.Embedding(22, d_msa, device=device) # embedding for query sequence
         self.drop = nn.Dropout(p_drop)
 
         self.input_seq_onehot=input_seq_onehot
 
-        self.reset_parameter()
+        self.reset_parameter(device)
 
-    def reset_parameter(self):
-        self.emb = init_lecun_normal(self.emb)
+    def reset_parameter(self, device=None):
+        self.emb = init_lecun_normal(self.emb, device=device)
         nn.init.zeros_(self.emb.bias)
 
     def forward(self, msa, seq, idx):
@@ -122,12 +122,13 @@ class Extra_emb(nn.Module):
 class TemplatePairStack(nn.Module):
     # process template pairwise features
     # use structure-biased attention
-    def __init__(self, n_block=2, d_templ=64, n_head=4, d_hidden=16, p_drop=0.25):
+    def __init__(self, n_block=2, d_templ=64, n_head=4, d_hidden=16, p_drop=0.25, device=None):
         super(TemplatePairStack, self).__init__()
         self.n_block = n_block
-        proc_s = [PairStr2Pair(d_pair=d_templ, n_head=n_head, d_hidden=d_hidden, p_drop=p_drop) for i in range(n_block)]
+        proc_s = [PairStr2Pair(d_pair=d_templ, n_head=n_head, d_hidden=d_hidden, p_drop=p_drop, device=device) for i in range(n_block)]
         self.block = nn.ModuleList(proc_s)
-        self.norm = nn.LayerNorm(d_templ)
+        self.norm = nn.LayerNorm(d_templ, device=device)
+
     def forward(self, templ, rbf_feat, use_checkpoint=False):
         B, T, L = templ.shape[:3]
         templ = templ.reshape(B*T, L, L, -1)
@@ -185,32 +186,32 @@ class Templ_emb(nn.Module):
     #Added extra t1d dimension for contacting or not
     def __init__(self, d_t1d=21+1+1, d_t2d=43+1, d_tor=30, d_pair=128, d_state=32,
                  n_block=2, d_templ=64,
-                 n_head=4, d_hidden=16, p_drop=0.25):
+                 n_head=4, d_hidden=16, p_drop=0.25, device=None):
         super(Templ_emb, self).__init__()
         # process 2D features
-        self.emb = nn.Linear(d_t1d*2+d_t2d, d_templ)
+        self.emb = nn.Linear(d_t1d*2+d_t2d, d_templ, device=device)
         self.templ_stack = TemplatePairStack(n_block=n_block, d_templ=d_templ, n_head=n_head,
-                                             d_hidden=d_hidden, p_drop=p_drop)
+                                             d_hidden=d_hidden, p_drop=p_drop, device=device)
 
-        self.attn = Attention(d_pair, d_templ, n_head, d_hidden, d_pair)
+        self.attn = Attention(d_pair, d_templ, n_head, d_hidden, d_pair, device=device)
 
         # process torsion angles
-        self.emb_t1d = nn.Linear(d_t1d+d_tor, d_templ)
-        self.proj_t1d = nn.Linear(d_templ, d_templ)
+        self.emb_t1d = nn.Linear(d_t1d+d_tor, d_templ, device=device)
+        self.proj_t1d = nn.Linear(d_templ, d_templ, device=device)
         #self.tor_stack = TemplateTorsionStack(n_block=n_block, d_templ=d_templ, n_head=n_head,
         #                                      d_hidden=d_hidden, p_drop=p_drop)
-        self.attn_tor = Attention(d_state, d_templ, n_head, d_hidden, d_state)
+        self.attn_tor = Attention(d_state, d_templ, n_head, d_hidden, d_state, device=device)
 
-        self.reset_parameter()
+        self.reset_parameter(device)
 
-    def reset_parameter(self):
-        self.emb = init_lecun_normal(self.emb)
+    def reset_parameter(self, device=None):
+        self.emb = init_lecun_normal(self.emb, device=device)
         nn.init.zeros_(self.emb.bias)
 
         nn.init.kaiming_normal_(self.emb_t1d.weight, nonlinearity='relu')
         nn.init.zeros_(self.emb_t1d.bias)
 
-        self.proj_t1d = init_lecun_normal(self.proj_t1d)
+        self.proj_t1d = init_lecun_normal(self.proj_t1d, device=device)
         nn.init.zeros_(self.proj_t1d.bias)
 
     def forward(self, t1d, t2d, alpha_t, xyz_t, pair, state, use_checkpoint=False):
@@ -262,17 +263,17 @@ class Templ_emb(nn.Module):
         return pair, state
 
 class Recycling(nn.Module):
-    def __init__(self, d_msa=256, d_pair=128, d_state=32):
+    def __init__(self, d_msa=256, d_pair=128, d_state=32, device=None):
         super(Recycling, self).__init__()
-        self.proj_dist = nn.Linear(36+d_state*2, d_pair)
-        self.norm_state = nn.LayerNorm(d_state)
-        self.norm_pair = nn.LayerNorm(d_pair)
-        self.norm_msa = nn.LayerNorm(d_msa)
+        self.proj_dist = nn.Linear(36+d_state*2, d_pair, device=device)
+        self.norm_state = nn.LayerNorm(d_state, device=device)
+        self.norm_pair = nn.LayerNorm(d_pair, device=device)
+        self.norm_msa = nn.LayerNorm(d_msa, device=device)
 
-        self.reset_parameter()
+        self.reset_parameter(device)
 
-    def reset_parameter(self):
-        self.proj_dist = init_lecun_normal(self.proj_dist)
+    def reset_parameter(self, device=None):
+        self.proj_dist = init_lecun_normal(self.proj_dist, device=device)
         nn.init.zeros_(self.proj_dist.bias)
 
     def forward(self, seq, msa, pair, xyz, state):

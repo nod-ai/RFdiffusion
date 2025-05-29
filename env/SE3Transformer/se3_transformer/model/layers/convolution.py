@@ -92,7 +92,8 @@ class RadialProfile(nn.Module):
             channels_out: int,
             edge_dim: int = 1,
             mid_dim: int = 32,
-            use_layer_norm: bool = False
+            use_layer_norm: bool = False,
+            device=None,
     ):
         """
         :param num_freq:         Number of frequencies
@@ -104,13 +105,13 @@ class RadialProfile(nn.Module):
         """
         super().__init__()
         modules = [
-            nn.Linear(edge_dim, mid_dim),
-            nn.LayerNorm(mid_dim) if use_layer_norm else None,
+            nn.Linear(edge_dim, mid_dim, device=device),
+            nn.LayerNorm(mid_dim, device=device) if use_layer_norm else None,
             nn.ReLU(),
-            nn.Linear(mid_dim, mid_dim),
-            nn.LayerNorm(mid_dim) if use_layer_norm else None,
+            nn.Linear(mid_dim, mid_dim, device=device),
+            nn.LayerNorm(mid_dim, device=device) if use_layer_norm else None,
             nn.ReLU(),
-            nn.Linear(mid_dim, num_freq * channels_in * channels_out, bias=False)
+            nn.Linear(mid_dim, num_freq * channels_in * channels_out, bias=False, device=device)
         ]
 
         self.net = torch.jit.script(nn.Sequential(*[m for m in modules if m is not None]))
@@ -131,7 +132,8 @@ class VersatileConvSE3(nn.Module):
                  channels_out: int,
                  edge_dim: int,
                  use_layer_norm: bool,
-                 fuse_level: ConvSE3FuseLevel):
+                 fuse_level: ConvSE3FuseLevel,
+                 device=None):
         super().__init__()
         self.freq_sum = freq_sum
         self.channels_out = channels_out
@@ -141,7 +143,8 @@ class VersatileConvSE3(nn.Module):
                                          channels_in=channels_in,
                                          channels_out=channels_out,
                                          edge_dim=edge_dim,
-                                         use_layer_norm=use_layer_norm)
+                                         use_layer_norm=use_layer_norm,
+                                         device=device)
 
     def forward(self, features: Tensor, invariant_edge_feats: Tensor, basis: Tensor):
         with nvtx_range(f'VersatileConvSE3'):
@@ -187,7 +190,8 @@ class ConvSE3(nn.Module):
             max_degree: int = 4,
             fuse_level: ConvSE3FuseLevel = ConvSE3FuseLevel.FULL,
             allow_fused_output: bool = False,
-            low_memory: bool = False
+            low_memory: bool = False,
+            device=None,
     ):
         """
         :param fiber_in:           Fiber describing the input features
@@ -216,6 +220,7 @@ class ConvSE3(nn.Module):
         unique_channels_out = (len(channels_out_set) == 1)
         degrees_up_to_max = list(range(max_degree + 1))
         common_args = dict(edge_dim=fiber_edge[0] + 1, use_layer_norm=use_layer_norm)
+        common_args["device"] = device
 
         if fuse_level.value >= ConvSE3FuseLevel.FULL.value and \
                 unique_channels_in and fiber_in.degrees == degrees_up_to_max and \
@@ -267,7 +272,7 @@ class ConvSE3(nn.Module):
             for degree_out, channels_out in fiber_out:
                 if fiber_in[degree_out]:
                     self.to_kernel_self[str(degree_out)] = nn.Parameter(
-                        torch.randn(channels_out, fiber_in[degree_out]) / np.sqrt(fiber_in[degree_out]))
+                        torch.randn(channels_out, fiber_in[degree_out], device=device) / np.sqrt(fiber_in[degree_out]))
 
     def _try_unpad(self, feature, basis):
         # Account for padded basis

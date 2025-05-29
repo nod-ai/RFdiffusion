@@ -44,11 +44,11 @@ class LinearSE3(nn.Module):
     type-k features (C_k channels) ────> Linear(bias=False) ────> type-k features (C'_k channels)
     """
 
-    def __init__(self, fiber_in: Fiber, fiber_out: Fiber):
+    def __init__(self, fiber_in: Fiber, fiber_out: Fiber, device=None):
         super().__init__()
         self.weights = nn.ParameterDict({
             str(degree_out): nn.Parameter(
-                torch.randn(channels_out, fiber_in[degree_out]) / np.sqrt(fiber_in[degree_out]))
+                torch.randn(channels_out, fiber_in[degree_out], device=device) / torch.sqrt(torch.tensor(fiber_in[degree_out], device=device)))
             for degree_out, channels_out in fiber_out
         })
 
