@@ -11,19 +11,12 @@ import random
 import glob
 
 
-def make_deterministic(seed=0):
-    print(f"WARNING: making deterministic with seed {seed}. Deterministic algorithms may affect performance")
-    # Consider controlling this with a different flag so we can set a seed without a perf hit.
-    torch.use_deterministic_algorithms(True)
-    torch.manual_seed(seed)
-    np.random.seed(seed)
-    random.seed(seed)
-
-
 def run_inference(conf: HydraConfig) -> None:
     log = logging.getLogger(__name__)
+
     if conf.inference.deterministic:
-        make_deterministic()
+        conf.inference.random_seed = conf.inference.random_seed or 0
+        iu.make_deterministic(conf.inference.random_seed)
 
     # Check for available GPU and print result of check
     if torch.cuda.is_available():
@@ -54,8 +47,8 @@ def run_inference(conf: HydraConfig) -> None:
         design_startnum = max(indices) + 1
 
     for i_des in range(design_startnum, design_startnum + sampler.inf_conf.num_designs):
-        if conf.inference.deterministic:
-            make_deterministic(i_des)
+        if conf.inference.random_seed is not None:
+            iu.seed_rngs(conf.inference.random_seed + i_des)
 
         start_time = time.time()
         out_prefix = f"{sampler.inf_conf.output_prefix}_{i_des}"

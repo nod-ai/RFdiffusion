@@ -877,9 +877,7 @@ class BlockAdjacency:
 
         # Handle determinism. Useful for integration tests
         if self.conf.inference.deterministic:
-            torch.manual_seed(self.num_completed)
-            np.random.seed(self.num_completed)
-            random.seed(self.num_completed)
+            seed_rngs(self.num_completed)
 
         if self.systematic:
             # reset if num designs > num_scaffolds
@@ -1013,3 +1011,17 @@ def ss_from_contig(ss_masks: dict):
         ss[mask,idx] = 1
         ss[mask, 3] = 0 # remove the mask token
     return ss
+
+def make_deterministic(seed=0):
+    print(f"WARNING: Forcing deterministic algorithms. This may affect performance")
+    torch.use_deterministic_algorithms(True)
+    torch._C._jit_set_profiling_executor(False)
+    torch._C._jit_set_profiling_mode(False)
+    torch._inductor.config.fallback_random = True
+
+    seed_rngs(seed)
+
+def seed_rngs(seed=0):
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
