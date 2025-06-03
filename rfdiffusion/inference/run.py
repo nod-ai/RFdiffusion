@@ -1,25 +1,7 @@
-#!/usr/bin/env python
-"""
-Inference script.
-
-To run with base.yaml as the config,
-
-> python run_inference.py
-
-To specify a different config,
-
-> python run_inference.py --config-name symmetry
-
-where symmetry can be the filename of any other config (without .yaml extension)
-See https://hydra.cc/docs/advanced/hydra-command-line-flags/ for more options.
-
-"""
-
 import re
 import os, time, pickle
 import torch
 from omegaconf import OmegaConf
-import hydra
 import logging
 from rfdiffusion.util import writepdb_multi, writepdb
 from rfdiffusion.inference import utils as iu
@@ -38,20 +20,20 @@ def make_deterministic(seed=0):
     random.seed(seed)
 
 
-@hydra.main(version_base=None, config_path="../config/inference", config_name="base")
-def main(conf: HydraConfig) -> None:
+def run_inference(conf: HydraConfig) -> None:
     log = logging.getLogger(__name__)
     if conf.inference.deterministic:
         make_deterministic()
 
     # Check for available GPU and print result of check
     if torch.cuda.is_available():
+        log.info("GPU is available")
         device_name = torch.cuda.get_device_name(torch.cuda.current_device())
         log.info(f"Found GPU with device_name {device_name}. Will run RFdiffusion on {device_name}")
     else:
-        log.info("////////////////////////////////////////////////")
-        log.info("///// NO GPU DETECTED! Falling back to CPU /////")
-        log.info("////////////////////////////////////////////////")
+        log.info("////////////////////////////////////////////////"
+                 "///// NO GPU DETECTED! Falling back to CPU /////"
+                 "////////////////////////////////////////////////")
 
     # Initialize sampler and target/contig.
     sampler = iu.sampler_selector(conf)
@@ -63,7 +45,7 @@ def main(conf: HydraConfig) -> None:
         indices = [-1]
         for e in existing:
             print(e)
-            m = re.match(".*_(\d+)\.pdb$", e)
+            m = re.match(r".*_(\d+)\.pdb$", e)
             print(m)
             if not m:
                 continue
@@ -191,7 +173,3 @@ def main(conf: HydraConfig) -> None:
             )
 
         log.info(f"Finished design in {(time.time()-start_time)/60:.2f} minutes")
-
-
-if __name__ == "__main__":
-    main()
