@@ -3,10 +3,11 @@ import pathlib
 import shutil
 import subprocess
 
+from Bio.PDB import PDBParser, Superimposer
+import numpy as np
 import pytest
 
 from rfdiffusion.inference import utils as iu
-from rfdiffusion.util import calc_rmsd
 
 script_dir = pathlib.Path(__file__).parent
 example_dir = script_dir.parent / "examples"
@@ -49,6 +50,41 @@ def symlink_inputs():
             link.symlink_to(p)
 
 
+def calc_atom_rmsd(ref_atoms, test_atoms):
+    # First do this the simple way and just take the RMSD between the
+    # coordinates directly. BioPython tries to find an RMSD-minimizing rotation
+    # and translation, but that introduces some slight numerical errors. That
+    # matters especially (only?) when the coordinates are identical to start
+    # because it results in an RMSD > 0. It's nice to know when things literally
+    # haven't changed.
+    ref_coords = np.array([a.get_coord() for a in ref_atoms])
+    test_coords = np.array([a.get_coord() for a in test_atoms])
+
+    direct_rmsd = np.sqrt(((ref_coords - test_coords) ** 2).sum(-1).mean()).item()
+
+    # The superimposed version can't possibly be smaller, so don't bother
+    # computing it.
+    if direct_rmsd == 0.0:
+        return direct_rmsd
+
+    sup = Superimposer()
+    sup.set_atoms(ref_atoms, test_atoms)
+
+    return min(direct_rmsd, sup.rms.item())
+
+
+def get_backbone(pdb):
+    # QUIET because RFdiffusion writes PDBs that are missing the element and Biopython complains.
+    parser = PDBParser(QUIET=True)
+    structure = parser.get_structure("pdb", pdb)
+    backbone = [a for a in structure.get_atoms() if a.get_id() in ["CA", "C", "N"]]
+    return backbone
+
+
+def calc_backbone_rmsd(ref_pdb, test_pdb):
+    return calc_atom_rmsd(get_backbone(ref_pdb), get_backbone(test_pdb))
+
+
 @pytest.mark.usefixtures("symlink_inputs")
 @pytest.mark.parametrize(
     "script", sorted(example_dir.glob("*.sh")), ids=lambda x: x.stem
@@ -82,11 +118,7 @@ def test_command(script, tmp_path, reference_dir, child_env, request):
         request.node.user_properties.append(("reference_file", str(reference_file)))
         print(f"Updated reference file {reference_file}")
     else:
-        test_pdb = iu.parse_pdb(test_file)
-        ref_pdb = iu.parse_pdb(reference_file)
-        rmsd = calc_rmsd(
-            test_pdb["xyz"][:, :3].reshape(-1, 3), ref_pdb["xyz"][:, :3].reshape(-1, 3)
-        )[0].item()
+        rmsd = calc_backbone_rmsd(reference_file, test_file)
         request.node.user_properties.append(("rmsd", rmsd))
         print(f"RMSD={rmsd:.3}")
 
