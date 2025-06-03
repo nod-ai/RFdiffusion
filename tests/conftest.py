@@ -2,8 +2,13 @@ import statistics
 
 import pytest
 
+
 def pytest_addoption(parser):
-    parser.addoption("--update-goldens", action="store_true", help="Update golden reference output files")
+    parser.addoption(
+        "--update-goldens",
+        action="store_true",
+        help="Update golden reference output files",
+    )
 
 
 def pytest_terminal_summary(terminalreporter, exitstatus, config):
@@ -56,3 +61,30 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
             # filepaths tend to be long and wrap poorly. Give them their own line.
             tr.write_line(f"    {ref_file}")
         tr.write_line("")
+
+
+# When running with --capture=no (-s), the first line of output gets printed on
+# the same line as the test name. So always print a newline as the first thing.
+# It seems weird that pytest doesn't just add the linebreak by default.
+@pytest.fixture(autouse=True)
+def print_starting_newline():
+    print()
+
+
+# If pytest-xdist is installed (or theoretically anything that provides the
+# `worker_id` fixture, we make worker index available. Otherwise we just set it
+# to 0.
+try:
+
+    @pytest.fixture(scope="session")
+    def worker_idx(worker_id):
+        if worker_id == "master":
+            return 0
+
+        return int(worker_id.removeprefix("gw"))
+
+except:
+
+    @pytest.fixture(scope="session")
+    def worker_idx():
+        return 0

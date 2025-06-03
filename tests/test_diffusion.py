@@ -1,3 +1,4 @@
+import os
 import pathlib
 import shutil
 import subprocess
@@ -9,6 +10,25 @@ from rfdiffusion.util import calc_rmsd
 
 script_dir = pathlib.Path(__file__).parent
 example_dir = script_dir.parent / "examples"
+
+
+def partition_gpus(idx, env, env_var):
+    devs = env.get(env_var)
+    if devs:
+        devs = [int(d) for d in devs.split(",")]
+        dev = devs[idx]
+        print(f"Running with {env_var}={dev}")
+        env[env_var] = str(dev)
+
+
+@pytest.fixture(scope="session")
+def child_env(worker_idx):
+    env = os.environ.copy()
+
+    partition_gpus(worker_idx, env, "CUDA_VISIBLE_DEVICES")
+    partition_gpus(worker_idx, env, "HIP_VISIBLE_DEVICES")
+
+    return env
 
 
 @pytest.fixture(scope="module")
@@ -30,15 +50,17 @@ def symlink_inputs():
 
 
 @pytest.mark.usefixtures("symlink_inputs")
-@pytest.mark.parametrize("script", sorted(example_dir.glob("*.sh")), ids=lambda x: x.stem)
-def test_command(script, tmp_path, reference_dir, request):
+@pytest.mark.parametrize(
+    "script", sorted(example_dir.glob("*.sh")), ids=lambda x: x.stem
+)
+def test_command(script, tmp_path, reference_dir, child_env, request):
     # The pytest docs say you need to create this directory, but empirically it
     # is already created.
     output_dir = tmp_path
     modified_script = _write_command(script, output_dir)
     print(f"Running {modified_script}")
     # cwd is required because the scripts use relative paths like `../scripts/run_inference.py`
-    subprocess.run(["bash", modified_script], check=True, cwd=script_dir)
+    subprocess.run(["bash", modified_script], check=True, cwd=script_dir, env=child_env)
     test_name = modified_script.stem
     test_file = output_dir / f"{test_name}_0.pdb"
     reference_file = reference_dir / test_file.relative_to(output_dir)
@@ -108,7 +130,7 @@ def _write_command(bash_file, output_dir):
                 out_lines.append(line)
 
     output_script = output_dir / bash_file.name
-    output_script.write_text(''.join(out_lines))
+    output_script.write_text("".join(out_lines))
 
     return output_script
 
