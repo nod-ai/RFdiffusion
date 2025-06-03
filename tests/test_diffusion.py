@@ -90,10 +90,9 @@ def calc_backbone_rmsd(ref_pdb, test_pdb):
     "script", sorted(example_dir.glob("*.sh")), ids=lambda x: x.stem
 )
 def test_command(script, tmp_path, reference_dir, child_env, request):
-    output_dir = tmp_path
     # The pytest docs say you need to create this directory, but empirically it
     # is already created.
-    # output_dir.mkdir()
+    output_dir = tmp_path
     modified_script = _write_command(script, output_dir)
     print(f"Running {modified_script}")
     # cwd is required because the scripts use relative paths like `../scripts/run_inference.py`
