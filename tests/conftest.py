@@ -71,7 +71,7 @@ def print_starting_newline():
     print()
 
 
-# If pytest-xdist is installed (or theoretically anthing that provides the
+# If pytest-xdist is installed (or theoretically anything that provides the
 # `worker_id` fixture, we make worker index available. Otherwise we just set it
 # to 0.
 try:
