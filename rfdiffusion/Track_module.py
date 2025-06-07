@@ -130,7 +130,7 @@ class MSA2Pair(nn.Module):
         left = self.proj_left(msa)
         right = self.proj_right(msa)
         right = right / float(N)
-        out = einsum('bsli,bsmj->blmij', left, right).reshape(B, L, L, -1)
+        out = torch.einsum('bsli,bsmj->blmij', left, right).reshape(B, L, L, -1)
         out = self.proj_out(out)
 
         pair = pair + out
@@ -287,7 +287,7 @@ class Str2Str(nn.Module):
         delRi[:,:,2,1] = 2*qC*qD + 2*qA*qB
         delRi[:,:,2,2] = qA*qA-qB*qB-qC*qC+qD*qD
 
-        Ri = einsum('bnij,bnjk->bnik', delRi, R_in)
+        Ri = torch.einsum('bnij,bnjk->bnik', delRi, R_in)
         Ti = delTi + T_in #einsum('bnij,bnj->bni', delRi, T_in) + delTi
 
         alpha = self.sc_predictor(msa[:,0], state)
@@ -415,7 +415,7 @@ class IterativeSimulator(nn.Module):
             R_in = R_in.detach() # detach rotation (for stability)
             T_in = T_in.detach()
             # Get current BB structure
-            xyz = einsum('bnij,bnaj->bnai', R_in, xyz_in) + T_in.unsqueeze(-2)
+            xyz = torch.einsum('bnij,bnaj->bnai', R_in, xyz_in) + T_in.unsqueeze(-2)
 
             msa_full, pair, R_in, T_in, state, alpha = self.extra_block[i_m](msa_full,
                                                                              pair,
@@ -434,7 +434,7 @@ class IterativeSimulator(nn.Module):
             R_in = R_in.detach()
             T_in = T_in.detach()
             # Get current BB structure
-            xyz = einsum('bnij,bnaj->bnai', R_in, xyz_in) + T_in.unsqueeze(-2)
+            xyz = torch.einsum('bnij,bnaj->bnai', R_in, xyz_in) + T_in.unsqueeze(-2)
 
             msa, pair, R_in, T_in, state, alpha = self.main_block[i_m](msa,
                                                                        pair,
@@ -453,7 +453,7 @@ class IterativeSimulator(nn.Module):
         for i_m in range(self.n_ref_block):
             R_in = R_in.detach()
             T_in = T_in.detach()
-            xyz = einsum('bnij,bnaj->bnai', R_in, xyz_in) + T_in.unsqueeze(-2)
+            xyz = torch.einsum('bnij,bnaj->bnai', R_in, xyz_in) + T_in.unsqueeze(-2)
             R_in, T_in, state, alpha = self.str_refiner(msa,
                                                         pair,
                                                         R_in,

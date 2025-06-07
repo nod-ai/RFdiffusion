@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
-from opt_einsum import contract as einsum
 from rfdiffusion.util_module import init_lecun_normal
 
 class FeedForwardLayer(nn.Module):
@@ -65,10 +64,10 @@ class Attention(nn.Module):
         value = self.to_v(value).reshape(B, K, self.h, self.dim)
         #
         query = query * self.scaling
-        attn = einsum('bqhd,bkhd->bhqk', query, key)
+        attn = torch.einsum('bqhd,bkhd->bhqk', query, key)
         attn = F.softmax(attn, dim=-1)
         #
-        out = einsum('bhqk,bkhd->bqhd', attn, value)
+        out = torch.einsum('bhqk,bkhd->bqhd', attn, value)
         out = out.reshape(B, Q, self.h*self.dim)
         #
         out = self.to_out(out)
@@ -124,11 +123,11 @@ class AttentionWithBias(nn.Module):
         gate = torch.sigmoid(self.to_g(x))
         #
         key = key * self.scaling
-        attn = einsum('bqhd,bkhd->bqkh', query, key)
+        attn = torch.einsum('bqhd,bkhd->bqkh', query, key)
         attn = attn + bias
         attn = F.softmax(attn, dim=-2)
         #
-        out = einsum('bqkh,bkhd->bqhd', attn, value).reshape(B, L, -1)
+        out = torch.einsum('bqkh,bkhd->bqhd', attn, value).reshape(B, L, -1)
         out = gate * out
         #
         out = self.to_out(out)
@@ -162,7 +161,7 @@ class SequenceWeight(nn.Module):
         k = self.to_key(msa).view(B, N, L, self.h, self.dim)
 
         q = q * self.scale
-        attn = einsum('bqihd,bkihd->bkihq', q, k)
+        attn = torch.einsum('bqihd,bkihd->bkihq', q, k)
         attn = F.softmax(attn, dim=1)
         return self.dropout(attn)
 
@@ -218,11 +217,11 @@ class MSARowAttentionWithBias(nn.Module):
         #
         query = query * seq_weight.expand(-1, -1, -1, -1, self.dim)
         key = key * self.scaling
-        attn = einsum('bsqhd,bskhd->bqkh', query, key)
+        attn = torch.einsum('bsqhd,bskhd->bqkh', query, key)
         attn = attn + bias
         attn = F.softmax(attn, dim=-2)
         #
-        out = einsum('bqkh,bskhd->bsqhd', attn, value).reshape(B, N, L, -1)
+        out = torch.einsum('bskhd,bqkh->bsqhd', value, attn).reshape(B, N, L, -1)
         out = gate * out
         #
         out = self.to_out(out)
@@ -270,10 +269,10 @@ class MSAColAttention(nn.Module):
         gate = torch.sigmoid(self.to_g(msa))
         #
         query = query * self.scaling
-        attn = einsum('bqihd,bkihd->bihqk', query, key)
+        attn = torch.einsum('bqihd,bkihd->bihqk', query, key)
         attn = F.softmax(attn, dim=-1)
         #
-        out = einsum('bihqk,bkihd->bqihd', attn, value).reshape(B, N, L, -1)
+        out = torch.einsum('bihqk,bkihd->bqihd', attn, value).reshape(B, N, L, -1)
         out = gate * out
         #
         out = self.to_out(out)
@@ -322,10 +321,10 @@ class MSAColGlobalAttention(nn.Module):
         gate = torch.sigmoid(self.to_g(msa)) # (B, N, L, h*dim)
         #
         query = query * self.scaling
-        attn = einsum('bihd,bkid->bihk', query, key) # (B, L, h, N)
+        attn = torch.einsum('bihd,bkid->bihk', query, key) # (B, L, h, N)
         attn = F.softmax(attn, dim=-1)
         #
-        out = einsum('bihk,bkid->bihd', attn, value).reshape(B, 1, L, -1) # (B, 1, L, h*dim)
+        out = torch.einsum('bihk,bkid->bihd', attn, value).reshape(B, 1, L, -1) # (B, 1, L, h*dim)
         out = gate * out # (B, N, L, h*dim)
         #
         out = self.to_out(out)
@@ -390,11 +389,11 @@ class BiasedAxialAttention(nn.Module):
 
         query = query * self.scaling
         key = key / math.sqrt(L) # normalize for tied attention
-        attn = einsum('bnihk,bnjhk->bijh', query, key) # tied attention
+        attn = torch.einsum('bnjhk,bnihk->bijh', key, query) # tied attention
         attn = attn + bias # apply bias
         attn = F.softmax(attn, dim=-2) # (B, L, L, h)
 
-        out = einsum('bijh,bkjhd->bikhd', attn, value).reshape(B, L, L, -1)
+        out = torch.einsum('bkjhd,bijh->bikhd', value, attn).reshape(B, L, L, -1)
         out = gate * out
 
         out = self.to_out(out)
