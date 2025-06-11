@@ -3,14 +3,12 @@ tests:
   ##### Unconditional Generation #####
   - inference:
       random_seed: 1337
+      final_step: 48
     contigmap:
       contigs: ["150-150"]
-    diffuser:
-      T: 15
 
   - inference:
       random_seed: 1337
+      final_step: 48
     contigmap:
       contigs: ["700-700"]
-    diffuser:
-      T: 15
