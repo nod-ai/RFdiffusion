@@ -217,8 +217,6 @@ def config_id(config):
         flattened["inference.input_pdb"] = pathlib.Path(
             flattened["inference.input_pdb"]
         ).stem
-    if "diffuser.T" in flattened:
-        flattened["diffuser.T"] = f"T{flattened['diffuser.T']}"
 
     fields = []
     for v in flattened.values():
