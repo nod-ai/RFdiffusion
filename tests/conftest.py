@@ -72,19 +72,16 @@ def print_starting_newline():
 
 
 # If pytest-xdist is installed (or theoretically anything that provides the
-# `worker_id` fixture, we make worker index available. Otherwise we just set it
-# to 0.
-try:
-
-    @pytest.fixture(scope="session")
-    def worker_idx(worker_id):
-        if worker_id == "master":
-            return 0
-
-        return int(worker_id.removeprefix("gw"))
-
-except:
-
-    @pytest.fixture(scope="session")
-    def worker_idx():
+# `worker_id` fixture, we make the worker index available as an int. Otherwise
+# we just set it to 0.
+@pytest.fixture(scope="session")
+def worker_idx(request):
+    try:
+        worker_id = request.getfixturevalue("worker_id")
+    except pytest.FixtureLookupError:
         return 0
+
+    if worker_id == "master":
+        return 0
+
+    return int(worker_id.removeprefix("gw"))
