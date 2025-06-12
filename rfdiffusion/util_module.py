@@ -83,7 +83,7 @@ class Dropout(nn.Module):
 def rbf(D):
     # Distance radial basis function
     D_min, D_max, D_count = 0., 20., 36
-    D_mu = torch.linspace(D_min, D_max, D_count).to(D.device)
+    D_mu = torch.linspace(D_min, D_max, D_count, device=D.device)
     D_mu = D_mu[None,:]
     D_sigma = (D_max - D_min) / D_count
     D_expand = torch.unsqueeze(D, -1)
