@@ -34,7 +34,7 @@ from se3_transformer.model.fiber import Fiber
 from se3_transformer.model.layers.convolution import ConvSE3, ConvSE3FuseLevel
 from se3_transformer.model.layers.linear import LinearSE3
 from se3_transformer.runtime.utils import degree_to_dim, aggregate_residual, unfuse_features
-from torch.cuda.nvtx import range as nvtx_range
+from se3_transformer.model.profiling import maybe_nvtx_range
 
 
 class AttentionSE3(nn.Module):
@@ -64,8 +64,8 @@ class AttentionSE3(nn.Module):
             query: Dict[str, Tensor],  # node features
             graph: DGLGraph
     ):
-        with nvtx_range('AttentionSE3'):
-            with nvtx_range('reshape keys and queries'):
+        with maybe_nvtx_range('AttentionSE3'):
+            with maybe_nvtx_range('reshape keys and queries'):
                 if isinstance(key, Tensor):
                     # case where features of all types are fused
                     key = key.reshape(key.shape[0], self.num_heads, -1)
@@ -77,14 +77,14 @@ class AttentionSE3(nn.Module):
                     key = self.key_fiber.to_attention_heads(key, self.num_heads)
                     query = self.key_fiber.to_attention_heads(query, self.num_heads)
 
-            with nvtx_range('attention dot product + softmax'):
+            with maybe_nvtx_range('attention dot product + softmax'):
                 # Compute attention weights (softmax of inner product between key and query)
                 edge_weights = dgl.ops.e_dot_v(graph, key, query).squeeze(-1)
                 edge_weights = edge_weights / np.sqrt(self.key_fiber.num_features)
                 edge_weights = edge_softmax(graph, edge_weights)
                 edge_weights = edge_weights[..., None, None]
 
-            with nvtx_range('weighted sum'):
+            with maybe_nvtx_range('weighted sum'):
                 if isinstance(value, Tensor):
                     # features of all types are fused
                     v = value.view(value.shape[0], self.num_heads, -1, value.shape[-1])
@@ -155,12 +155,12 @@ class AttentionBlockSE3(nn.Module):
             graph: DGLGraph,
             basis: Dict[str, Tensor]
     ):
-        with nvtx_range('AttentionBlockSE3'):
-            with nvtx_range('keys / values'):
+        with maybe_nvtx_range('AttentionBlockSE3'):
+            with maybe_nvtx_range('keys / values'):
                 fused_key_value = self.to_key_value(node_features, edge_features, graph, basis)
                 key, value = self._get_key_value_from_fused(fused_key_value)
 
-            with nvtx_range('queries'):
+            with maybe_nvtx_range('queries'):
                 query = self.to_query(node_features)
 
             z = self.attention(value, key, query, graph)
