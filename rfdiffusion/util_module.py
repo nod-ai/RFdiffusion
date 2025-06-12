@@ -119,7 +119,7 @@ def make_full_graph(xyz, pair, idx, top_k=64, kmin=9):
     device = xyz.device
 
     # We do some fancy math here to avoid the original implementation which
-    # forces a device-host sync and has siginificant negative impact on
+    # forces a device-host sync and has significant negative impact on
     # performance. The goal is to get the indices of the off-diagonal elements:
     # every node's connection to every other node (hence "full graph").
 
