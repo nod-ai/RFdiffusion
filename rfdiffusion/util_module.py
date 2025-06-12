@@ -6,15 +6,15 @@ import copy
 import dgl
 from rfdiffusion.util import base_indices, RTs_by_torsion, xyzs_in_base_frame, rigid_from_3_points
 
-def init_lecun_normal(module):
+def init_lecun_normal(module, device=None):
     def truncated_normal(uniform, mu=0.0, sigma=1.0, a=-2, b=2):
         normal = torch.distributions.normal.Normal(0, 1)
 
         alpha = (a - mu) / sigma
         beta = (b - mu) / sigma
 
-        alpha_normal_cdf = normal.cdf(torch.tensor(alpha))
-        p = alpha_normal_cdf + (normal.cdf(torch.tensor(beta)) - alpha_normal_cdf) * uniform
+        alpha_normal_cdf = normal.cdf(torch.tensor(alpha, device=device))
+        p = alpha_normal_cdf + (normal.cdf(torch.tensor(beta, device=device)) - alpha_normal_cdf) * uniform
 
         v = torch.clamp(2 * p - 1, -1 + 1e-8, 1 - 1e-8)
         x = mu + sigma * np.sqrt(2) * torch.erfinv(v)
@@ -24,20 +24,20 @@ def init_lecun_normal(module):
 
     def sample_truncated_normal(shape):
         stddev = np.sqrt(1.0/shape[-1])/.87962566103423978  # shape[-1] = fan_in
-        return stddev * truncated_normal(torch.rand(shape))
+        return stddev * truncated_normal(torch.rand(shape, device=device))
 
     module.weight = torch.nn.Parameter( (sample_truncated_normal(module.weight.shape)) )
     return module
 
-def init_lecun_normal_param(weight):
+def init_lecun_normal_param(weight, device=None):
     def truncated_normal(uniform, mu=0.0, sigma=1.0, a=-2, b=2):
         normal = torch.distributions.normal.Normal(0, 1)
 
         alpha = (a - mu) / sigma
         beta = (b - mu) / sigma
 
-        alpha_normal_cdf = normal.cdf(torch.tensor(alpha))
-        p = alpha_normal_cdf + (normal.cdf(torch.tensor(beta)) - alpha_normal_cdf) * uniform
+        alpha_normal_cdf = normal.cdf(torch.tensor(alpha, device=device))
+        p = alpha_normal_cdf + (normal.cdf(torch.tensor(beta, device=device)) - alpha_normal_cdf) * uniform
 
         v = torch.clamp(2 * p - 1, -1 + 1e-8, 1 - 1e-8)
         x = mu + sigma * np.sqrt(2) * torch.erfinv(v)
@@ -47,7 +47,7 @@ def init_lecun_normal_param(weight):
 
     def sample_truncated_normal(shape):
         stddev = np.sqrt(1.0/shape[-1])/.87962566103423978  # shape[-1] = fan_in
-        return stddev * truncated_normal(torch.rand(shape))
+        return stddev * truncated_normal(torch.rand(shape, device=device))
 
     weight = torch.nn.Parameter( (sample_truncated_normal(weight.shape)) )
     return weight
@@ -63,10 +63,10 @@ def get_clones(module, N):
 
 class Dropout(nn.Module):
     # Dropout entire row or column
-    def __init__(self, broadcast_dim=None, p_drop=0.15):
+    def __init__(self, broadcast_dim=None, p_drop=0.15, device=None):
         super(Dropout, self).__init__()
         # give ones with probability of 1-p_drop / zeros with p_drop
-        self.sampler = torch.distributions.bernoulli.Bernoulli(torch.tensor([1-p_drop]))
+        self.sampler = torch.distributions.bernoulli.Bernoulli(torch.tensor([1-p_drop], device=device))
         self.broadcast_dim=broadcast_dim
         self.p_drop=p_drop
     def forward(self, x):

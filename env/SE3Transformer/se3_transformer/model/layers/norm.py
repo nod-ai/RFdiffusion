@@ -52,18 +52,18 @@ class NormSE3(nn.Module):
 
     NORM_CLAMP = 2 ** -24  # Minimum positive subnormal for FP16
 
-    def __init__(self, fiber: Fiber, nonlinearity: nn.Module = nn.ReLU()):
+    def __init__(self, fiber: Fiber, nonlinearity: nn.Module = nn.ReLU(), device=None):
         super().__init__()
         self.fiber = fiber
         self.nonlinearity = nonlinearity
 
         if len(set(fiber.channels)) == 1:
             # Fuse all the layer normalizations into a group normalization
-            self.group_norm = nn.GroupNorm(num_groups=len(fiber.degrees), num_channels=sum(fiber.channels))
+            self.group_norm = nn.GroupNorm(num_groups=len(fiber.degrees), num_channels=sum(fiber.channels), device=device)
         else:
             # Use multiple layer normalizations
             self.layer_norms = nn.ModuleDict({
-                str(degree): nn.LayerNorm(channels)
+                str(degree): nn.LayerNorm(channels, device=device)
                 for degree, channels in fiber
             })
 

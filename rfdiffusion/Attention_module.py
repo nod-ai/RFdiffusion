@@ -5,12 +5,12 @@ import math
 from rfdiffusion.util_module import init_lecun_normal
 
 class FeedForwardLayer(nn.Module):
-    def __init__(self, d_model, r_ff, p_drop=0.1):
+    def __init__(self, d_model, r_ff, p_drop=0.1, device=None):
         super(FeedForwardLayer, self).__init__()
-        self.norm = nn.LayerNorm(d_model)
-        self.linear1 = nn.Linear(d_model, d_model*r_ff)
+        self.norm = nn.LayerNorm(d_model, device=device)
+        self.linear1 = nn.Linear(d_model, d_model*r_ff, device=device)
         self.dropout = nn.Dropout(p_drop)
-        self.linear2 = nn.Linear(d_model*r_ff, d_model)
+        self.linear2 = nn.Linear(d_model*r_ff, d_model, device=device)
 
         self.reset_parameter()
 
@@ -30,16 +30,16 @@ class FeedForwardLayer(nn.Module):
 
 class Attention(nn.Module):
     # calculate multi-head attention
-    def __init__(self, d_query, d_key, n_head, d_hidden, d_out):
+    def __init__(self, d_query, d_key, n_head, d_hidden, d_out, device=None):
         super(Attention, self).__init__()
         self.h = n_head
         self.dim = d_hidden
         #
-        self.to_q = nn.Linear(d_query, n_head*d_hidden, bias=False)
-        self.to_k = nn.Linear(d_key, n_head*d_hidden, bias=False)
-        self.to_v = nn.Linear(d_key, n_head*d_hidden, bias=False)
+        self.to_q = nn.Linear(d_query, n_head*d_hidden, bias=False, device=device)
+        self.to_k = nn.Linear(d_key, n_head*d_hidden, bias=False, device=device)
+        self.to_v = nn.Linear(d_key, n_head*d_hidden, bias=False, device=device)
         #
-        self.to_out = nn.Linear(n_head*d_hidden, d_out)
+        self.to_out = nn.Linear(n_head*d_hidden, d_out, device=device)
         self.scaling = 1/math.sqrt(d_hidden)
         #
         # initialize all parameters properly
@@ -135,14 +135,14 @@ class AttentionWithBias(nn.Module):
 
 # MSA Attention (row/column) from AlphaFold architecture
 class SequenceWeight(nn.Module):
-    def __init__(self, d_msa, n_head, d_hidden, p_drop=0.1):
+    def __init__(self, d_msa, n_head, d_hidden, p_drop=0.1, device=None):
         super(SequenceWeight, self).__init__()
         self.h = n_head
         self.dim = d_hidden
         self.scale = 1.0 / math.sqrt(self.dim)
 
-        self.to_query = nn.Linear(d_msa, n_head*d_hidden)
-        self.to_key = nn.Linear(d_msa, n_head*d_hidden)
+        self.to_query = nn.Linear(d_msa, n_head*d_hidden, device=device)
+        self.to_key = nn.Linear(d_msa, n_head*d_hidden, device=device)
         self.dropout = nn.Dropout(p_drop)
 
         self.reset_parameter()
@@ -166,33 +166,33 @@ class SequenceWeight(nn.Module):
         return self.dropout(attn)
 
 class MSARowAttentionWithBias(nn.Module):
-    def __init__(self, d_msa=256, d_pair=128, n_head=8, d_hidden=32):
+    def __init__(self, d_msa=256, d_pair=128, n_head=8, d_hidden=32, device=None):
         super(MSARowAttentionWithBias, self).__init__()
-        self.norm_msa = nn.LayerNorm(d_msa)
-        self.norm_pair = nn.LayerNorm(d_pair)
+        self.norm_msa = nn.LayerNorm(d_msa, device=device)
+        self.norm_pair = nn.LayerNorm(d_pair, device=device)
         #
-        self.seq_weight = SequenceWeight(d_msa, n_head, d_hidden, p_drop=0.1)
-        self.to_q = nn.Linear(d_msa, n_head*d_hidden, bias=False)
-        self.to_k = nn.Linear(d_msa, n_head*d_hidden, bias=False)
-        self.to_v = nn.Linear(d_msa, n_head*d_hidden, bias=False)
-        self.to_b = nn.Linear(d_pair, n_head, bias=False)
-        self.to_g = nn.Linear(d_msa, n_head*d_hidden)
-        self.to_out = nn.Linear(n_head*d_hidden, d_msa)
+        self.seq_weight = SequenceWeight(d_msa, n_head, d_hidden, p_drop=0.1, device=device)
+        self.to_q = nn.Linear(d_msa, n_head*d_hidden, bias=False, device=device)
+        self.to_k = nn.Linear(d_msa, n_head*d_hidden, bias=False, device=device)
+        self.to_v = nn.Linear(d_msa, n_head*d_hidden, bias=False, device=device)
+        self.to_b = nn.Linear(d_pair, n_head, bias=False, device=device)
+        self.to_g = nn.Linear(d_msa, n_head*d_hidden, device=device)
+        self.to_out = nn.Linear(n_head*d_hidden, d_msa, device=device)
 
         self.scaling = 1/math.sqrt(d_hidden)
         self.h = n_head
         self.dim = d_hidden
 
-        self.reset_parameter()
+        self.reset_parameter(device)
 
-    def reset_parameter(self):
+    def reset_parameter(self, device=None):
         # query/key/value projection: Glorot uniform / Xavier uniform
         nn.init.xavier_uniform_(self.to_q.weight)
         nn.init.xavier_uniform_(self.to_k.weight)
         nn.init.xavier_uniform_(self.to_v.weight)
 
         # bias: normal distribution
-        self.to_b = init_lecun_normal(self.to_b)
+        self.to_b = init_lecun_normal(self.to_b, device=device)
 
         # gating: zero weights, one biases (mostly open gate at the begining)
         nn.init.zeros_(self.to_g.weight)
@@ -228,15 +228,15 @@ class MSARowAttentionWithBias(nn.Module):
         return out
 
 class MSAColAttention(nn.Module):
-    def __init__(self, d_msa=256, n_head=8, d_hidden=32):
+    def __init__(self, d_msa=256, n_head=8, d_hidden=32, device=None):
         super(MSAColAttention, self).__init__()
-        self.norm_msa = nn.LayerNorm(d_msa)
+        self.norm_msa = nn.LayerNorm(d_msa, device=device)
         #
-        self.to_q = nn.Linear(d_msa, n_head*d_hidden, bias=False)
-        self.to_k = nn.Linear(d_msa, n_head*d_hidden, bias=False)
-        self.to_v = nn.Linear(d_msa, n_head*d_hidden, bias=False)
-        self.to_g = nn.Linear(d_msa, n_head*d_hidden)
-        self.to_out = nn.Linear(n_head*d_hidden, d_msa)
+        self.to_q = nn.Linear(d_msa, n_head*d_hidden, bias=False, device=device)
+        self.to_k = nn.Linear(d_msa, n_head*d_hidden, bias=False, device=device)
+        self.to_v = nn.Linear(d_msa, n_head*d_hidden, bias=False, device=device)
+        self.to_g = nn.Linear(d_msa, n_head*d_hidden, device=device)
+        self.to_out = nn.Linear(n_head*d_hidden, d_msa, device=device)
 
         self.scaling = 1/math.sqrt(d_hidden)
         self.h = n_head
@@ -279,15 +279,15 @@ class MSAColAttention(nn.Module):
         return out
 
 class MSAColGlobalAttention(nn.Module):
-    def __init__(self, d_msa=64, n_head=8, d_hidden=8):
+    def __init__(self, d_msa=64, n_head=8, d_hidden=8, device=None):
         super(MSAColGlobalAttention, self).__init__()
-        self.norm_msa = nn.LayerNorm(d_msa)
+        self.norm_msa = nn.LayerNorm(d_msa, device=device)
         #
-        self.to_q = nn.Linear(d_msa, n_head*d_hidden, bias=False)
-        self.to_k = nn.Linear(d_msa, d_hidden, bias=False)
-        self.to_v = nn.Linear(d_msa, d_hidden, bias=False)
-        self.to_g = nn.Linear(d_msa, n_head*d_hidden)
-        self.to_out = nn.Linear(n_head*d_hidden, d_msa)
+        self.to_q = nn.Linear(d_msa, n_head*d_hidden, bias=False, device=device)
+        self.to_k = nn.Linear(d_msa, d_hidden, bias=False, device=device)
+        self.to_v = nn.Linear(d_msa, d_hidden, bias=False, device=device)
+        self.to_g = nn.Linear(d_msa, n_head*d_hidden, device=device)
+        self.to_out = nn.Linear(n_head*d_hidden, d_msa, device=device)
 
         self.scaling = 1/math.sqrt(d_hidden)
         self.h = n_head
@@ -332,35 +332,35 @@ class MSAColGlobalAttention(nn.Module):
 
 # Instead of triangle attention, use Tied axail attention with bias from coordinates..?
 class BiasedAxialAttention(nn.Module):
-    def __init__(self, d_pair, d_bias, n_head, d_hidden, p_drop=0.1, is_row=True):
+    def __init__(self, d_pair, d_bias, n_head, d_hidden, p_drop=0.1, is_row=True, device=None):
         super(BiasedAxialAttention, self).__init__()
         #
         self.is_row = is_row
-        self.norm_pair = nn.LayerNorm(d_pair)
-        self.norm_bias = nn.LayerNorm(d_bias)
+        self.norm_pair = nn.LayerNorm(d_pair, device=device)
+        self.norm_bias = nn.LayerNorm(d_bias, device=device)
 
-        self.to_q = nn.Linear(d_pair, n_head*d_hidden, bias=False)
-        self.to_k = nn.Linear(d_pair, n_head*d_hidden, bias=False)
-        self.to_v = nn.Linear(d_pair, n_head*d_hidden, bias=False)
-        self.to_b = nn.Linear(d_bias, n_head, bias=False)
-        self.to_g = nn.Linear(d_pair, n_head*d_hidden)
-        self.to_out = nn.Linear(n_head*d_hidden, d_pair)
+        self.to_q = nn.Linear(d_pair, n_head*d_hidden, bias=False, device=device)
+        self.to_k = nn.Linear(d_pair, n_head*d_hidden, bias=False, device=device)
+        self.to_v = nn.Linear(d_pair, n_head*d_hidden, bias=False, device=device)
+        self.to_b = nn.Linear(d_bias, n_head, bias=False, device=device)
+        self.to_g = nn.Linear(d_pair, n_head*d_hidden, device=device)
+        self.to_out = nn.Linear(n_head*d_hidden, d_pair, device=device)
 
         self.scaling = 1/math.sqrt(d_hidden)
         self.h = n_head
         self.dim = d_hidden
 
         # initialize all parameters properly
-        self.reset_parameter()
+        self.reset_parameter(device)
 
-    def reset_parameter(self):
+    def reset_parameter(self, device=None):
         # query/key/value projection: Glorot uniform / Xavier uniform
         nn.init.xavier_uniform_(self.to_q.weight)
         nn.init.xavier_uniform_(self.to_k.weight)
         nn.init.xavier_uniform_(self.to_v.weight)
 
         # bias: normal distribution
-        self.to_b = init_lecun_normal(self.to_b)
+        self.to_b = init_lecun_normal(self.to_b, device=device)
 
         # gating: zero weights, one biases (mostly open gate at the begining)
         nn.init.zeros_(self.to_g.weight)

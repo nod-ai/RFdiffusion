@@ -74,6 +74,7 @@ class SE3Transformer(nn.Module):
                  use_layer_norm: bool = True,
                  tensor_cores: bool = False,
                  low_memory: bool = False,
+                 device=None,
                  **kwargs):
         """
         :param num_layers:          Number of attention layers
@@ -117,9 +118,10 @@ class SE3Transformer(nn.Module):
                                                    use_layer_norm=use_layer_norm,
                                                    max_degree=self.max_degree,
                                                    fuse_level=self.fuse_level,
-                                                   low_memory=low_memory))
+                                                   low_memory=low_memory,
+                                                   device=device))
             if norm:
-                graph_modules.append(NormSE3(fiber_hidden))
+                graph_modules.append(NormSE3(fiber_hidden, device=device))
             fiber_in = fiber_hidden
 
         graph_modules.append(ConvSE3(fiber_in=fiber_in,
@@ -129,12 +131,13 @@ class SE3Transformer(nn.Module):
                                      use_layer_norm=use_layer_norm,
                                      max_degree=self.max_degree,
                                      fuse_level=self.fuse_level,
-                                     low_memory=low_memory))
+                                     low_memory=low_memory,
+                                     device=device))
         self.graph_modules = Sequential(*graph_modules)
 
         if pooling is not None:
             assert return_type is not None, 'return_type must be specified when pooling'
-            self.pooling_module = GPooling(pool=pooling, feat_type=return_type)
+            self.pooling_module = GPooling(pool=pooling, feat_type=return_type, device=device)
 
     def forward(self, graph: DGLGraph, node_feats: Dict[str, Tensor],
                 edge_feats: Optional[Dict[str, Tensor]] = None,
