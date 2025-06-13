@@ -136,7 +136,7 @@ def make_full_graph(xyz, pair, idx, top_k=64, kmin=9):
     b = torch.arange(B, device=device).reshape(-1, 1, 1).expand(-1, L, L-1).flatten()
     i = torch.arange(L, device=device).reshape(1, -1, 1).expand(B, -1, L-1).flatten()
 
-    # L x L matrix: [0 ... L] repeated L times
+    # L x L matrix: [0 ... L-1] repeated L times
     full = torch.arange(L, device=device).reshape(1, -1).expand(L, -1)
 
     # Extract only the off-diagonal elements of the matrix. We strip off the
