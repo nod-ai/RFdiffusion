@@ -1,7 +1,7 @@
 import os
 import pathlib
+import shlex
 import shutil
-import subprocess
 
 from Bio.PDB import PDBParser, Superimposer
 import hydra
@@ -17,43 +17,10 @@ from rfdiffusion.inference.run import run_inference
 script_dir = pathlib.Path(__file__).parent
 example_dir = script_dir.parent / "examples"
 
-# We have two different ways of splitting up GPUs depending on whether the test
-# is launching a subprocess or running in-process. I tried just setting the
-# torch device number and environment variables together, but this had two problems:
-#   - setting the current device to anything other than 0 initalizes cuda, which
-#     takes a long time. This is pretty wasteful when the process is just going
-#     to launch another script.
-#   - Torch does not behave well if you change CUDA_VISIBLE_DEVICES after it's
-#     imported. Theoretically it's supposed to handle this, but it actually
-#     won't change the current device. It just uses the environment variable to
-#     calculate a new device_count, which means any subsequent attempt to change
-#     the device fails.
-
-
-def partition_gpus(idx, env, env_var):
-    devs = env.get(env_var)
-    if devs:
-        devs = [int(d) for d in devs.split(",")]
-        dev = devs[idx]
-        print(f"Running with {env_var}={dev}")
-        env[env_var] = str(dev)
-
-
-@pytest.fixture(scope="session")
-def child_env(worker_idx):
-    env = os.environ.copy()
-
-    partition_gpus(worker_idx, env, "CUDA_VISIBLE_DEVICES")
-    partition_gpus(worker_idx, env, "HIP_VISIBLE_DEVICES")
-
-    return env
-
 
 @pytest.fixture(scope="session")
 def set_torch_device(worker_idx):
-    if worker_idx == 0:
-        # these checks are slow. We can skip them in the simple case.
-        return
+    """Partition GPUs across workers in a distributed test run."""
     device_count = torch.cuda.device_count()
     torch.cuda.set_device(worker_idx % device_count)
 
@@ -138,62 +105,65 @@ def handle_test_output(test_name, reference_dir, output_dir, request):
         assert rmsd == pytest.approx(0, rel=0, abs=0.01)
 
 
-@pytest.mark.usefixtures("symlink_inputs")
+@pytest.mark.usefixtures("set_torch_device", "symlink_inputs")
 @pytest.mark.parametrize(
     "script", sorted(example_dir.glob("*.sh")), ids=lambda x: x.stem
 )
-def test_command(script, tmp_path, reference_dir, child_env, request):
+def test_command(script, tmp_path, reference_dir, request):
     # The pytest docs say you need to create this directory, but empirically it
     # is already created.
     output_dir = tmp_path
-    modified_script = _write_command(script, output_dir)
-    print(f"Running {modified_script}")
-    # cwd is required because the scripts use relative paths like `../scripts/run_inference.py`
-    subprocess.run(["bash", modified_script], check=True, cwd=script_dir, env=child_env)
-    handle_test_output(modified_script.stem, reference_dir, output_dir, request)
+    command_string = parse_bash_file(script)
+
+    command_overrides = shlex.split(command_string)
+
+    config_name = "base"
+    # This has to be the first argument if it's present, as it changes the rest
+    # of the argument parsing, and for the same reason it has to be passed to
+    # hydra.compose explicitly rather than through overrides.
+    if command_overrides[0].startswith("--config-name="):
+        config_name = command_overrides.pop(0).removeprefix("--config-name=")
+
+    os.chdir(script_dir)
+
+    with hydra.initialize(config_path="../config/inference", version_base="1.2"):
+        conf = hydra.compose(config_name=config_name, overrides=command_overrides)
+        output_dir = tmp_path
+        test_name = request.node.callspec.id.replace(" ", "_").replace("/", "_")
+        start_step = conf.diffuser.partial_T or conf.diffuser.T
+        overrides = {
+            "inference": {
+                "num_designs": 1,
+                "output_prefix": output_dir / test_name,
+                "deterministic": True,
+                "final_step": start_step - 2,
+            }
+        }
+        conf = OmegaConf.merge(conf, overrides)
+
+        run_inference(conf)
+        handle_test_output(test_name, reference_dir, output_dir, request)
 
 
-def _write_command(bash_file, output_dir):
-    """
-    Takes a bash file from the examples folder, and writes
-    a version of it to the output_dir folder.
-    It appends to the python command the following arguments:
-        inference.deterministic=True
-        if partial_T is in the command, it grabs partial T and sets:
-            inference.final_step=partial_T-2
-        else:
-            inference.final_step=48
-    """
-    out_lines = []
+def parse_bash_file(bash_file):
+    """Parses a bash file from the examples folder and extracts the command line passed to run_inference.py."""
     with open(bash_file, "r") as f:
         lines = f.readlines()
-        for line in lines:
-            if line.startswith("python") or line.startswith("../"):
-                command = line.rstrip()
-                if "partial_T" in command:
-                    final_step = int(command.split("partial_T=")[1].split(" ")[0]) - 2
-                else:
-                    final_step = 48
 
-                test_name = bash_file.stem
+    script_invocation = "../scripts/run_inference.py "
+    commands = []
+    for line in lines:
+        if line.startswith("#") or not line.strip():
+            continue
+        commands.append(line.strip())
 
-                # Override these. It's ok if they're already specified, as last one wins
-                command = (
-                    f"{command}"
-                    f" inference.num_designs=1"
-                    f" inference.output_prefix={output_dir}/{test_name}"
-                    f" inference.deterministic=True"
-                    f" inference.final_step={final_step}"
-                )
+    if len(commands) != 1 or not commands[0].startswith(script_invocation):
+        raise ValueError(
+            f"Expected exactly one non-empty non-comment line starting with '{script_invocation}' in {bash_file}, found:\n"
+            + "\n".join(commands)
+        )
 
-                out_lines.append(command)
-            else:
-                out_lines.append(line)
-
-    output_script = output_dir / bash_file.name
-    output_script.write_text("".join(out_lines))
-
-    return output_script
+    return commands[0].removeprefix(script_invocation).strip()
 
 
 def flatten_nested_dict(d, parent_key="", sep="."):
@@ -237,7 +207,7 @@ def config_id(config):
 def test_config(spec, tmp_path, reference_dir, request):
     os.chdir(script_dir)
 
-    with hydra.initialize(config_path="../config/inference"):
+    with hydra.initialize(config_path="../config/inference", version_base="1.2"):
         conf = hydra.compose(config_name="base")
         # hydra.compose has an overrides argument but it only accepts
         # dot-notation string syntax like
@@ -259,6 +229,7 @@ def test_config(spec, tmp_path, reference_dir, request):
 
         run_inference(conf)
         handle_test_output(test_name, reference_dir, output_dir, request)
+
 
 if __name__ == "__main__":
     pytest.main()
