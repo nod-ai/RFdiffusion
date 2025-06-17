@@ -49,7 +49,7 @@ class Sequential(nn.Sequential):
 
 def get_populated_edge_features(relative_pos: Tensor, edge_features: Optional[Dict[str, Tensor]] = None):
     """ Add relative positions to existing edge features """
-    edge_features = edge_features.copy() if edge_features else {}
+    edge_features = edge_features or {}
     r = relative_pos.norm(dim=-1, keepdim=True)
     if '0' in edge_features:
         edge_features['0'] = torch.cat([edge_features['0'], r[..., None]], dim=1)

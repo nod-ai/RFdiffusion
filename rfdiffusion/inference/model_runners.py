@@ -104,6 +104,8 @@ class Sampler:
             self.assemble_config_from_chk()
             # Now actually load the model weights into RF
             self.model = self.load_model()
+            if conf.inference.compile:
+                self.model.compile(mode=conf.inference.compilation_mode)
         else:
             self.assemble_config_from_chk()
 
