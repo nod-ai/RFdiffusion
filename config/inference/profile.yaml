@@ -1,0 +1,11 @@
+# Config for profiling inference.
+
+defaults:
+  - benchmark
+  - _self_
+
+profile:
+  wait_steps: 1
+
+inference:
+  output_prefix: test_outputs/profiles/trace

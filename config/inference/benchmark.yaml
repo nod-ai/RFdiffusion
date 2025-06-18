@@ -1,4 +1,4 @@
-# Config for running benchmarks.
+# Config for running inference benchmarks.
 
 defaults:
   - base
