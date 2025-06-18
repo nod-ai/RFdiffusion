@@ -1,0 +1,11 @@
+# Config for running benchmarks.
+
+defaults:
+  - base
+  - _self_
+
+benchmark:
+  warmup_designs: 1
+  warmup_steps: 1
+  benchmark_steps: 3
+  require_gpu: True
