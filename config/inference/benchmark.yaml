@@ -9,3 +9,6 @@ benchmark:
   warmup_steps: 1
   benchmark_steps: 3
   require_gpu: True
+
+inference:
+  num_designs: 1
