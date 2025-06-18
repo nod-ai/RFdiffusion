@@ -24,24 +24,7 @@ def benchmark_inference_step(conf: HydraConfig) -> None:
         conf.inference.random_seed = conf.inference.random_seed or 0
         iu.make_deterministic(conf.inference.random_seed)
 
-    # Check for available GPU and print result of check
-    if torch.cuda.is_available():
-        log.info("GPU is available")
-        device_name = torch.cuda.get_device_name(torch.cuda.current_device())
-        log.info(
-            f"Found GPU with device_name {device_name}. Will run RFdiffusion on {device_name}"
-        )
-    elif bench_conf.require_gpu:
-        raise RuntimeError(
-            "No GPU detected. Aborting because benchmark.require_gpu is True."
-            " Set to False to allow CPU benchmarking."
-        )
-    else:
-        log.info(
-            "////////////////////////////////////////////////"
-            "///// NO GPU DETECTED! Falling back to CPU /////"
-            "////////////////////////////////////////////////"
-        )
+    iu.find_gpu(required=conf.inference.require_gpu)
 
     # Initialize sampler and target/contig.
     sampler = iu.sampler_selector(conf)

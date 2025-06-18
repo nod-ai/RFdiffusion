@@ -24,6 +24,7 @@ inference:
   model_directory_path: null
   compile: False
   compilation_mode: null
+  require_gpu: False
 
 contigmap:
   contigs: null
