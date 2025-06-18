@@ -30,7 +30,6 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor
 from se3_transformer.model.profiling import maybe_nvtx_range
-from se3_transformer.model.profiling import maybe_nvtx_range
 
 from se3_transformer.runtime.utils import degree_to_dim
 
