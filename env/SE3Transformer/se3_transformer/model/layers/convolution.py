@@ -32,7 +32,7 @@ import torch.nn as nn
 import torch.utils.checkpoint
 from dgl import DGLGraph
 from torch import Tensor
-from torch.cuda.nvtx import range as nvtx_range
+from se3_transformer.model.profiling import maybe_nvtx_range
 
 from se3_transformer.model.fiber import Fiber
 from se3_transformer.runtime.utils import degree_to_dim, unfuse_features
@@ -147,10 +147,10 @@ class VersatileConvSE3(nn.Module):
                                          device=device)
 
     def forward(self, features: Tensor, invariant_edge_feats: Tensor, basis: Tensor):
-        with nvtx_range(f'VersatileConvSE3'):
+        with maybe_nvtx_range(f'VersatileConvSE3'):
             num_edges = features.shape[0]
             in_dim = features.shape[2]
-            with nvtx_range(f'RadialProfile'):
+            with maybe_nvtx_range(f'RadialProfile'):
                 radial_weights = self.radial_func(invariant_edge_feats) \
                     .view(-1, self.channels_out, self.channels_in * self.freq_sum)
 
@@ -290,7 +290,7 @@ class ConvSE3(nn.Module):
             graph: DGLGraph,
             basis: Dict[str, Tensor]
     ):
-        with nvtx_range(f'ConvSE3'):
+        with maybe_nvtx_range(f'ConvSE3'):
             invariant_edge_feats = edge_feats['0'].squeeze(-1)
             src, dst = graph.edges()
             out = {}
@@ -345,13 +345,13 @@ class ConvSE3(nn.Module):
 
             for degree_out in self.fiber_out.degrees:
                 if self.self_interaction and str(degree_out) in self.to_kernel_self:
-                    with nvtx_range(f'self interaction'):
+                    with maybe_nvtx_range(f'self interaction'):
                         dst_features = node_feats[str(degree_out)][dst]
                         kernel_self = self.to_kernel_self[str(degree_out)]
                         out[str(degree_out)] = out[str(degree_out)] + kernel_self @ dst_features
 
                 if self.pool:
-                    with nvtx_range(f'pooling'):
+                    with maybe_nvtx_range(f'pooling'):
                         if isinstance(out, dict):
                             out[str(degree_out)] = dgl.ops.copy_e_sum(graph, out[str(degree_out)])
                         else:
