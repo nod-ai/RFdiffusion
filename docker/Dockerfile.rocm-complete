@@ -9,7 +9,7 @@ ENV RFDIFFUSION_HOME="${RFDIFFUSION_HOME}"
 COPY . "${RFDIFFUSION_HOME}"
 WORKDIR "${RFDIFFUSION_HOME}"
 RUN cd env/SE3Transformer \
-    && python setup.py develop \
+    && pip install -e . \
     && cd ../.. \
     && pip install -e .
 
