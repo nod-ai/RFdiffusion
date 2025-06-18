@@ -29,9 +29,10 @@ def benchmark_inference_step(conf: HydraConfig) -> None:
     # Initialize sampler and target/contig.
     sampler = iu.sampler_selector(conf)
     total_steps = bench_conf.warmup_steps + bench_conf.benchmark_steps
+    sampler_steps = sampler.t_step_input - sampler.inf_conf.final_step + 1
     assert (
-        sampler.t_step_input >= total_steps
-    ), f"Sampler total steps {sampler.t_step_input} is less than requested total steps {total_steps}"
+        sampler_steps >= total_steps
+    ), f"Sampler total steps {sampler_steps} is less than requested total steps {total_steps}"
 
     # Loop over number of designs to sample.
     design_startnum = sampler.inf_conf.design_startnum
