@@ -68,6 +68,7 @@ def benchmark_inference_step(conf: HydraConfig) -> None:
         time_per_step = elapsed_time / bench_conf.benchmark_steps
 
         times.append(time_per_step)
+        print(f"Time per step: {time_per_step*1000:.0f}ms")
 
     times = times[bench_conf.warmup_designs :]
     times = sorted(times)
