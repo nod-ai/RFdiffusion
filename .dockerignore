@@ -2,12 +2,13 @@
 .github/
 docker/
 img/
-examples/ppi_scaffolds/
+*.venv
 
 **/*.py[cod]
 rfdiffusion.egg-info
 __pycache__/
 
+models/
 schedules/
 outputs/
 test_outputs/

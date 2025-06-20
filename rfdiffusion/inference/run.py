@@ -6,8 +6,6 @@ import logging
 from rfdiffusion.util import writepdb_multi, writepdb
 from rfdiffusion.inference import utils as iu
 from hydra.core.hydra_config import HydraConfig
-import numpy as np
-import random
 import glob
 
 
@@ -18,15 +16,7 @@ def run_inference(conf: HydraConfig) -> None:
         conf.inference.random_seed = conf.inference.random_seed or 0
         iu.make_deterministic(conf.inference.random_seed)
 
-    # Check for available GPU and print result of check
-    if torch.cuda.is_available():
-        log.info("GPU is available")
-        device_name = torch.cuda.get_device_name(torch.cuda.current_device())
-        log.info(f"Found GPU with device_name {device_name}. Will run RFdiffusion on {device_name}")
-    else:
-        log.info("////////////////////////////////////////////////"
-                 "///// NO GPU DETECTED! Falling back to CPU /////"
-                 "////////////////////////////////////////////////")
+    iu.find_gpu(conf.inference.require_gpu)
 
     # Initialize sampler and target/contig.
     sampler = iu.sampler_selector(conf)
@@ -50,7 +40,7 @@ def run_inference(conf: HydraConfig) -> None:
         if conf.inference.random_seed is not None:
             iu.seed_rngs(conf.inference.random_seed + i_des)
 
-        start_time = time.time()
+        start_time = time.perf_counter()
         out_prefix = f"{sampler.inf_conf.output_prefix}_{i_des}"
         log.info(f"Making design {out_prefix}")
         if sampler.inf_conf.cautious and os.path.exists(out_prefix + ".pdb"):
@@ -128,7 +118,7 @@ def run_inference(conf: HydraConfig) -> None:
             device=torch.cuda.get_device_name(torch.cuda.current_device())
             if torch.cuda.is_available()
             else "CPU",
-            time=time.time() - start_time,
+            time=time.perf_counter() - start_time,
         )
         if hasattr(sampler, "contig_map"):
             for key, value in sampler.contig_map.get_mappings().items():
@@ -165,4 +155,4 @@ def run_inference(conf: HydraConfig) -> None:
                 chain_ids=sampler.chain_idx,
             )
 
-        log.info(f"Finished design in {(time.time()-start_time)/60:.2f} minutes")
+        log.info(f"Finished design in {(time.perf_counter()-start_time)/60:.2f} minutes")

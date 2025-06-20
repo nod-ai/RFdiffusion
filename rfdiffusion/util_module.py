@@ -2,20 +2,19 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from opt_einsum import contract as einsum
 import copy
 import dgl
 from rfdiffusion.util import base_indices, RTs_by_torsion, xyzs_in_base_frame, rigid_from_3_points
 
-def init_lecun_normal(module):
+def init_lecun_normal(module, device=None):
     def truncated_normal(uniform, mu=0.0, sigma=1.0, a=-2, b=2):
         normal = torch.distributions.normal.Normal(0, 1)
 
         alpha = (a - mu) / sigma
         beta = (b - mu) / sigma
 
-        alpha_normal_cdf = normal.cdf(torch.tensor(alpha))
-        p = alpha_normal_cdf + (normal.cdf(torch.tensor(beta)) - alpha_normal_cdf) * uniform
+        alpha_normal_cdf = normal.cdf(torch.tensor(alpha, device=device))
+        p = alpha_normal_cdf + (normal.cdf(torch.tensor(beta, device=device)) - alpha_normal_cdf) * uniform
 
         v = torch.clamp(2 * p - 1, -1 + 1e-8, 1 - 1e-8)
         x = mu + sigma * np.sqrt(2) * torch.erfinv(v)
@@ -25,20 +24,20 @@ def init_lecun_normal(module):
 
     def sample_truncated_normal(shape):
         stddev = np.sqrt(1.0/shape[-1])/.87962566103423978  # shape[-1] = fan_in
-        return stddev * truncated_normal(torch.rand(shape))
+        return stddev * truncated_normal(torch.rand(shape, device=device))
 
     module.weight = torch.nn.Parameter( (sample_truncated_normal(module.weight.shape)) )
     return module
 
-def init_lecun_normal_param(weight):
+def init_lecun_normal_param(weight, device=None):
     def truncated_normal(uniform, mu=0.0, sigma=1.0, a=-2, b=2):
         normal = torch.distributions.normal.Normal(0, 1)
 
         alpha = (a - mu) / sigma
         beta = (b - mu) / sigma
 
-        alpha_normal_cdf = normal.cdf(torch.tensor(alpha))
-        p = alpha_normal_cdf + (normal.cdf(torch.tensor(beta)) - alpha_normal_cdf) * uniform
+        alpha_normal_cdf = normal.cdf(torch.tensor(alpha, device=device))
+        p = alpha_normal_cdf + (normal.cdf(torch.tensor(beta, device=device)) - alpha_normal_cdf) * uniform
 
         v = torch.clamp(2 * p - 1, -1 + 1e-8, 1 - 1e-8)
         x = mu + sigma * np.sqrt(2) * torch.erfinv(v)
@@ -48,7 +47,7 @@ def init_lecun_normal_param(weight):
 
     def sample_truncated_normal(shape):
         stddev = np.sqrt(1.0/shape[-1])/.87962566103423978  # shape[-1] = fan_in
-        return stddev * truncated_normal(torch.rand(shape))
+        return stddev * truncated_normal(torch.rand(shape, device=device))
 
     weight = torch.nn.Parameter( (sample_truncated_normal(weight.shape)) )
     return weight
@@ -64,10 +63,10 @@ def get_clones(module, N):
 
 class Dropout(nn.Module):
     # Dropout entire row or column
-    def __init__(self, broadcast_dim=None, p_drop=0.15):
+    def __init__(self, broadcast_dim=None, p_drop=0.15, device=None):
         super(Dropout, self).__init__()
         # give ones with probability of 1-p_drop / zeros with p_drop
-        self.sampler = torch.distributions.bernoulli.Bernoulli(torch.tensor([1-p_drop]))
+        self.sampler = torch.distributions.bernoulli.Bernoulli(torch.tensor([1-p_drop], device=device))
         self.broadcast_dim=broadcast_dim
         self.p_drop=p_drop
     def forward(self, x):
@@ -84,7 +83,7 @@ class Dropout(nn.Module):
 def rbf(D):
     # Distance radial basis function
     D_min, D_max, D_count = 0., 20., 36
-    D_mu = torch.linspace(D_min, D_max, D_count).to(D.device)
+    D_mu = torch.linspace(D_min, D_max, D_count, device=D.device)
     D_mu = D_mu[None,:]
     D_sigma = (D_max - D_min) / D_count
     D_expand = torch.unsqueeze(D, -1)
@@ -119,13 +118,42 @@ def make_full_graph(xyz, pair, idx, top_k=64, kmin=9):
     B, L = xyz.shape[:2]
     device = xyz.device
 
-    # seq sep
-    sep = idx[:,None,:] - idx[:,:,None]
-    b,i,j = torch.where(sep.abs() > 0)
+    # We do some fancy math here to avoid the original implementation which
+    # forces a device-host sync and has significant negative impact on
+    # performance. The goal is to get the indices of the off-diagonal elements:
+    # every node's connection to every other node (hence "full graph").
+
+    # The original implementation is similar to the one used for topk:
+    # sep = idx[:,None,:] - idx[:,:,None]
+    # b,i,j = torch.where(sep.abs() > 0)
+
+    # If B is 2 and L is 4, we have 2*4*(4-1) = 24 indices:
+
+    # b = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    # i = [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3]
+    # j = [1, 2, 3, 0, 2, 3, 0, 1, 3, 0, 1, 2, 1, 2, 3, 0, 2, 3, 0, 1, 3, 0, 1, 2]
+
+    b = torch.arange(B, device=device).reshape(-1, 1, 1).expand(-1, L, L-1).flatten()
+    i = torch.arange(L, device=device).reshape(1, -1, 1).expand(B, -1, L-1).flatten()
+
+    # L x L matrix: [0 ... L-1] repeated L times
+    full = torch.arange(L, device=device).reshape(1, -1).expand(L, -1)
+
+    # Extract only the off-diagonal elements of the matrix. We strip off the
+    # first entry (which is the first diagonal entry) and then create rows that
+    # go from the first non-diagonal entry to the next diagonal entry. These
+    # rows are one longer that of the original square matrix. Note that this
+    # works because n*n - 1 = (n+1)*(n-1) (i.e. the length of the square matrix
+    # with the first element stripped off is the length of our new matrix). Then
+    # we strip off this last column that is now all diagonal entries. Finally,
+    # we repeat B times as the indices for each batch are identical. See
+    # https://discuss.pytorch.org/t/keep-off-diagonal-elements-only-from-square-matrix/54379
+    j = full.flatten()[1:].reshape(L-1, L+1)[:, :-1].unsqueeze(0).expand(B, -1, -1).flatten()
 
     src = b*L+i
     tgt = b*L+j
-    G = dgl.graph((src, tgt), num_nodes=B*L).to(device)
+    # Checking the node count is a big performance hit
+    G = dgl.graph((src, tgt), num_nodes=B*L, node_count_check=False, device=device)
     G.edata['rel_pos'] = (xyz[b,j,:] - xyz[b,i,:]).detach() # no gradient through basis function
 
     return G, pair[b,i,j][...,None]
@@ -163,7 +191,7 @@ def make_topk_graph(xyz, pair, idx, top_k=64, kmin=32, eps=1e-6):
 
     src = b*L+i
     tgt = b*L+j
-    G = dgl.graph((src, tgt), num_nodes=B*L).to(device)
+    G = dgl.graph((src, tgt), num_nodes=B*L, node_count_check=False, device=device)
     G.edata['rel_pos'] = (xyz[b,j,:] - xyz[b,i,:]).detach() # no gradient through basis function
 
     return G, pair[b,i,j][...,None]

@@ -27,16 +27,14 @@ from typing import Dict
 import torch
 import torch.nn as nn
 from torch import Tensor
-from torch.cuda.nvtx import range as nvtx_range
+from se3_transformer.model.profiling import maybe_nvtx_range
 
 from se3_transformer.model.fiber import Fiber
 
 
-@torch.jit.script
 def clamped_norm(x, clamp: float):
     return x.norm(p=2, dim=-1, keepdim=True).clamp(min=clamp)
 
-@torch.jit.script
 def rescale(x, norm, new_norm):
     return x / norm * new_norm
 
@@ -52,23 +50,23 @@ class NormSE3(nn.Module):
 
     NORM_CLAMP = 2 ** -24  # Minimum positive subnormal for FP16
 
-    def __init__(self, fiber: Fiber, nonlinearity: nn.Module = nn.ReLU()):
+    def __init__(self, fiber: Fiber, nonlinearity: nn.Module = nn.ReLU(), device=None):
         super().__init__()
         self.fiber = fiber
         self.nonlinearity = nonlinearity
 
         if len(set(fiber.channels)) == 1:
             # Fuse all the layer normalizations into a group normalization
-            self.group_norm = nn.GroupNorm(num_groups=len(fiber.degrees), num_channels=sum(fiber.channels))
+            self.group_norm = nn.GroupNorm(num_groups=len(fiber.degrees), num_channels=sum(fiber.channels), device=device)
         else:
             # Use multiple layer normalizations
             self.layer_norms = nn.ModuleDict({
-                str(degree): nn.LayerNorm(channels)
+                str(degree): nn.LayerNorm(channels, device=device)
                 for degree, channels in fiber
             })
 
     def forward(self, features: Dict[str, Tensor], *args, **kwargs) -> Dict[str, Tensor]:
-        with nvtx_range('NormSE3'):
+        with maybe_nvtx_range('NormSE3'):
             output = {}
             if hasattr(self, 'group_norm'):
                 # Compute per-degree norms of features

@@ -3,7 +3,6 @@ import torch.nn as nn
 from rfdiffusion.Embeddings import MSA_emb, Extra_emb, Templ_emb, Recycling
 from rfdiffusion.Track_module import IterativeSimulator
 from rfdiffusion.AuxiliaryPredictor import DistanceNetwork, MaskedTokenNetwork, ExpResolvedNetwork, LDDTNetwork
-from opt_einsum import contract as einsum
 
 class RoseTTAFoldModule(nn.Module):
     def __init__(self,
@@ -28,6 +27,7 @@ class RoseTTAFoldModule(nn.Module):
                  SE3_param_full={'l0_in_features':32, 'l0_out_features':16, 'num_edge_features':32},
                  SE3_param_topk={'l0_in_features':32, 'l0_out_features':16, 'num_edge_features':32},
                  input_seq_onehot=False,     # For continuous vs. discrete sequence
+                 device=None,
                  ):
 
         super(RoseTTAFoldModule, self).__init__()
@@ -37,16 +37,16 @@ class RoseTTAFoldModule(nn.Module):
         # Input Embeddings
         d_state = SE3_param_topk['l0_out_features']
         self.latent_emb = MSA_emb(d_msa=d_msa, d_pair=d_pair, d_state=d_state,
-                p_drop=p_drop, input_seq_onehot=input_seq_onehot) # Allowed to take onehotseq
+                p_drop=p_drop, input_seq_onehot=input_seq_onehot, device=device) # Allowed to take onehotseq
         self.full_emb = Extra_emb(d_msa=d_msa_full, d_init=25,
-                p_drop=p_drop, input_seq_onehot=input_seq_onehot) # Allowed to take onehotseq
+                p_drop=p_drop, input_seq_onehot=input_seq_onehot, device=device) # Allowed to take onehotseq
         self.templ_emb = Templ_emb(d_pair=d_pair, d_templ=d_templ, d_state=d_state,
                                    n_head=n_head_templ,
-                                   d_hidden=d_hidden_templ, p_drop=0.25, d_t1d=d_t1d, d_t2d=d_t2d)
+                                   d_hidden=d_hidden_templ, p_drop=0.25, d_t1d=d_t1d, d_t2d=d_t2d, device=device)
 
 
         # Update inputs with outputs from previous round
-        self.recycle = Recycling(d_msa=d_msa, d_pair=d_pair, d_state=d_state)
+        self.recycle = Recycling(d_msa=d_msa, d_pair=d_pair, d_state=d_state, device=device)
         #
         self.simulator = IterativeSimulator(n_extra_block=n_extra_block,
                                             n_main_block=n_main_block,
@@ -57,13 +57,13 @@ class RoseTTAFoldModule(nn.Module):
                                             n_head_pair=n_head_pair,
                                             SE3_param_full=SE3_param_full,
                                             SE3_param_topk=SE3_param_topk,
-                                            p_drop=p_drop)
+                                            p_drop=p_drop, device=device)
         ##
-        self.c6d_pred = DistanceNetwork(d_pair, p_drop=p_drop)
-        self.aa_pred = MaskedTokenNetwork(d_msa)
-        self.lddt_pred = LDDTNetwork(d_state)
+        self.c6d_pred = DistanceNetwork(d_pair, p_drop=p_drop, device=device)
+        self.aa_pred = MaskedTokenNetwork(d_msa, device=device)
+        self.lddt_pred = LDDTNetwork(d_state, device=device)
 
-        self.exp_pred = ExpResolvedNetwork(d_msa, d_state)
+        self.exp_pred = ExpResolvedNetwork(d_msa, d_state, device=device)
 
     def forward(self, msa_latent, msa_full, seq, xyz, idx, t,
                 t1d=None, t2d=None, xyz_t=None, alpha_t=None,
@@ -105,7 +105,7 @@ class RoseTTAFoldModule(nn.Module):
 
         if return_raw:
             # get last structure
-            xyz = einsum('bnij,bnaj->bnai', R[-1], xyz[:,:,:3]-xyz[:,:,1].unsqueeze(-2)) + T[-1].unsqueeze(-2)
+            xyz = torch.einsum('bnij,bnaj->bnai', R[-1], xyz[:,:,:3]-xyz[:,:,1].unsqueeze(-2)) + T[-1].unsqueeze(-2)
             return msa[:,0], pair, xyz, state, alpha_s[-1]
 
         # predict masked amino acids
@@ -116,7 +116,7 @@ class RoseTTAFoldModule(nn.Module):
 
         if return_infer:
             # get last structure
-            xyz = einsum('bnij,bnaj->bnai', R[-1], xyz[:,:,:3]-xyz[:,:,1].unsqueeze(-2)) + T[-1].unsqueeze(-2)
+            xyz = torch.einsum('bnij,bnaj->bnai', R[-1], xyz[:,:,:3]-xyz[:,:,1].unsqueeze(-2)) + T[-1].unsqueeze(-2)
 
             # get scalar plddt
             nbin = lddt.shape[1]
@@ -135,6 +135,6 @@ class RoseTTAFoldModule(nn.Module):
         logits_exp = self.exp_pred(msa[:,0], state)
 
         # get all intermediate bb structures
-        xyz = einsum('rbnij,bnaj->rbnai', R, xyz[:,:,:3]-xyz[:,:,1].unsqueeze(-2)) + T.unsqueeze(-2)
+        xyz = torch.einsum('rbnij,bnaj->rbnai', R, xyz[:,:,:3]-xyz[:,:,1].unsqueeze(-2)) + T.unsqueeze(-2)
 
         return logits, logits_aa, logits_exp, xyz, alpha_s, lddt

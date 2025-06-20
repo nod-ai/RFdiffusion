@@ -104,6 +104,8 @@ class Sampler:
             self.assemble_config_from_chk()
             # Now actually load the model weights into RF
             self.model = self.load_model()
+            if conf.inference.compile:
+                self.model.compile(mode=conf.inference.compilation_mode)
         else:
             self.assemble_config_from_chk()
 
@@ -223,13 +225,16 @@ class Sampler:
         # Read input dimensions from checkpoint.
         self.d_t1d=self._conf.preprocess.d_t1d
         self.d_t2d=self._conf.preprocess.d_t2d
-        model = RoseTTAFoldModule(**self._conf.model, d_t1d=self.d_t1d, d_t2d=self.d_t2d, T=self._conf.diffuser.T).to(self.device)
+        self._log.info('Creating model...')
+        model = RoseTTAFoldModule(**self._conf.model, d_t1d=self.d_t1d, d_t2d=self.d_t2d, T=self._conf.diffuser.T, device=self.device)
+        self._log.info('...model created')
         if self._conf.logging.inputs:
             pickle_dir = pickle_function_call(model, 'forward', 'inference')
             print(f'pickle_dir: {pickle_dir}')
         model = model.eval()
-        self._log.info(f'Loading checkpoint.')
+        self._log.info('Loading checkpoint...')
         model.load_state_dict(self.ckpt['model_state_dict'], strict=True)
+        self._log.info('...checkpoint loaded')
         return model
 
     def construct_contig(self, target_feats):
@@ -570,7 +575,7 @@ class Sampler:
         pair_prev = None
         state_prev = None
 
-        with torch.no_grad():
+        with torch.inference_mode():
             msa_prev, pair_prev, px0, state_prev, alpha, logits, plddt = self.model(msa_masked,
                                 msa_full,
                                 seq_in,
@@ -660,7 +665,7 @@ class SelfConditioning(Sampler):
         ### Forward Pass ###
         ####################
 
-        with torch.no_grad():
+        with torch.inference_mode():
             msa_prev, pair_prev, px0, state_prev, alpha, logits, plddt = self.model(msa_masked,
                                 msa_full,
                                 seq_in,

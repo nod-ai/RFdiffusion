@@ -2,6 +2,7 @@
 
 defaults:
   - base
+  - _self_
 
 inference:
   # Symmetry to sample
