@@ -6,7 +6,7 @@ FROM gcmn/dgl:rocm-complete
 
 WORKDIR /pip
 # RFdiffusion deps
-RUN pip install hydra-core pyrsistent e3nn==0.3.3 decorator==5.1.0 \
+RUN pip install hydra-core pyrsistent e3nn==0.3.3 decorator==5.1.0 biopython=1.85 \
     && rm -rf /pip
 
 ENV PYTHONWARNINGS="ignore::UserWarning,ignore::DeprecationWarning,ignore::PendingDeprecationWarning,ignore::ImportWarning,ignore::ResourceWarning,ignore::FutureWarning"

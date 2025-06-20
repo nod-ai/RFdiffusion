@@ -123,7 +123,9 @@ def handle_test_output(test_name, reference_dir, output_dir, request):
     # serializable by execnet in order to use pytest-xdist (which basically
     # means only Python primitives).
 
-    if request.config.getoption("--update-goldens"):
+    if request.config.getoption("--update-goldens") or not os.path.exists(
+        reference_file
+    ):
         reference_file.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(test_file, reference_file)
         # Anything in these properties needs to be serializable by execnet in
@@ -258,9 +260,10 @@ def test_config(spec, tmp_path, reference_dir, request):
             }
         }
         conf = OmegaConf.merge(conf, spec, overrides)
-
+        print(f"Running test {test_name} with config:\n{OmegaConf.to_yaml(conf)}")
         run_inference(conf)
         handle_test_output(test_name, reference_dir, output_dir, request)
+
 
 if __name__ == "__main__":
     pytest.main()
