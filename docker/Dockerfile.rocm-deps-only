@@ -6,7 +6,8 @@ FROM gcmn/dgl:rocm-complete
 
 WORKDIR /pip
 # RFdiffusion deps
-RUN pip install hydra-core pyrsistent e3nn==0.3.3 decorator==5.1.0 biopython=1.85 \
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install hydra-core pyrsistent e3nn==0.3.3 decorator==5.1.0 biopython \
     && rm -rf /pip
 
 WORKDIR /
