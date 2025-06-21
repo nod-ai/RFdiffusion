@@ -188,6 +188,14 @@ def config_id(config):
             flattened["inference.input_pdb"]
         ).stem
 
+    if "inference.ckpt_override_path" in flattened:
+        flattened["inference.ckpt_override_path"] = pathlib.Path(
+            flattened["inference.ckpt_override_path"]
+        ).stem.removesuffix("_ckpt")
+
+    # This is not an exciting property of the test
+    flattened.pop("inference.random_seed", None)
+
     fields = []
     for v in flattened.values():
         if isinstance(v, list):
