@@ -90,9 +90,7 @@ def handle_test_output(test_name, reference_dir, output_dir, request):
     # serializable by execnet in order to use pytest-xdist (which basically
     # means only Python primitives).
 
-    if request.config.getoption("--update-goldens") or not os.path.exists(
-        reference_file
-    ):
+    if request.config.getoption("--update-goldens"):
         reference_file.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(test_file, reference_file)
         # Anything in these properties needs to be serializable by execnet in
