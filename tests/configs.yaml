@@ -12,8 +12,6 @@ tests:
       final_step: 48
     contigmap:
       contigs: ["700-700"]
-    diffuser:
-      T: 15
 
   ##### Motif Scaffolding #####
   - inference:
