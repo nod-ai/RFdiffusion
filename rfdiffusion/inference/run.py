@@ -44,7 +44,7 @@ def run_inference(conf: HydraConfig) -> None:
         out_prefix = f"{sampler.inf_conf.output_prefix}_{i_des}"
         log.info(f"Making design {out_prefix}")
         if sampler.inf_conf.cautious and os.path.exists(out_prefix + ".pdb"):
-            log.info(
+            log.warning(
                 f"(cautious mode) Skipping this design because {out_prefix}.pdb already exists."
             )
             continue

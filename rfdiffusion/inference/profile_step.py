@@ -47,7 +47,7 @@ def profile_inference_step(conf: HydraConfig) -> None:
         trace_path = f"{sampler.inf_conf.output_prefix}_{i_des}.json"
         log.info(f"Making design {i_des}")
         if sampler.inf_conf.cautious and os.path.exists(trace_path):
-            log.info(
+            log.warning(
                 f"(cautious mode) Skipping this design because {trace_path} already exists."
             )
             continue
