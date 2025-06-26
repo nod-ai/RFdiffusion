@@ -240,7 +240,7 @@ class Str2Str(nn.Module):
         nn.init.zeros_(self.embed_e2.bias)
 
     @torch.amp.autocast('cuda', enabled=False)
-    def forward(self, msa, pair, R_in, T_in, xyz, state, idx, motif_mask, top_k=64, eps=1e-5):
+    def forward(self, msa, pair, R_in, T_in, xyz, state, idx, motif_mask, cyclic_reses=None, top_k=64, eps=1e-5):
         B, N, L = msa.shape[:3]
 
         if motif_mask is None:
@@ -255,7 +255,7 @@ class Str2Str(nn.Module):
         node = self.norm_node(self.embed_x(node))
         pair = self.norm_edge1(self.embed_e1(pair))
 
-        neighbor = get_seqsep(idx)
+        neighbor = get_seqsep(idx, cyclic_reses)
         rbf_feat = rbf(torch.cdist(xyz[:,:,1], xyz[:,:,1]))
         pair = torch.cat((pair, rbf_feat, neighbor), dim=-1)
         pair = self.norm_edge2(self.embed_e2(pair))
@@ -329,13 +329,13 @@ class IterBlock(nn.Module):
                                p_drop=p_drop,
                                device=device)
 
-    def forward(self, msa, pair, R_in, T_in, xyz, state, idx, motif_mask, use_checkpoint=False):
+    def forward(self, msa, pair, R_in, T_in, xyz, state, idx, motif_mask, use_checkpoint=False, cyclic_reses=None):
         rbf_feat = rbf(torch.cdist(xyz[:,:,1,:], xyz[:,:,1,:]))
         if use_checkpoint:
             msa = checkpoint.checkpoint(create_custom_forward(self.msa2msa), msa, pair, rbf_feat, state)
             pair = checkpoint.checkpoint(create_custom_forward(self.msa2pair), msa, pair)
             pair = checkpoint.checkpoint(create_custom_forward(self.pair2pair), pair, rbf_feat)
-            R, T, state, alpha = checkpoint.checkpoint(create_custom_forward(self.str2str, top_k=0), msa, pair, R_in, T_in, xyz, state, idx, motif_mask)
+            R, T, state, alpha = checkpoint.checkpoint(create_custom_forward(self.str2str, top_k=0), msa, pair, R_in, T_in, xyz, state, idx, motif_mask, cyclic_reses)
         else:
             msa = self.msa2msa(msa, pair, rbf_feat, state)
             pair = self.msa2pair(msa, pair)
@@ -396,7 +396,7 @@ class IterativeSimulator(nn.Module):
         self.proj_state2 = init_lecun_normal(self.proj_state2, device=device)
         nn.init.zeros_(self.proj_state2.bias)
 
-    def forward(self, seq, msa, msa_full, pair, xyz_in, state, idx, use_checkpoint=False, motif_mask=None):
+    def forward(self, seq, msa, msa_full, pair, xyz_in, state, idx, cyclic_reses=None, use_checkpoint=False, motif_mask=None):
         """
         input:
            seq: query sequence (B, L)
@@ -437,7 +437,8 @@ class IterativeSimulator(nn.Module):
                                                                              state,
                                                                              idx,
                                                                              motif_mask=motif_mask,
-                                                                             use_checkpoint=use_checkpoint)
+                                                                             use_checkpoint=use_checkpoint,
+                                                                             cyclic_reses=cyclic_reses)
             R_s.append(R_in)
             T_s.append(T_in)
             alpha_s.append(alpha)
@@ -456,7 +457,8 @@ class IterativeSimulator(nn.Module):
                                                                        state,
                                                                        idx,
                                                                        motif_mask=motif_mask,
-                                                                       use_checkpoint=use_checkpoint)
+                                                                       use_checkpoint=use_checkpoint,
+                                                                       cyclic_reses=cyclic_reses)
             R_s.append(R_in)
             T_s.append(T_in)
             alpha_s.append(alpha)
@@ -474,7 +476,8 @@ class IterativeSimulator(nn.Module):
                                                         state,
                                                         idx,
                                                         top_k=64,
-                                                        motif_mask=motif_mask)
+                                                        motif_mask=motif_mask,
+                                                        cyclic_reses=cyclic_reses)
             R_s.append(R_in)
             T_s.append(T_in)
             alpha_s.append(alpha)
