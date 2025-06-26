@@ -478,13 +478,13 @@ examples/design_macrocyclic_binder.sh
 #### RFpeptides binder design
 <img src="./img/rfpeptides_binder.png" alt="alt text" width="1100" align="center"/>
 
-To design a macrocyclic peptide to bind a target, the flags needed are very similar to classic binder design, but with two additional flags: 
+To design a macrocyclic peptide to bind a target, the flags needed are very similar to classic binder design, but with two additional flags:
 ```
-#!/bin/bash 
+#!/bin/bash
 
 prefix=./outputs/diffused_binder_cyclic2
 
-# Note that the indices in this pdb file have been 
+# Note that the indices in this pdb file have been
 # shifted by +2 in chain A relative to pdbID 7zkr.
 pdb='./input_pdbs/7zkr_GABARAP.pdb'
 
@@ -501,9 +501,9 @@ inference.cyc_chains='a' \
 ppi.hotspot_res=[\'A51\',\'A52\',\'A50\',\'A48\',\'A62\',\'A65\'] \
 ```
 
-The new flags are `inference.cyclic=True` and `inference.cyc_chains`. Yes, they are somewhat redundant. 
+The new flags are `inference.cyclic=True` and `inference.cyc_chains`. Yes, they are somewhat redundant.
 
-`inference.cyclic` simply notifies the program that the user would like to design at least one macrocycle, and `inference.cyc_chains` is just a string containing the letter of every chain you would like to design as a cyclic peptide. In the example above, only chain `A` (`inference.cyc_chains='a'`) is cyclized, but one could do `inference.cyc_chains='abcd'` if they so desired (and the contigs was compatible with this, which the above one is not). 
+`inference.cyclic` simply notifies the program that the user would like to design at least one macrocycle, and `inference.cyc_chains` is just a string containing the letter of every chain you would like to design as a cyclic peptide. In the example above, only chain `A` (`inference.cyc_chains='a'`) is cyclized, but one could do `inference.cyc_chains='abcd'` if they so desired (and the contigs was compatible with this, which the above one is not).
 
 #### RFpeptides monomer design
 For monomer design, you can simply adjust the contigs to only contain a single generated chain e.g., `contigmap.contigs=[12-18]`, keep the `inference.cyclic=True` and `inference.cyc_chains='a'`, and you're off to the races making monomers.

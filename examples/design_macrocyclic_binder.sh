@@ -2,7 +2,7 @@
 
 prefix=./outputs/diffused_binder_cyclic2
 
-# Note that the indices in this pdb file have been 
+# Note that the indices in this pdb file have been
 # shifted by +2 in chain A relative to pdbID 7zkr.
 pdb='./input_pdbs/7zkr_GABARAP.pdb'
 
