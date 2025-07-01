@@ -215,8 +215,12 @@ def config_id(config):
 def test_config(spec, tmp_path, reference_dir, request):
     os.chdir(script_dir)
 
+    config_name = "base"
+    if "config_name" in spec:
+        config_name = spec.pop("config_name")
+
     with hydra.initialize(config_path="../config/inference", version_base="1.2"):
-        conf = hydra.compose(config_name="base")
+        conf = hydra.compose(config_name=config_name)
         # hydra.compose has an overrides argument but it only accepts
         # dot-notation string syntax like
         # "configmap.contigs=[A151-180/70-70/A251-300]" for some reason. It
@@ -226,14 +230,19 @@ def test_config(spec, tmp_path, reference_dir, request):
         # end goal)
         output_dir = tmp_path
         test_name = request.node.callspec.id.replace(" ", "_").replace("/", "_")
+        conf = OmegaConf.merge(conf, spec)
+        # First resolve the diffuser configuration
+        start_step = conf.diffuser.partial_T or conf.diffuser.T
         overrides = {
             "inference": {
                 "num_designs": 1,
                 "output_prefix": output_dir / test_name,
                 "deterministic": True,
+                "final_step": start_step - 2,
+                "random_seed": 1337,
             }
         }
-        conf = OmegaConf.merge(conf, spec, overrides)
+        conf = OmegaConf.merge(conf, overrides)
         print(f"Running test {test_name} with config:\n{OmegaConf.to_yaml(conf)}")
         run_inference(conf)
         handle_test_output(test_name, reference_dir, output_dir, request)
