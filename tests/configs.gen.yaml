@@ -1,0 +1,1547 @@
+unconditional_100:
+  contigmap:
+    length: "100"
+    contigs: ["100"]
+unconditional_200:
+  contigmap:
+    length: "200"
+    contigs: ["200"]
+unconditional_300:
+  contigmap:
+    length: "300"
+    contigs: ["300"]
+unconditional_400:
+  contigmap:
+    length: "400"
+    contigs: ["400"]
+unconditional_500:
+  contigmap:
+    length: "500"
+    contigs: ["500"]
+unconditional_600:
+  contigmap:
+    length: "600"
+    contigs: ["600"]
+unconditional_700:
+  contigmap:
+    length: "700"
+    contigs: ["700"]
+unconditional_800:
+  contigmap:
+    length: "800"
+    contigs: ["800"]
+unconditional_900:
+  contigmap:
+    length: "900"
+    contigs: ["900"]
+unconditional_1000:
+  contigmap:
+    length: "1000"
+    contigs: ["1000"]
+unconditional_1100:
+  contigmap:
+    length: "1100"
+    contigs: ["1100"]
+unconditional_1200:
+  contigmap:
+    length: "1200"
+    contigs: ["1200"]
+motifscaffolding_39:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "39"
+    contigs: ["10/A163-181/10"]
+motifscaffolding_139:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "139"
+    contigs: ["60/A163-181/60"]
+motifscaffolding_239:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "239"
+    contigs: ["110/A163-181/110"]
+motifscaffolding_339:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "339"
+    contigs: ["160/A163-181/160"]
+motifscaffolding_439:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "439"
+    contigs: ["210/A163-181/210"]
+motifscaffolding_539:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "539"
+    contigs: ["260/A163-181/260"]
+motifscaffolding_639:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "639"
+    contigs: ["310/A163-181/310"]
+motifscaffolding_739:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "739"
+    contigs: ["360/A163-181/360"]
+motifscaffolding_839:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "839"
+    contigs: ["410/A163-181/410"]
+motifscaffolding_939:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "939"
+    contigs: ["460/A163-181/460"]
+motifscaffolding_1039:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "1039"
+    contigs: ["510/A163-181/510"]
+motifscaffolding_1139:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "1139"
+    contigs: ["560/A163-181/560"]
+motifscaffolding_with_target_83:
+  inference:
+    input_pdb: "input_pdbs/1YCR.pdb"
+    ckpt_override_path: "../models/Complex_base_ckpt.pt"
+  contigmap:
+    length: "83"
+    contigs: ["A25-109/0 35/B17-29/35"]
+motifscaffolding_with_target_183:
+  inference:
+    input_pdb: "input_pdbs/1YCR.pdb"
+    ckpt_override_path: "../models/Complex_base_ckpt.pt"
+  contigmap:
+    length: "183"
+    contigs: ["A25-109/0 85/B17-29/85"]
+motifscaffolding_with_target_283:
+  inference:
+    input_pdb: "input_pdbs/1YCR.pdb"
+    ckpt_override_path: "../models/Complex_base_ckpt.pt"
+  contigmap:
+    length: "283"
+    contigs: ["A25-109/0 135/B17-29/135"]
+motifscaffolding_with_target_383:
+  inference:
+    input_pdb: "input_pdbs/1YCR.pdb"
+    ckpt_override_path: "../models/Complex_base_ckpt.pt"
+  contigmap:
+    length: "383"
+    contigs: ["A25-109/0 185/B17-29/185"]
+motifscaffolding_with_target_483:
+  inference:
+    input_pdb: "input_pdbs/1YCR.pdb"
+    ckpt_override_path: "../models/Complex_base_ckpt.pt"
+  contigmap:
+    length: "483"
+    contigs: ["A25-109/0 235/B17-29/235"]
+motifscaffolding_with_target_583:
+  inference:
+    input_pdb: "input_pdbs/1YCR.pdb"
+    ckpt_override_path: "../models/Complex_base_ckpt.pt"
+  contigmap:
+    length: "583"
+    contigs: ["A25-109/0 285/B17-29/285"]
+motifscaffolding_with_target_683:
+  inference:
+    input_pdb: "input_pdbs/1YCR.pdb"
+    ckpt_override_path: "../models/Complex_base_ckpt.pt"
+  contigmap:
+    length: "683"
+    contigs: ["A25-109/0 335/B17-29/335"]
+motifscaffolding_with_target_783:
+  inference:
+    input_pdb: "input_pdbs/1YCR.pdb"
+    ckpt_override_path: "../models/Complex_base_ckpt.pt"
+  contigmap:
+    length: "783"
+    contigs: ["A25-109/0 385/B17-29/385"]
+motifscaffolding_with_target_883:
+  inference:
+    input_pdb: "input_pdbs/1YCR.pdb"
+    ckpt_override_path: "../models/Complex_base_ckpt.pt"
+  contigmap:
+    length: "883"
+    contigs: ["A25-109/0 435/B17-29/435"]
+motifscaffolding_with_target_983:
+  inference:
+    input_pdb: "input_pdbs/1YCR.pdb"
+    ckpt_override_path: "../models/Complex_base_ckpt.pt"
+  contigmap:
+    length: "983"
+    contigs: ["A25-109/0 485/B17-29/485"]
+motifscaffolding_with_target_1083:
+  inference:
+    input_pdb: "input_pdbs/1YCR.pdb"
+    ckpt_override_path: "../models/Complex_base_ckpt.pt"
+  contigmap:
+    length: "1083"
+    contigs: ["A25-109/0 535/B17-29/535"]
+motifscaffolding_with_target_1183:
+  inference:
+    input_pdb: "input_pdbs/1YCR.pdb"
+    ckpt_override_path: "../models/Complex_base_ckpt.pt"
+  contigmap:
+    length: "1183"
+    contigs: ["A25-109/0 585/B17-29/585"]
+motifscaffolding_inpaintseq_39:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "39"
+    contigs: ["10/A163-181/10"]
+    inpaint_seq: ["A163-168/A170-171/A179"]
+motifscaffolding_inpaintseq_139:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "139"
+    contigs: ["60/A163-181/60"]
+    inpaint_seq: ["A163-168/A170-171/A179"]
+motifscaffolding_inpaintseq_239:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "239"
+    contigs: ["110/A163-181/110"]
+    inpaint_seq: ["A163-168/A170-171/A179"]
+motifscaffolding_inpaintseq_339:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "339"
+    contigs: ["160/A163-181/160"]
+    inpaint_seq: ["A163-168/A170-171/A179"]
+motifscaffolding_inpaintseq_439:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "439"
+    contigs: ["210/A163-181/210"]
+    inpaint_seq: ["A163-168/A170-171/A179"]
+motifscaffolding_inpaintseq_539:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "539"
+    contigs: ["260/A163-181/260"]
+    inpaint_seq: ["A163-168/A170-171/A179"]
+motifscaffolding_inpaintseq_639:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "639"
+    contigs: ["310/A163-181/310"]
+    inpaint_seq: ["A163-168/A170-171/A179"]
+motifscaffolding_inpaintseq_739:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "739"
+    contigs: ["360/A163-181/360"]
+    inpaint_seq: ["A163-168/A170-171/A179"]
+motifscaffolding_inpaintseq_839:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "839"
+    contigs: ["410/A163-181/410"]
+    inpaint_seq: ["A163-168/A170-171/A179"]
+motifscaffolding_inpaintseq_939:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "939"
+    contigs: ["460/A163-181/460"]
+    inpaint_seq: ["A163-168/A170-171/A179"]
+motifscaffolding_inpaintseq_1039:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "1039"
+    contigs: ["510/A163-181/510"]
+    inpaint_seq: ["A163-168/A170-171/A179"]
+motifscaffolding_inpaintseq_1139:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "1139"
+    contigs: ["560/A163-181/560"]
+    inpaint_seq: ["A163-168/A170-171/A179"]
+partialdiffusion_full:
+  inference:
+    input_pdb: "input_pdbs/2KL8.pdb"
+  contigmap:
+    length: "79"
+    contigs: ["79"]
+  diffuser:
+    partial_T: 10
+partialdiffusion_half:
+  inference:
+    input_pdb: "input_pdbs/2KL8.pdb"
+  contigmap:
+    contigs: ["A1-39/40"]
+  diffuser:
+    partial_T: 10
+ppi_50:
+  inference:
+    input_pdb: "input_pdbs/insulin_target.pdb"
+  contigmap:
+    length: "50"
+    contigs: ["A1-150/0 50"]
+  ppi:
+    hotspot_res: ["A59", "A83", "A91"]
+  denoiser:
+    noise_scale_ca: 0
+    noise_scale_frame: 0
+ppi_150:
+  inference:
+    input_pdb: "input_pdbs/insulin_target.pdb"
+  contigmap:
+    length: "150"
+    contigs: ["A1-150/0 150"]
+  ppi:
+    hotspot_res: ["A59", "A83", "A91"]
+  denoiser:
+    noise_scale_ca: 0
+    noise_scale_frame: 0
+ppi_250:
+  inference:
+    input_pdb: "input_pdbs/insulin_target.pdb"
+  contigmap:
+    length: "250"
+    contigs: ["A1-150/0 250"]
+  ppi:
+    hotspot_res: ["A59", "A83", "A91"]
+  denoiser:
+    noise_scale_ca: 0
+    noise_scale_frame: 0
+ppi_350:
+  inference:
+    input_pdb: "input_pdbs/insulin_target.pdb"
+  contigmap:
+    length: "350"
+    contigs: ["A1-150/0 350"]
+  ppi:
+    hotspot_res: ["A59", "A83", "A91"]
+  denoiser:
+    noise_scale_ca: 0
+    noise_scale_frame: 0
+ppi_450:
+  inference:
+    input_pdb: "input_pdbs/insulin_target.pdb"
+  contigmap:
+    length: "450"
+    contigs: ["A1-150/0 450"]
+  ppi:
+    hotspot_res: ["A59", "A83", "A91"]
+  denoiser:
+    noise_scale_ca: 0
+    noise_scale_frame: 0
+ppi_550:
+  inference:
+    input_pdb: "input_pdbs/insulin_target.pdb"
+  contigmap:
+    length: "550"
+    contigs: ["A1-150/0 550"]
+  ppi:
+    hotspot_res: ["A59", "A83", "A91"]
+  denoiser:
+    noise_scale_ca: 0
+    noise_scale_frame: 0
+ppi_650:
+  inference:
+    input_pdb: "input_pdbs/insulin_target.pdb"
+  contigmap:
+    length: "650"
+    contigs: ["A1-150/0 650"]
+  ppi:
+    hotspot_res: ["A59", "A83", "A91"]
+  denoiser:
+    noise_scale_ca: 0
+    noise_scale_frame: 0
+ppi_750:
+  inference:
+    input_pdb: "input_pdbs/insulin_target.pdb"
+  contigmap:
+    length: "750"
+    contigs: ["A1-150/0 750"]
+  ppi:
+    hotspot_res: ["A59", "A83", "A91"]
+  denoiser:
+    noise_scale_ca: 0
+    noise_scale_frame: 0
+ppi_850:
+  inference:
+    input_pdb: "input_pdbs/insulin_target.pdb"
+  contigmap:
+    length: "850"
+    contigs: ["A1-150/0 850"]
+  ppi:
+    hotspot_res: ["A59", "A83", "A91"]
+  denoiser:
+    noise_scale_ca: 0
+    noise_scale_frame: 0
+ppi_950:
+  inference:
+    input_pdb: "input_pdbs/insulin_target.pdb"
+  contigmap:
+    length: "950"
+    contigs: ["A1-150/0 950"]
+  ppi:
+    hotspot_res: ["A59", "A83", "A91"]
+  denoiser:
+    noise_scale_ca: 0
+    noise_scale_frame: 0
+ppi_1050:
+  inference:
+    input_pdb: "input_pdbs/insulin_target.pdb"
+  contigmap:
+    length: "1050"
+    contigs: ["A1-150/0 1050"]
+  ppi:
+    hotspot_res: ["A59", "A83", "A91"]
+  denoiser:
+    noise_scale_ca: 0
+    noise_scale_frame: 0
+ppi_1150:
+  inference:
+    input_pdb: "input_pdbs/insulin_target.pdb"
+  contigmap:
+    length: "1150"
+    contigs: ["A1-150/0 1150"]
+  ppi:
+    hotspot_res: ["A59", "A83", "A91"]
+  denoiser:
+    noise_scale_ca: 0
+    noise_scale_frame: 0
+unconditional_w_contact_potential_100:
+  contigmap:
+    length: "100"
+    contigs: ["100"]
+  potentials:
+    guiding_potentials: ["type:monomer_contacts,weight:0.05"]
+unconditional_w_contact_potential_200:
+  contigmap:
+    length: "200"
+    contigs: ["200"]
+  potentials:
+    guiding_potentials: ["type:monomer_contacts,weight:0.05"]
+unconditional_w_contact_potential_300:
+  contigmap:
+    length: "300"
+    contigs: ["300"]
+  potentials:
+    guiding_potentials: ["type:monomer_contacts,weight:0.05"]
+unconditional_w_contact_potential_400:
+  contigmap:
+    length: "400"
+    contigs: ["400"]
+  potentials:
+    guiding_potentials: ["type:monomer_contacts,weight:0.05"]
+unconditional_w_contact_potential_500:
+  contigmap:
+    length: "500"
+    contigs: ["500"]
+  potentials:
+    guiding_potentials: ["type:monomer_contacts,weight:0.05"]
+unconditional_w_contact_potential_600:
+  contigmap:
+    length: "600"
+    contigs: ["600"]
+  potentials:
+    guiding_potentials: ["type:monomer_contacts,weight:0.05"]
+unconditional_w_contact_potential_700:
+  contigmap:
+    length: "700"
+    contigs: ["700"]
+  potentials:
+    guiding_potentials: ["type:monomer_contacts,weight:0.05"]
+unconditional_w_contact_potential_800:
+  contigmap:
+    length: "800"
+    contigs: ["800"]
+  potentials:
+    guiding_potentials: ["type:monomer_contacts,weight:0.05"]
+unconditional_w_contact_potential_900:
+  contigmap:
+    length: "900"
+    contigs: ["900"]
+  potentials:
+    guiding_potentials: ["type:monomer_contacts,weight:0.05"]
+unconditional_w_contact_potential_1000:
+  contigmap:
+    length: "1000"
+    contigs: ["1000"]
+  potentials:
+    guiding_potentials: ["type:monomer_contacts,weight:0.05"]
+unconditional_w_contact_potential_1100:
+  contigmap:
+    length: "1100"
+    contigs: ["1100"]
+  potentials:
+    guiding_potentials: ["type:monomer_contacts,weight:0.05"]
+unconditional_w_contact_potential_1200:
+  contigmap:
+    length: "1200"
+    contigs: ["1200"]
+  potentials:
+    guiding_potentials: ["type:monomer_contacts,weight:0.05"]
+unconditional_w_monomer_ROG_100:
+  contigmap:
+    length: "100"
+    contigs: ["100"]
+  potentials:
+    guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
+    guide_scale: 2
+    guide_decay: "quadratic"
+unconditional_w_monomer_ROG_200:
+  contigmap:
+    length: "200"
+    contigs: ["200"]
+  potentials:
+    guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
+    guide_scale: 2
+    guide_decay: "quadratic"
+unconditional_w_monomer_ROG_300:
+  contigmap:
+    length: "300"
+    contigs: ["300"]
+  potentials:
+    guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
+    guide_scale: 2
+    guide_decay: "quadratic"
+unconditional_w_monomer_ROG_400:
+  contigmap:
+    length: "400"
+    contigs: ["400"]
+  potentials:
+    guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
+    guide_scale: 2
+    guide_decay: "quadratic"
+unconditional_w_monomer_ROG_500:
+  contigmap:
+    length: "500"
+    contigs: ["500"]
+  potentials:
+    guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
+    guide_scale: 2
+    guide_decay: "quadratic"
+unconditional_w_monomer_ROG_600:
+  contigmap:
+    length: "600"
+    contigs: ["600"]
+  potentials:
+    guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
+    guide_scale: 2
+    guide_decay: "quadratic"
+unconditional_w_monomer_ROG_700:
+  contigmap:
+    length: "700"
+    contigs: ["700"]
+  potentials:
+    guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
+    guide_scale: 2
+    guide_decay: "quadratic"
+unconditional_w_monomer_ROG_800:
+  contigmap:
+    length: "800"
+    contigs: ["800"]
+  potentials:
+    guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
+    guide_scale: 2
+    guide_decay: "quadratic"
+unconditional_w_monomer_ROG_900:
+  contigmap:
+    length: "900"
+    contigs: ["900"]
+  potentials:
+    guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
+    guide_scale: 2
+    guide_decay: "quadratic"
+unconditional_w_monomer_ROG_1000:
+  contigmap:
+    length: "1000"
+    contigs: ["1000"]
+  potentials:
+    guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
+    guide_scale: 2
+    guide_decay: "quadratic"
+unconditional_w_monomer_ROG_1100:
+  contigmap:
+    length: "1100"
+    contigs: ["1100"]
+  potentials:
+    guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
+    guide_scale: 2
+    guide_decay: "quadratic"
+unconditional_w_monomer_ROG_1200:
+  contigmap:
+    length: "1200"
+    contigs: ["1200"]
+  potentials:
+    guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
+    guide_scale: 2
+    guide_decay: "quadratic"
+partialdiffusion_withseq:
+  inference:
+    input_pdb: "input_pdbs/peptide_complex_ideal_helix.pdb"
+  contigmap:
+    length: "206"
+    contigs: ["172/0 34"]
+    provide_seq: ["172-205"]
+  diffuser:
+    partial_T: 10
+partialdiffusion_multipleseq:
+  inference:
+    input_pdb: "input_pdbs/peptide_complex_ideal_helix.pdb"
+  contigmap:
+    length: "206"
+    contigs: ["172/0 34"]
+    provide_seq: ["172-177", "200-205"]
+  diffuser:
+    partial_T: 10
+ppi_flexible_peptide_70:
+  inference:
+    input_pdb: "input_pdbs/3IOL.pdb"
+  contigmap:
+    length: "70"
+    contigs: ["B10-35/0 70"]
+    inpaint_str: ["B10-35"]
+  ppi:
+    hotspot_res: ["B28", "B29"]
+ppi_flexible_peptide_170:
+  inference:
+    input_pdb: "input_pdbs/3IOL.pdb"
+  contigmap:
+    length: "170"
+    contigs: ["B10-35/0 170"]
+    inpaint_str: ["B10-35"]
+  ppi:
+    hotspot_res: ["B28", "B29"]
+ppi_flexible_peptide_270:
+  inference:
+    input_pdb: "input_pdbs/3IOL.pdb"
+  contigmap:
+    length: "270"
+    contigs: ["B10-35/0 270"]
+    inpaint_str: ["B10-35"]
+  ppi:
+    hotspot_res: ["B28", "B29"]
+ppi_flexible_peptide_370:
+  inference:
+    input_pdb: "input_pdbs/3IOL.pdb"
+  contigmap:
+    length: "370"
+    contigs: ["B10-35/0 370"]
+    inpaint_str: ["B10-35"]
+  ppi:
+    hotspot_res: ["B28", "B29"]
+ppi_flexible_peptide_470:
+  inference:
+    input_pdb: "input_pdbs/3IOL.pdb"
+  contigmap:
+    length: "470"
+    contigs: ["B10-35/0 470"]
+    inpaint_str: ["B10-35"]
+  ppi:
+    hotspot_res: ["B28", "B29"]
+ppi_flexible_peptide_570:
+  inference:
+    input_pdb: "input_pdbs/3IOL.pdb"
+  contigmap:
+    length: "570"
+    contigs: ["B10-35/0 570"]
+    inpaint_str: ["B10-35"]
+  ppi:
+    hotspot_res: ["B28", "B29"]
+ppi_flexible_peptide_670:
+  inference:
+    input_pdb: "input_pdbs/3IOL.pdb"
+  contigmap:
+    length: "670"
+    contigs: ["B10-35/0 670"]
+    inpaint_str: ["B10-35"]
+  ppi:
+    hotspot_res: ["B28", "B29"]
+ppi_flexible_peptide_770:
+  inference:
+    input_pdb: "input_pdbs/3IOL.pdb"
+  contigmap:
+    length: "770"
+    contigs: ["B10-35/0 770"]
+    inpaint_str: ["B10-35"]
+  ppi:
+    hotspot_res: ["B28", "B29"]
+ppi_flexible_peptide_870:
+  inference:
+    input_pdb: "input_pdbs/3IOL.pdb"
+  contigmap:
+    length: "870"
+    contigs: ["B10-35/0 870"]
+    inpaint_str: ["B10-35"]
+  ppi:
+    hotspot_res: ["B28", "B29"]
+ppi_flexible_peptide_970:
+  inference:
+    input_pdb: "input_pdbs/3IOL.pdb"
+  contigmap:
+    length: "970"
+    contigs: ["B10-35/0 970"]
+    inpaint_str: ["B10-35"]
+  ppi:
+    hotspot_res: ["B28", "B29"]
+ppi_flexible_peptide_1070:
+  inference:
+    input_pdb: "input_pdbs/3IOL.pdb"
+  contigmap:
+    length: "1070"
+    contigs: ["B10-35/0 1070"]
+    inpaint_str: ["B10-35"]
+  ppi:
+    hotspot_res: ["B28", "B29"]
+ppi_flexible_peptide_1170:
+  inference:
+    input_pdb: "input_pdbs/3IOL.pdb"
+  contigmap:
+    length: "1170"
+    contigs: ["B10-35/0 1170"]
+    inpaint_str: ["B10-35"]
+  ppi:
+    hotspot_res: ["B28", "B29"]
+ppi_flexible_peptide_with_secondarystructure_70:
+  inference:
+    input_pdb: "input_pdbs/tau_peptide.pdb"
+  contigmap:
+    length: "70"
+    contigs: ["70/0 B165-178"]
+    inpaint_str: ["B165-178"]
+    inpaint_str_helix: ["B165-178"]
+  scaffoldguided:
+    scaffoldguided: true
+ppi_flexible_peptide_with_secondarystructure_170:
+  inference:
+    input_pdb: "input_pdbs/tau_peptide.pdb"
+  contigmap:
+    length: "170"
+    contigs: ["170/0 B165-178"]
+    inpaint_str: ["B165-178"]
+    inpaint_str_helix: ["B165-178"]
+  scaffoldguided:
+    scaffoldguided: true
+ppi_flexible_peptide_with_secondarystructure_270:
+  inference:
+    input_pdb: "input_pdbs/tau_peptide.pdb"
+  contigmap:
+    length: "270"
+    contigs: ["270/0 B165-178"]
+    inpaint_str: ["B165-178"]
+    inpaint_str_helix: ["B165-178"]
+  scaffoldguided:
+    scaffoldguided: true
+ppi_flexible_peptide_with_secondarystructure_370:
+  inference:
+    input_pdb: "input_pdbs/tau_peptide.pdb"
+  contigmap:
+    length: "370"
+    contigs: ["370/0 B165-178"]
+    inpaint_str: ["B165-178"]
+    inpaint_str_helix: ["B165-178"]
+  scaffoldguided:
+    scaffoldguided: true
+ppi_flexible_peptide_with_secondarystructure_470:
+  inference:
+    input_pdb: "input_pdbs/tau_peptide.pdb"
+  contigmap:
+    length: "470"
+    contigs: ["470/0 B165-178"]
+    inpaint_str: ["B165-178"]
+    inpaint_str_helix: ["B165-178"]
+  scaffoldguided:
+    scaffoldguided: true
+ppi_flexible_peptide_with_secondarystructure_570:
+  inference:
+    input_pdb: "input_pdbs/tau_peptide.pdb"
+  contigmap:
+    length: "570"
+    contigs: ["570/0 B165-178"]
+    inpaint_str: ["B165-178"]
+    inpaint_str_helix: ["B165-178"]
+  scaffoldguided:
+    scaffoldguided: true
+ppi_flexible_peptide_with_secondarystructure_670:
+  inference:
+    input_pdb: "input_pdbs/tau_peptide.pdb"
+  contigmap:
+    length: "670"
+    contigs: ["670/0 B165-178"]
+    inpaint_str: ["B165-178"]
+    inpaint_str_helix: ["B165-178"]
+  scaffoldguided:
+    scaffoldguided: true
+ppi_flexible_peptide_with_secondarystructure_770:
+  inference:
+    input_pdb: "input_pdbs/tau_peptide.pdb"
+  contigmap:
+    length: "770"
+    contigs: ["770/0 B165-178"]
+    inpaint_str: ["B165-178"]
+    inpaint_str_helix: ["B165-178"]
+  scaffoldguided:
+    scaffoldguided: true
+ppi_flexible_peptide_with_secondarystructure_870:
+  inference:
+    input_pdb: "input_pdbs/tau_peptide.pdb"
+  contigmap:
+    length: "870"
+    contigs: ["870/0 B165-178"]
+    inpaint_str: ["B165-178"]
+    inpaint_str_helix: ["B165-178"]
+  scaffoldguided:
+    scaffoldguided: true
+ppi_flexible_peptide_with_secondarystructure_970:
+  inference:
+    input_pdb: "input_pdbs/tau_peptide.pdb"
+  contigmap:
+    length: "970"
+    contigs: ["970/0 B165-178"]
+    inpaint_str: ["B165-178"]
+    inpaint_str_helix: ["B165-178"]
+  scaffoldguided:
+    scaffoldguided: true
+ppi_flexible_peptide_with_secondarystructure_1070:
+  inference:
+    input_pdb: "input_pdbs/tau_peptide.pdb"
+  contigmap:
+    length: "1070"
+    contigs: ["1070/0 B165-178"]
+    inpaint_str: ["B165-178"]
+    inpaint_str_helix: ["B165-178"]
+  scaffoldguided:
+    scaffoldguided: true
+ppi_flexible_peptide_with_secondarystructure_1170:
+  inference:
+    input_pdb: "input_pdbs/tau_peptide.pdb"
+  contigmap:
+    length: "1170"
+    contigs: ["1170/0 B165-178"]
+    inpaint_str: ["B165-178"]
+    inpaint_str_helix: ["B165-178"]
+  scaffoldguided:
+    scaffoldguided: true
+ppi_scaffolded:
+  scaffoldguided:
+    target_path: "input_pdbs/insulin_target.pdb"
+    scaffoldguided: true
+    target_pdb: true
+    target_ss: "target_folds/insulin_target_ss.pt"
+    target_adj: "target_folds/insulin_target_adj.pt"
+    scaffold_dir: "./ppi_scaffolds/"
+  ppi:
+    hotspot_res: ["A59", "A83", "A91"]
+  denoiser:
+    noise_scale_ca: 0
+    noise_scale_frame: 0
+enzyme_43:
+  inference:
+    input_pdb: "input_pdbs/5an7.pdb"
+    ckpt_override_path: "../models/ActiveSite_ckpt.pt"
+  contigmap:
+    length: "43"
+    contigs: ["10/A1083-1083/10/A1051-1051/10/A1180-1180/10"]
+  potentials:
+    guide_scale: 1
+    guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
+    substrate: "LLK"
+enzyme_143:
+  inference:
+    input_pdb: "input_pdbs/5an7.pdb"
+    ckpt_override_path: "../models/ActiveSite_ckpt.pt"
+  contigmap:
+    length: "143"
+    contigs: ["35/A1083-1083/35/A1051-1051/35/A1180-1180/35"]
+  potentials:
+    guide_scale: 1
+    guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
+    substrate: "LLK"
+enzyme_243:
+  inference:
+    input_pdb: "input_pdbs/5an7.pdb"
+    ckpt_override_path: "../models/ActiveSite_ckpt.pt"
+  contigmap:
+    length: "243"
+    contigs: ["60/A1083-1083/60/A1051-1051/60/A1180-1180/60"]
+  potentials:
+    guide_scale: 1
+    guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
+    substrate: "LLK"
+enzyme_343:
+  inference:
+    input_pdb: "input_pdbs/5an7.pdb"
+    ckpt_override_path: "../models/ActiveSite_ckpt.pt"
+  contigmap:
+    length: "343"
+    contigs: ["85/A1083-1083/85/A1051-1051/85/A1180-1180/85"]
+  potentials:
+    guide_scale: 1
+    guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
+    substrate: "LLK"
+enzyme_443:
+  inference:
+    input_pdb: "input_pdbs/5an7.pdb"
+    ckpt_override_path: "../models/ActiveSite_ckpt.pt"
+  contigmap:
+    length: "443"
+    contigs: ["110/A1083-1083/110/A1051-1051/110/A1180-1180/110"]
+  potentials:
+    guide_scale: 1
+    guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
+    substrate: "LLK"
+enzyme_543:
+  inference:
+    input_pdb: "input_pdbs/5an7.pdb"
+    ckpt_override_path: "../models/ActiveSite_ckpt.pt"
+  contigmap:
+    length: "543"
+    contigs: ["135/A1083-1083/135/A1051-1051/135/A1180-1180/135"]
+  potentials:
+    guide_scale: 1
+    guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
+    substrate: "LLK"
+enzyme_643:
+  inference:
+    input_pdb: "input_pdbs/5an7.pdb"
+    ckpt_override_path: "../models/ActiveSite_ckpt.pt"
+  contigmap:
+    length: "643"
+    contigs: ["160/A1083-1083/160/A1051-1051/160/A1180-1180/160"]
+  potentials:
+    guide_scale: 1
+    guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
+    substrate: "LLK"
+enzyme_743:
+  inference:
+    input_pdb: "input_pdbs/5an7.pdb"
+    ckpt_override_path: "../models/ActiveSite_ckpt.pt"
+  contigmap:
+    length: "743"
+    contigs: ["185/A1083-1083/185/A1051-1051/185/A1180-1180/185"]
+  potentials:
+    guide_scale: 1
+    guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
+    substrate: "LLK"
+enzyme_843:
+  inference:
+    input_pdb: "input_pdbs/5an7.pdb"
+    ckpt_override_path: "../models/ActiveSite_ckpt.pt"
+  contigmap:
+    length: "843"
+    contigs: ["210/A1083-1083/210/A1051-1051/210/A1180-1180/210"]
+  potentials:
+    guide_scale: 1
+    guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
+    substrate: "LLK"
+enzyme_943:
+  inference:
+    input_pdb: "input_pdbs/5an7.pdb"
+    ckpt_override_path: "../models/ActiveSite_ckpt.pt"
+  contigmap:
+    length: "943"
+    contigs: ["235/A1083-1083/235/A1051-1051/235/A1180-1180/235"]
+  potentials:
+    guide_scale: 1
+    guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
+    substrate: "LLK"
+enzyme_1043:
+  inference:
+    input_pdb: "input_pdbs/5an7.pdb"
+    ckpt_override_path: "../models/ActiveSite_ckpt.pt"
+  contigmap:
+    length: "1043"
+    contigs: ["260/A1083-1083/260/A1051-1051/260/A1180-1180/260"]
+  potentials:
+    guide_scale: 1
+    guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
+    substrate: "LLK"
+enzyme_1143:
+  inference:
+    input_pdb: "input_pdbs/5an7.pdb"
+    ckpt_override_path: "../models/ActiveSite_ckpt.pt"
+  contigmap:
+    length: "1143"
+    contigs: ["285/A1083-1083/285/A1051-1051/285/A1180-1180/285"]
+  potentials:
+    guide_scale: 1
+    guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
+    substrate: "LLK"
+cyclic_oligos_120:
+  config_name: "symmetry"
+  inference:
+    symmetry: "C6"
+  contigmap:
+    length: "120"
+    contigs: ["120"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+cyclic_oligos_240:
+  config_name: "symmetry"
+  inference:
+    symmetry: "C6"
+  contigmap:
+    length: "240"
+    contigs: ["240"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+cyclic_oligos_360:
+  config_name: "symmetry"
+  inference:
+    symmetry: "C6"
+  contigmap:
+    length: "360"
+    contigs: ["360"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+cyclic_oligos_480:
+  config_name: "symmetry"
+  inference:
+    symmetry: "C6"
+  contigmap:
+    length: "480"
+    contigs: ["480"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+cyclic_oligos_600:
+  config_name: "symmetry"
+  inference:
+    symmetry: "C6"
+  contigmap:
+    length: "600"
+    contigs: ["600"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+cyclic_oligos_720:
+  config_name: "symmetry"
+  inference:
+    symmetry: "C6"
+  contigmap:
+    length: "720"
+    contigs: ["720"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+cyclic_oligos_840:
+  config_name: "symmetry"
+  inference:
+    symmetry: "C6"
+  contigmap:
+    length: "840"
+    contigs: ["840"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+cyclic_oligos_960:
+  config_name: "symmetry"
+  inference:
+    symmetry: "C6"
+  contigmap:
+    length: "960"
+    contigs: ["960"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+cyclic_oligos_1080:
+  config_name: "symmetry"
+  inference:
+    symmetry: "C6"
+  contigmap:
+    length: "1080"
+    contigs: ["1080"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+cyclic_oligos_1200:
+  config_name: "symmetry"
+  inference:
+    symmetry: "C6"
+  contigmap:
+    length: "1200"
+    contigs: ["1200"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+dihedral_oligos_320:
+  config_name: "symmetry"
+  inference:
+    symmetry: "D2"
+  contigmap:
+    length: "320"
+    contigs: ["320"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+dihedral_oligos_420:
+  config_name: "symmetry"
+  inference:
+    symmetry: "D2"
+  contigmap:
+    length: "420"
+    contigs: ["420"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+dihedral_oligos_520:
+  config_name: "symmetry"
+  inference:
+    symmetry: "D2"
+  contigmap:
+    length: "520"
+    contigs: ["520"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+dihedral_oligos_620:
+  config_name: "symmetry"
+  inference:
+    symmetry: "D2"
+  contigmap:
+    length: "620"
+    contigs: ["620"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+dihedral_oligos_720:
+  config_name: "symmetry"
+  inference:
+    symmetry: "D2"
+  contigmap:
+    length: "720"
+    contigs: ["720"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+dihedral_oligos_820:
+  config_name: "symmetry"
+  inference:
+    symmetry: "D2"
+  contigmap:
+    length: "820"
+    contigs: ["820"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+dihedral_oligos_920:
+  config_name: "symmetry"
+  inference:
+    symmetry: "D2"
+  contigmap:
+    length: "920"
+    contigs: ["920"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+dihedral_oligos_1020:
+  config_name: "symmetry"
+  inference:
+    symmetry: "D2"
+  contigmap:
+    length: "1020"
+    contigs: ["1020"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+dihedral_oligos_1120:
+  config_name: "symmetry"
+  inference:
+    symmetry: "D2"
+  contigmap:
+    length: "1120"
+    contigs: ["1120"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+tetrahedral_oligos_120:
+  config_name: "symmetry"
+  inference:
+    symmetry: "tetrahedral"
+  contigmap:
+    length: "120"
+    contigs: ["120"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+tetrahedral_oligos_240:
+  config_name: "symmetry"
+  inference:
+    symmetry: "tetrahedral"
+  contigmap:
+    length: "240"
+    contigs: ["240"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+tetrahedral_oligos_360:
+  config_name: "symmetry"
+  inference:
+    symmetry: "tetrahedral"
+  contigmap:
+    length: "360"
+    contigs: ["360"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+tetrahedral_oligos_480:
+  config_name: "symmetry"
+  inference:
+    symmetry: "tetrahedral"
+  contigmap:
+    length: "480"
+    contigs: ["480"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+tetrahedral_oligos_600:
+  config_name: "symmetry"
+  inference:
+    symmetry: "tetrahedral"
+  contigmap:
+    length: "600"
+    contigs: ["600"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+tetrahedral_oligos_720:
+  config_name: "symmetry"
+  inference:
+    symmetry: "tetrahedral"
+  contigmap:
+    length: "720"
+    contigs: ["720"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+tetrahedral_oligos_840:
+  config_name: "symmetry"
+  inference:
+    symmetry: "tetrahedral"
+  contigmap:
+    length: "840"
+    contigs: ["840"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+tetrahedral_oligos_960:
+  config_name: "symmetry"
+  inference:
+    symmetry: "tetrahedral"
+  contigmap:
+    length: "960"
+    contigs: ["960"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+tetrahedral_oligos_1080:
+  config_name: "symmetry"
+  inference:
+    symmetry: "tetrahedral"
+  contigmap:
+    length: "1080"
+    contigs: ["1080"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+tetrahedral_oligos_1200:
+  config_name: "symmetry"
+  inference:
+    symmetry: "tetrahedral"
+  contigmap:
+    length: "1200"
+    contigs: ["1200"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
+nickel_212:
+  inference:
+    input_pdb: "input_pdbs/nickel_symmetric_motif.pdb"
+    symmetry: "C4"
+    ckpt_override_path: "../models/Base_epoch8_ckpt.pt"
+  contigmap:
+    length: "212"
+    contigs: ["25/A2-4/25/0 25/A7-9/25/0 25/A12-14/25/0 25/A17-19/25/0"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.06"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2
+    guide_decay: "quadratic"
+nickel_308:
+  inference:
+    input_pdb: "input_pdbs/nickel_symmetric_motif.pdb"
+    symmetry: "C4"
+    ckpt_override_path: "../models/Base_epoch8_ckpt.pt"
+  contigmap:
+    length: "308"
+    contigs: ["37/A2-4/37/0 37/A7-9/37/0 37/A12-14/37/0 37/A17-19/37/0"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.06"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2
+    guide_decay: "quadratic"
+nickel_404:
+  inference:
+    input_pdb: "input_pdbs/nickel_symmetric_motif.pdb"
+    symmetry: "C4"
+    ckpt_override_path: "../models/Base_epoch8_ckpt.pt"
+  contigmap:
+    length: "404"
+    contigs: ["49/A2-4/49/0 49/A7-9/49/0 49/A12-14/49/0 49/A17-19/49/0"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.06"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2
+    guide_decay: "quadratic"
+nickel_500:
+  inference:
+    input_pdb: "input_pdbs/nickel_symmetric_motif.pdb"
+    symmetry: "C4"
+    ckpt_override_path: "../models/Base_epoch8_ckpt.pt"
+  contigmap:
+    length: "500"
+    contigs: ["61/A2-4/61/0 61/A7-9/61/0 61/A12-14/61/0 61/A17-19/61/0"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.06"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2
+    guide_decay: "quadratic"
+nickel_596:
+  inference:
+    input_pdb: "input_pdbs/nickel_symmetric_motif.pdb"
+    symmetry: "C4"
+    ckpt_override_path: "../models/Base_epoch8_ckpt.pt"
+  contigmap:
+    length: "596"
+    contigs: ["73/A2-4/73/0 73/A7-9/73/0 73/A12-14/73/0 73/A17-19/73/0"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.06"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2
+    guide_decay: "quadratic"
+nickel_692:
+  inference:
+    input_pdb: "input_pdbs/nickel_symmetric_motif.pdb"
+    symmetry: "C4"
+    ckpt_override_path: "../models/Base_epoch8_ckpt.pt"
+  contigmap:
+    length: "692"
+    contigs: ["85/A2-4/85/0 85/A7-9/85/0 85/A12-14/85/0 85/A17-19/85/0"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.06"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2
+    guide_decay: "quadratic"
+nickel_788:
+  inference:
+    input_pdb: "input_pdbs/nickel_symmetric_motif.pdb"
+    symmetry: "C4"
+    ckpt_override_path: "../models/Base_epoch8_ckpt.pt"
+  contigmap:
+    length: "788"
+    contigs: ["97/A2-4/97/0 97/A7-9/97/0 97/A12-14/97/0 97/A17-19/97/0"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.06"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2
+    guide_decay: "quadratic"
+nickel_884:
+  inference:
+    input_pdb: "input_pdbs/nickel_symmetric_motif.pdb"
+    symmetry: "C4"
+    ckpt_override_path: "../models/Base_epoch8_ckpt.pt"
+  contigmap:
+    length: "884"
+    contigs: ["109/A2-4/109/0 109/A7-9/109/0 109/A12-14/109/0 109/A17-19/109/0"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.06"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2
+    guide_decay: "quadratic"
+nickel_980:
+  inference:
+    input_pdb: "input_pdbs/nickel_symmetric_motif.pdb"
+    symmetry: "C4"
+    ckpt_override_path: "../models/Base_epoch8_ckpt.pt"
+  contigmap:
+    length: "980"
+    contigs: ["121/A2-4/121/0 121/A7-9/121/0 121/A12-14/121/0 121/A17-19/121/0"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.06"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2
+    guide_decay: "quadratic"
+nickel_1076:
+  inference:
+    input_pdb: "input_pdbs/nickel_symmetric_motif.pdb"
+    symmetry: "C4"
+    ckpt_override_path: "../models/Base_epoch8_ckpt.pt"
+  contigmap:
+    length: "1076"
+    contigs: ["133/A2-4/133/0 133/A7-9/133/0 133/A12-14/133/0 133/A17-19/133/0"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.06"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2
+    guide_decay: "quadratic"
+nickel_1172:
+  inference:
+    input_pdb: "input_pdbs/nickel_symmetric_motif.pdb"
+    symmetry: "C4"
+    ckpt_override_path: "../models/Base_epoch8_ckpt.pt"
+  contigmap:
+    length: "1172"
+    contigs: ["145/A2-4/145/0 145/A7-9/145/0 145/A12-14/145/0 145/A17-19/145/0"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.06"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2
+    guide_decay: "quadratic"
+timbarrel_short:
+  scaffoldguided:
+    scaffoldguided: true
+    target_pdb: false
+    scaffold_dir: "tim_barrel_scaffold/"
+    sampled_insertion: "0"
+    sampled_N: "0"
+    sampled_C: "0"
+  denoiser:
+    noise_scale_ca: 0.5
+    noise_scale_frame: 0.5
+timbarrel_long:
+  scaffoldguided:
+    scaffoldguided: true
+    target_pdb: false
+    scaffold_dir: "tim_barrel_scaffold/"
+    sampled_insertion: "5"
+    sampled_N: "5"
+    sampled_C: "5"
+  denoiser:
+    noise_scale_ca: 0.5
+    noise_scale_frame: 0.5

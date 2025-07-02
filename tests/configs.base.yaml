@@ -1,401 +1,255 @@
-tests:
+##### Unconditional Generation #####
+# Adapted from design_unconditional.sh
+unconditional:
+  contigmap:
+    length: "100"
+    contigs: ["100"]
 
-  ##### Unconditional Generation #####
-  # Sort of adapted from design_unconditional.sh but we go much longer as well
-  - name: design_unconditional_short
-    inference:
-      random_seed: 1337
-      final_step: 48
-    contigmap:
-      contigs: ["150"]
+##### Motif Scaffolding #####
+# Adapted from design_motif_scaffolding.sh
+motifscaffolding:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "39"
+    contigs: ["10/A163-181/10"]
 
-  - name: design_unconditional_long
-    inference:
-      random_seed: 1337
-      final_step: 48
-    contigmap:
-      contigs: ["700"]
+##### Motif Scaffolding with target #####
+# Adapted from design_motifscaffolding_with_target.sh
+motifscaffolding_with_target:
+  inference:
+    input_pdb: "input_pdbs/1YCR.pdb"
+    ckpt_override_path: "../models/Complex_base_ckpt.pt"
+  contigmap:
+    length: "83"
+    contigs: ["A25-109/0 35/B17-29/35"]
 
-  ##### Motif Scaffolding #####
-  # Adapted from design_motif_scaffolding.sh
-  - name: design_motif_scaffolding_short
-    inference:
-      random_seed: 1337
-      final_step: 48
-      input_pdb: "input_pdbs/5TPN.pdb"
-    contigmap:
-      contigs: ["10/A163-181/10"]
+##### Motif Scaffolding with Inpainting #####
+# Adapted from design_motifscaffolding_inpaintseq.sh
+motifscaffolding_inpaintseq:
+  inference:
+    input_pdb: "input_pdbs/5TPN.pdb"
+  contigmap:
+    length: "39"
+    contigs: ["10/A163-181/10"]
+    inpaint_seq: ["A163-168/A170-171/A179"]
 
-  - name: design_motif_scaffolding_long
-    inference:
-      random_seed: 1337
-      final_step: 48
-      input_pdb: "input_pdbs/5TPN.pdb"
-    contigmap:
-      contigs: ["40/A163-181/40"]
+##### Partial Diffusion #####
+# Adapted from design_partialdiffusion.sh
+partialdiffusion_full:
+  inference:
+    input_pdb: "input_pdbs/2KL8.pdb"
+  contigmap:
+    length: "79"
+    contigs: ["79"]
+  diffuser:
+    partial_T: 10
 
-  ##### Motif Scaffolding with target #####
-  # Adapted from design_motif_scaffolding_target.sh
-  - name: design_motif_scaffolding_target_short
-    inference:
-      random_seed: 1337
-      final_step: 48
-      input_pdb: "input_pdbs/1YCR.pdb"
-      ckpt_override_path: "../models/Complex_base_ckpt.pt"
-    contigmap:
-      contigs: ["A25-109/0 35/B17-29/35"]
-      inpaint_seq: ["A163-168/A170-171/A179"]
+partialdiffusion_half:
+  inference:
+    input_pdb: "input_pdbs/2KL8.pdb"
+  contigmap:
+    contigs: ["A1-39/40"] # Partially diffuse half the protein
+  diffuser:
+    partial_T: 10
 
-  - name: design_motif_scaffolding_target_long
-    inference:
-      random_seed: 1337
-      final_step: 48
-      input_pdb: "input_pdbs/1YCR.pdb"
-      ckpt_override_path: "../models/Complex_base_ckpt.pt"
-    contigmap:
-      contigs: ["A25-109/0 60/B17-29/60"]
-      inpaint_seq: ["A163-168/A170-171/A179"]
+##### Binder Design #####
+# Adapted from design_ppi.sh with a range of fixed lengths
+ppi:
+  inference:
+    input_pdb: "input_pdbs/insulin_target.pdb"
+  contigmap:
+    length: "50"
+    contigs: ["A1-150/0 50"]
+  ppi:
+    hotspot_res: ["A59", "A83", "A91"]
+  denoiser:
+    noise_scale_ca: 0
+    noise_scale_frame: 0
 
-  ##### Motif Scaffolding with Inpainting #####
-  # Adapted from design_motifscaffolding_inpaintseq.sh
-  - name: design_motifscaffolding_inpaintseq_short
-    inference:
-      random_seed: 1337
-      final_step: 48
-      input_pdb: "input_pdbs/5TPN.pdb"
-    contigmap:
-      contigs: ["10-10/A163-181/10-10"]
-      inpaint_seq: ["A163-168/A170-171/A179"]
+##### Unconditional Generation with Potentials #####
+# Adapted from design_unconditional_w_contact_potential.sh
+unconditional_w_contact_potential:
+  contigmap:
+    length: "100"
+    contigs: ["100"]
+  potentials:
+    guiding_potentials: ["type:monomer_contacts,weight:0.05"]
 
-  - name: design_motifscaffolding_inpaintseq_long
-    inference:
-      random_seed: 1337
-      final_step: 48
-      input_pdb: "input_pdbs/5TPN.pdb"
-    contigmap:
-      contigs: ["40/A163-181/40"]
-      inpaint_seq: ["A163-168/A170-171/A179"]
 
-  ##### Partial Diffusion #####
-  # Adapted from design_partialdiffusion.sh
-  - name: design_partialdiffusion_full
-    inference:
-      random_seed: 1337
-      final_step: 8
-      input_pdb: "input_pdbs/2KL8.pdb"
-    contigmap:
-      contigs: ["79"] # Partially diffuse the full protein
-    diffuser:
-      partial_T: 10
+# Adapted from design_unconditional_w_monomer_ROG.sh
+unconditional_w_monomer_ROG:
+  contigmap:
+    length: "100"
+    contigs: ["100"]
+  potentials:
+    guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
+    guide_scale: 2
+    guide_decay: "quadratic"
 
-  - name: design_partialdiffusion_half
-    inference:
-      random_seed: 1337
-      final_step: 8
-      input_pdb: "input_pdbs/2KL8.pdb"
-    contigmap:
-      contigs: ["A1-39/40"] # Partially diffuse half the protein
-    diffuser:
-      partial_T: 10
+##### Partial Diffusion with Sequence #####
+# Adapted from design_partialdiffusion_withseq.sh
+partialdiffusion_withseq:
+  inference:
+    input_pdb: "input_pdbs/peptide_complex_ideal_helix.pdb"
+  contigmap:
+    length: "206"
+    contigs: ["172/0 34"]
+    provide_seq: ["172-205"]
+  diffuser:
+    partial_T: 10
 
-  ##### Binder Design #####
-  # Adapted from design_ppi.sh with a range of fixed lengths
-  - name: design_ppi_short
-    inference:
-      random_seed: 1337
-      final_step: 48
-      input_pdb: "input_pdbs/insulin_target.pdb"
-    contigmap:
-      contigs: ["A1-150/0 50"] # Generate a binder of size 50 with hotspots
-    ppi:
-      hotspot_res: ["A59","A83","A91"]
-    denoiser:
-      noise_scale_ca: 0
-      noise_scale_frame: 0
+# Adapted from design_partialdiffusion_multipleseq.sh
+partialdiffusion_multipleseq:
+  inference:
+    input_pdb: "input_pdbs/peptide_complex_ideal_helix.pdb"
+  contigmap:
+    length: "206"
+    contigs: ["172/0 34"]
+    provide_seq: ["172-177", "200-205"]
+  diffuser:
+    partial_T: 10
 
-  - name: design_ppi_long
-    inference:
-      random_seed: 1337
-      final_step: 48
-      input_pdb: "input_pdbs/insulin_target.pdb"
-    contigmap:
-      contigs: ["A1-150/0 100"] # Generate a binder of size 100 with hotspots
-    ppi:
-      hotspot_res: ["A59","A83","A91"]
-    denoiser:
-      noise_scale_ca: 0
-      noise_scale_frame: 0
+##### PPI Flexible Peptide Design #####
+# Adapted from design_ppi_flexible_peptide.sh
+ppi_flexible_peptide:
+  inference:
+    input_pdb: "input_pdbs/3IOL.pdb"
+  contigmap:
+    length: "70"
+    contigs: ["B10-35/0 70"]
+    inpaint_str: ["B10-35"]
+  ppi:
+    hotspot_res: ["B28", "B29"]
 
-  - name: design_ppi_no_hotspots
-    inference:
-      random_seed: 1337
-      final_step: 48
-      input_pdb: "input_pdbs/insulin_target.pdb"
-    contigmap:
-      contigs: ["A1-150/0 75"] # Generate a binder of size 75 without hotspots
-    denoiser:
-      noise_scale_ca: 0
-      noise_scale_frame: 0
+# Adapted from design_ppi_flexible_peptide_with_secondarystructure_specification.sh
+ppi_flexible_peptide_with_secondarystructure:
+  inference:
+    input_pdb: "input_pdbs/tau_peptide.pdb"
+  contigmap:
+    length: "70"
+    contigs: ["70/0 B165-178"]
+    inpaint_str: ["B165-178"]
+    inpaint_str_helix: ["B165-178"]
+  scaffoldguided:
+    scaffoldguided: true
 
-  ##### Unconditional Generation with Potentials #####
-  # Adapted from design_unconditional_w_contact_potential.sh
-  - name: "design_unconditional_w_contact_potential_short"
-    inference:
-      random_seed: 1337
-      final_step: 48
-    contigmap:
-      contigs: ["100"] # Min range from 100-200
-    potentials:
-      guiding_potentials: ["type:monomer_contacts,weight:0.05"]
+##### PPI Scaffolded Design #####
+# Adapted from design_ppi_scaffolded.sh
+ppi_scaffolded:
+  scaffoldguided:
+    target_path: "input_pdbs/insulin_target.pdb"
+    scaffoldguided: true
+    target_pdb: true
+    target_ss: "target_folds/insulin_target_ss.pt"
+    target_adj: "target_folds/insulin_target_adj.pt"
+    scaffold_dir: "./ppi_scaffolds/"
+  ppi:
+    hotspot_res: ["A59", "A83", "A91"]
+  denoiser:
+    noise_scale_ca: 0
+    noise_scale_frame: 0
 
-  - name: "design_unconditional_w_contact_potential_long"
-    inference:
-      random_seed: 1337
-      final_step: 48
-    contigmap:
-      contigs: ["200"] # Max range from 100-200
-    potentials:
-      guiding_potentials: ["type:monomer_contacts,weight:0.05"]
+##### Enzyme Design #####
+# Adapted from design_enzyme.sh
+enzyme:
+  inference:
+    input_pdb: "input_pdbs/5an7.pdb"
+    ckpt_override_path: "../models/ActiveSite_ckpt.pt"
+  contigmap:
+    length: "43"
+    contigs: ["10/A1083-1083/10/A1051-1051/10/A1180-1180/10"]
+  potentials:
+    guide_scale: 1
+    guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
+    substrate: "LLK"
 
-  # Adapted from design_unconditional_w_monomer_ROG.sh
-  - name: "design_unconditional_w_monomer_ROG_short"
-    inference:
-      random_seed: 1337
-      final_step: 48
-    contigmap:
-      contigs: ["100"] # Min range from 100-200
-    potentials:
-      guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
-      guide_scale: 2
-      guide_decay: "quadratic"
+##### Symmetric Oligomer Design #####
+# Adapted from design_cyclic_oligos.sh
 
-  - name: "design_unconditional_w_monomer_ROG_long"
-    inference:
-      random_seed: 1337
-      final_step: 48
-    contigmap:
-      contigs: ["200"] # Max range from 100-200
-    potentials:
-      guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
-      guide_scale: 2
-      guide_decay: "quadratic"
+cyclic_oligos:
+  config_name: "symmetry"
+  inference:
+    symmetry: "C6"
+  contigmap:
+    length: "120"
+    contigs: ["120"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
 
-  ##### Partial Diffusion with Sequence #####
-  # Adapted from design_partialdiffusion_withseq.sh
-  - name: "design_partialdiffusion_withseq"
-    inference:
-      random_seed: 1337
-      final_step: 8
-      input_pdb: "input_pdbs/peptide_complex_ideal_helix.pdb"
-    contigmap:
-      contigs: ["172-172/0 34-34"]
-      provide_seq: ["172-205"]
-    diffuser:
-      partial_T: 10
+# Adapted from design_dihedral_oligos.sh
+dihedral_oligos:
+  config_name: "symmetry"
+  inference:
+    symmetry: "D2"
+  contigmap:
+    length: "320"
+    contigs: ["320"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
 
-  # Adapted from design_partialdiffusion_multipleseq.sh
-  - name: "design_partialdiffusion_multipleseq"
-    inference:
-      random_seed: 1337
-      final_step: 8
-      input_pdb: "input_pdbs/peptide_complex_ideal_helix.pdb"
-    contigmap:
-      contigs: ["172-172/0 34-34"]
-      provide_seq: ["172-205"]
-    diffuser:
-      partial_T: 10
+# Adapted from design_tetrahedral_oligos.sh
+tetrahedral_oligos:
+  config_name: "symmetry"
+  inference:
+    symmetry: "tetrahedral"
+  contigmap:
+    length: "120"
+    contigs: ["120"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2.0
+    guide_decay: "quadratic"
 
-  ##### PPI Flexible Peptide Design #####
-  # Adapted from design_ppi_flexible_peptide.sh
-  - name: "design_ppi_flexible_peptide_short"
-    inference:
-      random_seed: 1337
-      final_step: 48
-      input_pdb: "input_pdbs/3IOL.pdb"
-    contigmap:
-      contigs: ["B10-35/0 70"] # Min range from 70-100
-      inpaint_str: ["B10-35"]
-    ppi:
-      hotspot_res: ["B28","B29"]
+##### Metal-binding Site Design #####
+# Adapted from design_nickel.sh
+nickel:
+  inference:
+    input_pdb: "input_pdbs/nickel_symmetric_motif.pdb"
+    symmetry: "C4"
+    ckpt_override_path: "../models/Base_epoch8_ckpt.pt"
+  contigmap:
+    length: "212"
+    contigs: ["25/A2-4/25/0 25/A7-9/25/0 25/A12-14/25/0 25/A17-19/25/0"]
+  potentials:
+    guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.06"]
+    olig_intra_all: true
+    olig_inter_all: true
+    guide_scale: 2
+    guide_decay: "quadratic"
 
-  - name: "design_ppi_flexible_peptide_long"
-    inference:
-      random_seed: 1337
-      final_step: 48
-      input_pdb: "input_pdbs/3IOL.pdb"
-    contigmap:
-      contigs: ["B10-35/0 100"] # Max range from 70-100
-      inpaint_str: ["B10-35"]
-    ppi:
-      hotspot_res: ["B28","B29"]
+##### Fold-guided Design #####
+# Adapted from design_timbarrel.sh
+timbarrel_short:
+  scaffoldguided:
+    scaffoldguided: true
+    target_pdb: false
+    scaffold_dir: "tim_barrel_scaffold/"
+    sampled_insertion: "0"
+    sampled_N: "0"
+    sampled_C: "0"
+  denoiser:
+    noise_scale_ca: 0.5
+    noise_scale_frame: 0.5
 
-  # Adapted from design_ppi_flexible_peptide_with_secondarystructure_specification.sh
-  - name: "design_ppi_flexible_peptide_with_secondarystructure_short"
-    inference:
-      random_seed: 1337
-      final_step: 48
-      input_pdb: "input_pdbs/tau_peptide.pdb"
-    contigmap:
-      contigs: ["70/0 B165-178"] # Min range from 70-100
-      inpaint_str: ["B165-178"]
-      inpaint_str_helix: ["B165-178"]
-    scaffoldguided:
-      scaffoldguided: True
-
-  - name: "design_ppi_flexible_peptide_with_secondarystructure_long"
-    inference:
-      random_seed: 1337
-      final_step: 48
-      input_pdb: "input_pdbs/tau_peptide.pdb"
-    contigmap:
-      contigs: ["100/0 B165-178"] # Max range from 70-100
-      inpaint_str: ["B165-178"]
-      inpaint_str_helix: ["B165-178"]
-    scaffoldguided:
-      scaffoldguided: True
-
-  ##### PPI Scaffolded Design #####
-  # Adapted from design_ppi_scaffolded.sh
-  - name: "design_ppi_scaffolded"
-    inference:
-      random_seed: 1337
-      final_step: 48
-    scaffoldguided:
-      target_path: "input_pdbs/insulin_target.pdb"
-      scaffoldguided: True
-      target_pdb: True
-      target_ss: "target_folds/insulin_target_ss.pt"
-      target_adj: "target_folds/insulin_target_adj.pt"
-      scaffold_dir: "./ppi_scaffolds/"
-    ppi:
-      hotspot_res: ["A59","A83","A91"]
-    denoiser:
-      noise_scale_ca: 0
-      noise_scale_frame: 0
-
-  ##### Enzyme Design #####
-  # Adapted from design_enzyme.sh
-  - name: "design_enzyme_short"
-    inference:
-      random_seed: 1337
-      final_step: 48
-      input_pdb: "input_pdbs/5an7.pdb"
-      ckpt_override_path: "../models/ActiveSite_ckpt.pt"
-    contigmap:
-      contigs: ["10/A1083-1083/10/A1051-1051/10/A1180-1180/10"] # Min ranges from 10-100
-    potentials:
-      guide_scale: 1
-      guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
-      substrate: "LLK"
-
-  - name: "design_enzyme_long"
-    inference:
-      random_seed: 1337
-      final_step: 48
-      input_pdb: "input_pdbs/5an7.pdb"
-      ckpt_override_path: "../models/ActiveSite_ckpt.pt"
-    contigmap:
-      contigs: ["100/A1083-1083/100/A1051-1051/100/A1180-1180/100"] # Max ranges from 10-100
-    potentials:
-      guide_scale: 1
-      guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
-      substrate: "LLK"
-
-  ##### Symmetric Oligomer Design #####
-  # Adapted from design_cyclic_oligos.sh
-  - name: "design_cyclic_oligos"
-    config_name: "symmetry"
-    inference:
-      random_seed: 1337
-      final_step: 48
-      symmetry: "C6"
-    contigmap:
-      contigs: ["480"]
-    potentials:
-      guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
-      olig_intra_all: True
-      olig_inter_all: True
-      guide_scale: 2.0
-      guide_decay: "quadratic"
-
-  # Adapted from design_dihedral_oligos.sh
-  - name: "design_dihedral_oligos"
-    config_name: "symmetry"
-    inference:
-      random_seed: 1337
-      final_step: 48
-      symmetry: "D2"
-    contigmap:
-      contigs: ["320"]
-    potentials:
-      guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
-      olig_intra_all: True
-      olig_inter_all: True
-      guide_scale: 2.0
-      guide_decay: "quadratic"
-
-  # Adapted from design_tetrahedral_oligos.sh
-  - name: "design_tetrahedral_oligos"
-    config_name: "symmetry"
-    inference:
-      random_seed: 1337
-      final_step: 48
-      symmetry: "tetrahedral"
-    contigmap:
-      contigs: ["1200"]
-    potentials:
-      guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
-      olig_intra_all: True
-      olig_inter_all: True
-      guide_scale: 2.0
-      guide_decay: "quadratic"
-
-  ##### Metal-binding Site Design #####
-  # Adapted from design_nickel.sh
-  - name: "design_nickel"
-    inference:
-      random_seed: 1337
-      final_step: 48
-      input_pdb: "input_pdbs/nickel_symmetric_motif.pdb"
-      symmetry: "C4"
-      ckpt_override_path: "../models/Base_epoch8_ckpt.pt"
-    contigmap:
-      contigs: ["50/A2-4/50/0 50/A7-9/50/0 50/A12-14/50/0 50/A17-19/50/0"]
-    potentials:
-      guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.06"]
-      olig_intra_all: True
-      olig_inter_all: True
-      guide_scale: 2
-      guide_decay: "quadratic"
-
-  ##### Fold-guided Design #####
-  # Adapted from design_timbarrel.sh
-  - name: "design_timbarrel_short"
-    inference:
-      random_seed: 1337
-      final_step: 48
-    scaffoldguided:
-      scaffoldguided: True
-      target_pdb: False
-      scaffold_dir: "tim_barrel_scaffold/"
-      sampled_insertion: "0" # Min range from 0-5
-      sampled_N: "0" # Min range from 0-5
-      sampled_C: "0" # Min range from 0-5
-    denoiser:
-      noise_scale_ca: 0.5
-      noise_scale_frame: 0.5
-
-  - name: "design_timbarrel_long"
-    inference:
-      random_seed: 1337
-      final_step: 48
-    scaffoldguided:
-      scaffoldguided: True
-      target_pdb: False
-      scaffold_dir: "tim_barrel_scaffold/"
-      sampled_insertion: "5" # Max range from 0-5
-      sampled_N: "5" # Max range from 0-5
-      sampled_C: "5" # Max range from 0-5
-    denoiser:
-      noise_scale_ca: 0.5
-      noise_scale_frame: 0.5
+timbarrel_long:
+  scaffoldguided:
+    scaffoldguided: true
+    target_pdb: false
+    scaffold_dir: "tim_barrel_scaffold/"
+    sampled_insertion: "5"
+    sampled_N: "5"
+    sampled_C: "5"
+  denoiser:
+    noise_scale_ca: 0.5
+    noise_scale_frame: 0.5
