@@ -187,8 +187,8 @@ dihedral_oligos:
   inference:
     symmetry: "D2"
   contigmap:
-    length: "320"
-    contigs: ["320"]
+    length: "120"
+    contigs: ["120"]
   potentials:
     guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
     olig_intra_all: true
@@ -219,8 +219,8 @@ nickel:
     symmetry: "C4"
     ckpt_override_path: "../models/Base_epoch8_ckpt.pt"
   contigmap:
-    length: "212"
-    contigs: ["25/A2-4/25/0 25/A7-9/25/0 25/A12-14/25/0 25/A17-19/25/0"]
+    length: "108"
+    contigs: ["12/A2-4/12/0 12/A7-9/12/0 12/A12-14/12/0 12/A17-19/12/0"]
   potentials:
     guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.06"]
     olig_intra_all: true

@@ -72,7 +72,7 @@ def print_starting_newline():
 
 
 # If pytest-xdist is installed (or theoretically anything that provides the
-# `worker_id` fixture, we make the worker index available as an int. Otherwise
+# `worker_id` fixture) we make the worker index available as an int. Otherwise
 # we just set it to 0.
 @pytest.fixture(scope="session")
 def worker_idx(request):

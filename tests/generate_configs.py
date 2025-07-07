@@ -7,11 +7,11 @@ import yaml
 CONFIG_INPUT = pathlib.Path(__file__).with_name("configs.base.yaml")
 CONFIG_OUTPUT = CONFIG_INPUT.with_name("configs.gen.yaml")
 
-MAX_LENGTH = 1200
-LENGTHEN_STEP = {
-    "nickel": 96,
-    "cyclic_oligos": 120,
-    "tetrahedral_oligos": 120,
+LENGTHEN_SETTINGS = {
+    "nickel": (120, 1200),
+    "cyclic_oligos": (120, 1200),
+    "tetrahedral_oligos": (120, 1200),
+    "dihedral_oligos": (120, 1200),
     "partialdiffusion_full": 0,
     "partialdiffusion_withseq": 0,
     "partialdiffusion_multipleseq": 0,
@@ -88,31 +88,38 @@ def lengthen_contig(contig, lengthen_by):
 def generate_configs():
     tests = yaml.safe_load(CONFIG_INPUT.read_text())
 
-    new_tests = {}
+    small_tests = {}
+    large_tests = {}
 
     for design, config in tests.items():
         try:
             length = config.get("contigmap", {}).get("length")
-            lengthen_step = LENGTHEN_STEP.get(design, 100)
-            if not length or lengthen_step == 0:
-                new_tests[design] = config
+            lengthen_settings = LENGTHEN_SETTINGS.get(design, (100, 1000))
+            if not length or not lengthen_settings:
+                small_tests[design] = config
                 continue
-            length = int(config["contigmap"]["length"])
+            lengthen_step, max_length = lengthen_settings
+            length = int(length)
+            name_pad_width = len(str(max_length))
+
+            small_tests[f"{design}_{length:0{name_pad_width}}"] = config
+
             new_length = length
             contig = config["contigmap"].get("contigs")
-            while new_length <= MAX_LENGTH:
+            for new_length in range(
+                length + lengthen_step, max_length + 1, lengthen_step
+            ):
                 new_config = copy.deepcopy(config)
                 lengthen_by = new_length - length
                 if contig:
                     new_contig = lengthen_contig(contig, lengthen_by)
                     new_config["contigmap"]["contigs"] = new_contig
                 new_config["contigmap"]["length"] = str(new_length)
-                new_tests[f"{design}_{new_length}"] = new_config
-                new_length += lengthen_step
-        except:
-            print(f"Error generating {design}")
-            raise
+                large_tests[f"{design}_{new_length:0{name_pad_width}}"] = new_config
+        except Exception as e:
+            raise RuntimeError(f"Error expanding {design}") from e
 
+    new_tests = {"small": small_tests, "large": large_tests}
     yaml_output = yaml.dump(
         new_tests,
         Dumper=CustomDumper,
