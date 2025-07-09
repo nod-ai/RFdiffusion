@@ -170,6 +170,11 @@ class ContigMap:
         """
         length_compatible = False
         count = 0
+        max_sampled_length = 0
+        # Technically the sampled length is an integer that could be of
+        # arbitrary size, but if we're hitting this limit something else is
+        # totally broken.
+        min_sampled_length = sys.maxsize
         while length_compatible is False:
             inpaint_chains = 0
             contig_list = self.contigs[0].strip().split()
@@ -216,6 +221,8 @@ class ContigMap:
                                 subcon_out.append(f"{length_inpaint}-{length_inpaint}")
                                 sampled_mask_length += int(subcon)
                     sampled_mask.append("/".join(subcon_out))
+            max_sampled_length = max(max_sampled_length, sampled_mask_length)
+            min_sampled_length = min(min_sampled_length, sampled_mask_length)
             # check length is compatible
             if self.length is not None:
                 if (
@@ -227,7 +234,9 @@ class ContigMap:
                 length_compatible = True
             count += 1
             if count == 100000:  # contig string incompatible with this length
-                sys.exit("Contig string incompatible with --length range")
+                sys.exit(
+                    f"Contig string '{self.contigs[0]}' incompatible with length [{self.length[0]}, {self.length[1]})"
+                    f" range. Sampled mask length range {min_sampled_length}-{max_sampled_length}")
         return sampled_mask, sampled_mask_length, inpaint_chains
 
     def expand_sampled_mask(self):
