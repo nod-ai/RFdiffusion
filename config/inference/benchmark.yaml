@@ -12,3 +12,4 @@ benchmark:
 inference:
   num_designs: 1
   device: "cuda"
+  random_seed: 1337
