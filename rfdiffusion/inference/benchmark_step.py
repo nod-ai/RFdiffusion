@@ -3,7 +3,6 @@ import torch
 import logging
 from rfdiffusion.inference import utils as iu
 from hydra.core.hydra_config import HydraConfig
-import statistics
 
 
 def benchmark_inference_step(conf: HydraConfig) -> None:
@@ -68,10 +67,10 @@ def benchmark_inference_step(conf: HydraConfig) -> None:
         times.append(time_per_step)
         logger.info(f"Time per step: {time_per_step*1000:.0f}ms")
 
-    times = times[bench_conf.warmup_designs :]
-    times = sorted(times)
-    median_time_per_step = statistics.median(times)
-    print(
-        f"Median time per step: {median_time_per_step*1000:.0f}ms ({times[0]*1000:.0f}ms-{times[-1]*1000:.0f}ms): ",
-        ",".join([f"{t*1000:.0f}" for t in times]),
-    )
+    times = sorted(times[bench_conf.warmup_designs :])
+    # median_time_per_step = statistics.median(times)
+    # print(
+    #     f"Median time per step: {median_time_per_step*1000:.0f}ms ({times[0]*1000:.0f}ms-{times[-1]*1000:.0f}ms): ",
+    #     ",".join([f"{t*1000:.0f}" for t in times]),
+    # )
+    return times
