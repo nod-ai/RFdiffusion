@@ -30,18 +30,6 @@ def reference_dir():
     d.mkdir(parents=True, exist_ok=True)
     return d
 
-
-@pytest.fixture(scope="module")
-def symlink_inputs():
-    # Make sure we have access to all the relevant files
-    exclude_dirs = ["outputs", "example_outputs"]
-    for p in example_dir.iterdir():
-        link = script_dir / p.name
-        if p.name not in exclude_dirs and p.is_dir() and not link.is_symlink():
-            print(f"Symlinking {link} -> {p}")
-            link.symlink_to(p)
-
-
 def calc_atom_rmsd(ref_atoms, test_atoms):
     # First do this the simple way and just take the RMSD between the
     # coordinates directly. BioPython tries to find an RMSD-minimizing rotation
@@ -122,10 +110,10 @@ def get_config_params():
     return params
 
 
-@pytest.mark.usefixtures("set_torch_device", "symlink_inputs")
+@pytest.mark.usefixtures("set_torch_device")
 @pytest.mark.parametrize("conf", get_config_params())
 def test_config(conf, tmp_path, reference_dir, request):
-    os.chdir(script_dir)
+    os.chdir(example_dir)
 
     config_name = "base"
     if "config_name" in conf:
