@@ -1,6 +1,6 @@
 import numpy as np
 import os
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 import torch
 import torch.nn.functional as nn
 from rfdiffusion.diffusion import get_beta_schedule
@@ -691,14 +691,17 @@ class BlockAdjacency:
         """
 
         self.conf=conf
-        # either list or path to .txt file with list of scaffolds
-        if self.conf.scaffoldguided.scaffold_list is not None:
-            if isinstance(self.conf.scaffoldguided.scaffold_list, list):
-                self.scaffold_list = self.conf.scaffoldguided.scaffold_list
-            elif self.conf.scaffoldguided.scaffold_list[-4:] == ".txt":
+        # This is either a list or a path to .txt file with list of scaffolds
+        # We need normal Python objects at this point. e.g. OmegaConf ListConfig
+        # does not inherit from the primitive list.
+        scaffold_list = OmegaConf.to_object(self.conf.scaffoldguided.scaffold_list)
+        if scaffold_list is not None:
+            if isinstance(scaffold_list, list):
+                self.scaffold_list = scaffold_list
+            elif scaffold_list[-4:] == ".txt":
                 # txt file with list of ids
                 list_from_file = []
-                with open(self.conf.scaffoldguided.scaffold_list, "r") as f:
+                with open(scaffold_list, "r") as f:
                     for line in f:
                         list_from_file.append(line.strip())
                 self.scaffold_list = list_from_file
