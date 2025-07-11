@@ -83,7 +83,6 @@ small:
       guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
       substrate: "LLK"
   cyclic_oligos_0120:
-    config_name: "symmetry"
     inference:
       symmetry: "C6"
     contigmap:
@@ -96,7 +95,6 @@ small:
       guide_scale: 2.0
       guide_decay: "quadratic"
   dihedral_oligos_0120:
-    config_name: "symmetry"
     inference:
       symmetry: "D2"
     contigmap:
@@ -109,7 +107,6 @@ small:
       guide_scale: 2.0
       guide_decay: "quadratic"
   tetrahedral_oligos_0120:
-    config_name: "symmetry"
     inference:
       symmetry: "tetrahedral"
     contigmap:
@@ -705,7 +702,6 @@ large:
       guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
       substrate: "LLK"
   cyclic_oligos_0240:
-    config_name: "symmetry"
     inference:
       symmetry: "C6"
     contigmap:
@@ -718,7 +714,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   cyclic_oligos_0360:
-    config_name: "symmetry"
     inference:
       symmetry: "C6"
     contigmap:
@@ -731,7 +726,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   cyclic_oligos_0480:
-    config_name: "symmetry"
     inference:
       symmetry: "C6"
     contigmap:
@@ -744,7 +738,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   cyclic_oligos_0600:
-    config_name: "symmetry"
     inference:
       symmetry: "C6"
     contigmap:
@@ -757,7 +750,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   cyclic_oligos_0720:
-    config_name: "symmetry"
     inference:
       symmetry: "C6"
     contigmap:
@@ -770,7 +762,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   cyclic_oligos_0840:
-    config_name: "symmetry"
     inference:
       symmetry: "C6"
     contigmap:
@@ -783,7 +774,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   cyclic_oligos_0960:
-    config_name: "symmetry"
     inference:
       symmetry: "C6"
     contigmap:
@@ -796,7 +786,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   cyclic_oligos_1080:
-    config_name: "symmetry"
     inference:
       symmetry: "C6"
     contigmap:
@@ -809,7 +798,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   cyclic_oligos_1200:
-    config_name: "symmetry"
     inference:
       symmetry: "C6"
     contigmap:
@@ -822,7 +810,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   dihedral_oligos_0240:
-    config_name: "symmetry"
     inference:
       symmetry: "D2"
     contigmap:
@@ -835,7 +822,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   dihedral_oligos_0360:
-    config_name: "symmetry"
     inference:
       symmetry: "D2"
     contigmap:
@@ -848,7 +834,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   dihedral_oligos_0480:
-    config_name: "symmetry"
     inference:
       symmetry: "D2"
     contigmap:
@@ -861,7 +846,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   dihedral_oligos_0600:
-    config_name: "symmetry"
     inference:
       symmetry: "D2"
     contigmap:
@@ -874,7 +858,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   dihedral_oligos_0720:
-    config_name: "symmetry"
     inference:
       symmetry: "D2"
     contigmap:
@@ -887,7 +870,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   dihedral_oligos_0840:
-    config_name: "symmetry"
     inference:
       symmetry: "D2"
     contigmap:
@@ -900,7 +882,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   dihedral_oligos_0960:
-    config_name: "symmetry"
     inference:
       symmetry: "D2"
     contigmap:
@@ -913,7 +894,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   dihedral_oligos_1080:
-    config_name: "symmetry"
     inference:
       symmetry: "D2"
     contigmap:
@@ -926,7 +906,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   dihedral_oligos_1200:
-    config_name: "symmetry"
     inference:
       symmetry: "D2"
     contigmap:
@@ -939,7 +918,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   tetrahedral_oligos_0240:
-    config_name: "symmetry"
     inference:
       symmetry: "tetrahedral"
     contigmap:
@@ -952,7 +930,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   tetrahedral_oligos_0360:
-    config_name: "symmetry"
     inference:
       symmetry: "tetrahedral"
     contigmap:
@@ -965,7 +942,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   tetrahedral_oligos_0480:
-    config_name: "symmetry"
     inference:
       symmetry: "tetrahedral"
     contigmap:
@@ -978,7 +954,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   tetrahedral_oligos_0600:
-    config_name: "symmetry"
     inference:
       symmetry: "tetrahedral"
     contigmap:
@@ -991,7 +966,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   tetrahedral_oligos_0720:
-    config_name: "symmetry"
     inference:
       symmetry: "tetrahedral"
     contigmap:
@@ -1004,7 +978,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   tetrahedral_oligos_0840:
-    config_name: "symmetry"
     inference:
       symmetry: "tetrahedral"
     contigmap:
@@ -1017,7 +990,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   tetrahedral_oligos_0960:
-    config_name: "symmetry"
     inference:
       symmetry: "tetrahedral"
     contigmap:
@@ -1030,7 +1002,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   tetrahedral_oligos_1080:
-    config_name: "symmetry"
     inference:
       symmetry: "tetrahedral"
     contigmap:
@@ -1043,7 +1014,6 @@ large:
       guide_scale: 2.0
       guide_decay: "quadratic"
   tetrahedral_oligos_1200:
-    config_name: "symmetry"
     inference:
       symmetry: "tetrahedral"
     contigmap:

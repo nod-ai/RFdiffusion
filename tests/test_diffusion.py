@@ -115,12 +115,8 @@ def get_config_params():
 def test_config(conf, tmp_path, reference_dir, request):
     os.chdir(example_dir)
 
-    config_name = "base"
-    if "config_name" in conf:
-        config_name = conf.pop("config_name")
-
     with hydra.initialize(config_path="../config/inference", version_base="1.2"):
-        base_conf = hydra.compose(config_name=config_name)
+        base_conf = hydra.compose(config_name="base")
         output_dir = tmp_path
         test_name = request.node.callspec.id.replace(" ", "_").replace("/", "_")
         # First resolve the diffuser configuration
