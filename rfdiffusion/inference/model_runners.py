@@ -321,12 +321,12 @@ class Sampler:
         ####################################
 
         if self.diffuser_conf.partial_T:
-            assert xyz_27.shape[0] == L_mapped, f"there must be a coordinate in the input PDB for \
-                    each residue implied by the contig string for partial diffusion.  length of \
-                    input PDB != length of contig string: {xyz_27.shape[0]} != {L_mapped}"
-            assert contig_map.hal_idx0 == contig_map.ref_idx0, f'for partial diffusion there can \
-                    be no offset between the index of a residue in the input and the index of the \
-                    residue in the output, {contig_map.hal_idx0} != {contig_map.ref_idx0}'
+            assert xyz_27.shape[0] == L_mapped, (f"there must be a coordinate in the input PDB for"
+                    f"each residue implied by the contig string for partial diffusion.  length of"
+                    f"input PDB != length of contig string: {xyz_27.shape[0]} != {L_mapped}")
+            assert contig_map.hal_idx0 == contig_map.ref_idx0, (f"for partial diffusion there can"
+                    f"be no offset between the index of a residue in the input and the index of the"
+                    f"residue in the output,\n{contig_map.hal_idx0}\n!=\n{contig_map.ref_idx0}")
             # Partially diffusing from a known structure
             xyz_mapped=xyz_27
             atom_mask_mapped = mask_27
@@ -833,7 +833,9 @@ class ScaffoldedSampler(SelfConditioning):
                 contig = ["".join(contig)]
             else:
                 contig = [f"{self.binderlen}-{self.binderlen}"]
-            self.contig_map=ContigMap(self.target_pdb, contig)
+            contig_conf = OmegaConf.to_object(self.contig_conf)
+            contig_conf["contigs"] = contig
+            self.contig_map=ContigMap(self.target_pdb, **contig_conf)
             self.mappings = self.contig_map.get_mappings()
             self.mask_seq = self.diffusion_mask
             self.mask_str = self.diffusion_mask
