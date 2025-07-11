@@ -23,7 +23,7 @@ small:
       length: "39"
       contigs: ["10/A163-181/10"]
       inpaint_seq: ["A163-168/A170-171/A179"]
-  partialdiffusion_full:
+  partialdiffusion_2KL8_full_0079:
     inference:
       input_pdb: "input_pdbs/2KL8.pdb"
     contigmap:
@@ -31,11 +31,30 @@ small:
       contigs: ["79"]
     diffuser:
       partial_T: 10
-  partialdiffusion_half:
+  partialdiffusion_2KL8_half_0079:
     inference:
       input_pdb: "input_pdbs/2KL8.pdb"
     contigmap:
+      length: "79"
       contigs: ["A1-39/40"]
+    diffuser:
+      partial_T: 10
+  partialdiffusion_withseq_0206:
+    inference:
+      input_pdb: "input_pdbs/peptide_complex_ideal_helix.pdb"
+    contigmap:
+      length: "206"
+      contigs: ["172/0 34"]
+      provide_seq: ["172-205"]
+    diffuser:
+      partial_T: 10
+  partialdiffusion_multipleseq_0206:
+    inference:
+      input_pdb: "input_pdbs/peptide_complex_ideal_helix.pdb"
+    contigmap:
+      length: "206"
+      contigs: ["172/0 34"]
+      provide_seq: ["172-177", "200-205"]
     diffuser:
       partial_T: 10
   ppi_0050:
@@ -63,24 +82,6 @@ small:
       guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
       guide_scale: 2
       guide_decay: "quadratic"
-  partialdiffusion_withseq:
-    inference:
-      input_pdb: "input_pdbs/peptide_complex_ideal_helix.pdb"
-    contigmap:
-      length: "206"
-      contigs: ["172/0 34"]
-      provide_seq: ["172-205"]
-    diffuser:
-      partial_T: 10
-  partialdiffusion_multipleseq:
-    inference:
-      input_pdb: "input_pdbs/peptide_complex_ideal_helix.pdb"
-    contigmap:
-      length: "206"
-      contigs: ["172/0 34"]
-      provide_seq: ["172-177", "200-205"]
-    diffuser:
-      partial_T: 10
   ppi_flexible_peptide_0070:
     inference:
       input_pdb: "input_pdbs/3IOL.pdb"
@@ -100,7 +101,9 @@ small:
       inpaint_str_helix: ["B165-178"]
     scaffoldguided:
       scaffoldguided: true
-  ppi_scaffolded:
+  ppi_scaffolded_0056:
+    contigmap:
+      length: "56"
     scaffoldguided:
       target_path: "input_pdbs/insulin_target.pdb"
       scaffoldguided: true
@@ -108,6 +111,10 @@ small:
       target_ss: "target_folds/insulin_target_ss.pt"
       target_adj: "target_folds/insulin_target_adj.pt"
       scaffold_dir: "./ppi_scaffolds/"
+      scaffold_list: ["HHH_b2_06953"]
+      sampled_insertion: "0-0"
+      sampled_N: "0-0"
+      sampled_C: "0-0"
     ppi:
       hotspot_res: ["A59", "A83", "A91"]
     denoiser:
@@ -177,29 +184,85 @@ small:
       olig_inter_all: true
       guide_scale: 2
       guide_decay: "quadratic"
-  timbarrel_short:
+  timbarrel_0182:
+    contigmap:
+      length: "182"
     scaffoldguided:
       scaffoldguided: true
       target_pdb: false
       scaffold_dir: "tim_barrel_scaffold/"
-      sampled_insertion: "0"
-      sampled_N: "0"
-      sampled_C: "0"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "0-0"
+      sampled_N: "0-0"
+      sampled_C: "0-0"
     denoiser:
       noise_scale_ca: 0.5
       noise_scale_frame: 0.5
-  timbarrel_long:
+  timbarrel_si3_0233:
+    contigmap:
+      length: "233"
     scaffoldguided:
       scaffoldguided: true
       target_pdb: false
       scaffold_dir: "tim_barrel_scaffold/"
-      sampled_insertion: "5"
-      sampled_N: "5"
-      sampled_C: "5"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "3-3"
+      sampled_N: "0-0"
+      sampled_C: "0-0"
     denoiser:
       noise_scale_ca: 0.5
       noise_scale_frame: 0.5
 large:
+  partialdiffusion_5an7_full_0242:
+    inference:
+      input_pdb: "input_pdbs/5an7.pdb"
+    contigmap:
+      length: "242"
+      contigs: ["242"]
+    diffuser:
+      partial_T: 10
+  partialdiffusion_5an7_half_0242:
+    inference:
+      input_pdb: "input_pdbs/5an7.pdb"
+    contigmap:
+      length: "242"
+      contigs: ["95/A1101-1221/26"]
+    diffuser:
+      partial_T: 10
+  partialdiffusion_5TPN_full_0916:
+    inference:
+      input_pdb: "input_pdbs/5TPN.pdb"
+    contigmap:
+      length: "916"
+      contigs: ["490/0 212/0 214/0"]
+    diffuser:
+      partial_T: 10
+  partialdiffusion_5TPN_half_0916:
+    inference:
+      input_pdb: "input_pdbs/5TPN.pdb"
+    contigmap:
+      length: "916"
+      contigs: ["79/A134-544/0 212/0 214/0"]
+    diffuser:
+      partial_T: 10
+  partialdiffusion_5TPN_withseq_0916:
+    inference:
+      input_pdb: "input_pdbs/5TPN.pdb"
+    contigmap:
+      length: "916"
+      contigs: ["490/0 212/0 214/0"]
+      provide_seq: ["490-915"]
+    diffuser:
+      partial_T: 10
+  partialdiffusion_5TPN_multipleseq_0916:
+    inference:
+      input_pdb: "input_pdbs/5TPN.pdb"
+    contigmap:
+      length: "916"
+      contigs: ["490/0 212/0 214/0"]
+      provide_seq: ["490-495", "696-701", "702-707", "910-915"]
+    diffuser:
+      partial_T: 10
   unconditional_0200:
     contigmap:
       length: "200"
@@ -812,6 +875,177 @@ large:
       inpaint_str_helix: ["B165-178"]
     scaffoldguided:
       scaffoldguided: true
+  ppi_scaffolded_0156:
+    contigmap:
+      length: "156"
+    scaffoldguided:
+      target_path: "input_pdbs/insulin_target.pdb"
+      scaffoldguided: true
+      target_pdb: true
+      target_ss: "target_folds/insulin_target_ss.pt"
+      target_adj: "target_folds/insulin_target_adj.pt"
+      scaffold_dir: "./ppi_scaffolds/"
+      scaffold_list: ["HHH_b2_06953"]
+      sampled_insertion: "0-0"
+      sampled_N: "50-50"
+      sampled_C: "50-50"
+    ppi:
+      hotspot_res: ["A59", "A83", "A91"]
+    denoiser:
+      noise_scale_ca: 0
+      noise_scale_frame: 0
+  ppi_scaffolded_0256:
+    contigmap:
+      length: "256"
+    scaffoldguided:
+      target_path: "input_pdbs/insulin_target.pdb"
+      scaffoldguided: true
+      target_pdb: true
+      target_ss: "target_folds/insulin_target_ss.pt"
+      target_adj: "target_folds/insulin_target_adj.pt"
+      scaffold_dir: "./ppi_scaffolds/"
+      scaffold_list: ["HHH_b2_06953"]
+      sampled_insertion: "0-0"
+      sampled_N: "100-100"
+      sampled_C: "100-100"
+    ppi:
+      hotspot_res: ["A59", "A83", "A91"]
+    denoiser:
+      noise_scale_ca: 0
+      noise_scale_frame: 0
+  ppi_scaffolded_0356:
+    contigmap:
+      length: "356"
+    scaffoldguided:
+      target_path: "input_pdbs/insulin_target.pdb"
+      scaffoldguided: true
+      target_pdb: true
+      target_ss: "target_folds/insulin_target_ss.pt"
+      target_adj: "target_folds/insulin_target_adj.pt"
+      scaffold_dir: "./ppi_scaffolds/"
+      scaffold_list: ["HHH_b2_06953"]
+      sampled_insertion: "0-0"
+      sampled_N: "150-150"
+      sampled_C: "150-150"
+    ppi:
+      hotspot_res: ["A59", "A83", "A91"]
+    denoiser:
+      noise_scale_ca: 0
+      noise_scale_frame: 0
+  ppi_scaffolded_0456:
+    contigmap:
+      length: "456"
+    scaffoldguided:
+      target_path: "input_pdbs/insulin_target.pdb"
+      scaffoldguided: true
+      target_pdb: true
+      target_ss: "target_folds/insulin_target_ss.pt"
+      target_adj: "target_folds/insulin_target_adj.pt"
+      scaffold_dir: "./ppi_scaffolds/"
+      scaffold_list: ["HHH_b2_06953"]
+      sampled_insertion: "0-0"
+      sampled_N: "200-200"
+      sampled_C: "200-200"
+    ppi:
+      hotspot_res: ["A59", "A83", "A91"]
+    denoiser:
+      noise_scale_ca: 0
+      noise_scale_frame: 0
+  ppi_scaffolded_0556:
+    contigmap:
+      length: "556"
+    scaffoldguided:
+      target_path: "input_pdbs/insulin_target.pdb"
+      scaffoldguided: true
+      target_pdb: true
+      target_ss: "target_folds/insulin_target_ss.pt"
+      target_adj: "target_folds/insulin_target_adj.pt"
+      scaffold_dir: "./ppi_scaffolds/"
+      scaffold_list: ["HHH_b2_06953"]
+      sampled_insertion: "0-0"
+      sampled_N: "250-250"
+      sampled_C: "250-250"
+    ppi:
+      hotspot_res: ["A59", "A83", "A91"]
+    denoiser:
+      noise_scale_ca: 0
+      noise_scale_frame: 0
+  ppi_scaffolded_0656:
+    contigmap:
+      length: "656"
+    scaffoldguided:
+      target_path: "input_pdbs/insulin_target.pdb"
+      scaffoldguided: true
+      target_pdb: true
+      target_ss: "target_folds/insulin_target_ss.pt"
+      target_adj: "target_folds/insulin_target_adj.pt"
+      scaffold_dir: "./ppi_scaffolds/"
+      scaffold_list: ["HHH_b2_06953"]
+      sampled_insertion: "0-0"
+      sampled_N: "300-300"
+      sampled_C: "300-300"
+    ppi:
+      hotspot_res: ["A59", "A83", "A91"]
+    denoiser:
+      noise_scale_ca: 0
+      noise_scale_frame: 0
+  ppi_scaffolded_0756:
+    contigmap:
+      length: "756"
+    scaffoldguided:
+      target_path: "input_pdbs/insulin_target.pdb"
+      scaffoldguided: true
+      target_pdb: true
+      target_ss: "target_folds/insulin_target_ss.pt"
+      target_adj: "target_folds/insulin_target_adj.pt"
+      scaffold_dir: "./ppi_scaffolds/"
+      scaffold_list: ["HHH_b2_06953"]
+      sampled_insertion: "0-0"
+      sampled_N: "350-350"
+      sampled_C: "350-350"
+    ppi:
+      hotspot_res: ["A59", "A83", "A91"]
+    denoiser:
+      noise_scale_ca: 0
+      noise_scale_frame: 0
+  ppi_scaffolded_0856:
+    contigmap:
+      length: "856"
+    scaffoldguided:
+      target_path: "input_pdbs/insulin_target.pdb"
+      scaffoldguided: true
+      target_pdb: true
+      target_ss: "target_folds/insulin_target_ss.pt"
+      target_adj: "target_folds/insulin_target_adj.pt"
+      scaffold_dir: "./ppi_scaffolds/"
+      scaffold_list: ["HHH_b2_06953"]
+      sampled_insertion: "0-0"
+      sampled_N: "400-400"
+      sampled_C: "400-400"
+    ppi:
+      hotspot_res: ["A59", "A83", "A91"]
+    denoiser:
+      noise_scale_ca: 0
+      noise_scale_frame: 0
+  ppi_scaffolded_0956:
+    contigmap:
+      length: "956"
+    scaffoldguided:
+      target_path: "input_pdbs/insulin_target.pdb"
+      scaffoldguided: true
+      target_pdb: true
+      target_ss: "target_folds/insulin_target_ss.pt"
+      target_adj: "target_folds/insulin_target_adj.pt"
+      scaffold_dir: "./ppi_scaffolds/"
+      scaffold_list: ["HHH_b2_06953"]
+      sampled_insertion: "0-0"
+      sampled_N: "450-450"
+      sampled_C: "450-450"
+    ppi:
+      hotspot_res: ["A59", "A83", "A91"]
+    denoiser:
+      noise_scale_ca: 0
+      noise_scale_frame: 0
   enzyme_0143:
     inference:
       input_pdb: "input_pdbs/5an7.pdb"
@@ -1388,3 +1622,213 @@ large:
       olig_inter_all: true
       guide_scale: 2
       guide_decay: "quadratic"
+  timbarrel_0282:
+    contigmap:
+      length: "282"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "0-0"
+      sampled_N: "50-50"
+      sampled_C: "50-50"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
+  timbarrel_0382:
+    contigmap:
+      length: "382"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "0-0"
+      sampled_N: "100-100"
+      sampled_C: "100-100"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
+  timbarrel_0482:
+    contigmap:
+      length: "482"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "0-0"
+      sampled_N: "150-150"
+      sampled_C: "150-150"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
+  timbarrel_0582:
+    contigmap:
+      length: "582"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "0-0"
+      sampled_N: "200-200"
+      sampled_C: "200-200"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
+  timbarrel_0682:
+    contigmap:
+      length: "682"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "0-0"
+      sampled_N: "250-250"
+      sampled_C: "250-250"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
+  timbarrel_0782:
+    contigmap:
+      length: "782"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "0-0"
+      sampled_N: "300-300"
+      sampled_C: "300-300"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
+  timbarrel_0882:
+    contigmap:
+      length: "882"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "0-0"
+      sampled_N: "350-350"
+      sampled_C: "350-350"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
+  timbarrel_0982:
+    contigmap:
+      length: "982"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "0-0"
+      sampled_N: "400-400"
+      sampled_C: "400-400"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
+  timbarrel_si3_0333:
+    contigmap:
+      length: "333"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "3-3"
+      sampled_N: "50-50"
+      sampled_C: "50-50"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
+  timbarrel_si3_0433:
+    contigmap:
+      length: "433"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "3-3"
+      sampled_N: "100-100"
+      sampled_C: "100-100"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
+  timbarrel_si3_0533:
+    contigmap:
+      length: "533"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "3-3"
+      sampled_N: "150-150"
+      sampled_C: "150-150"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
+  timbarrel_si3_0633:
+    contigmap:
+      length: "633"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "3-3"
+      sampled_N: "200-200"
+      sampled_C: "200-200"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
+  timbarrel_si3_0733:
+    contigmap:
+      length: "733"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "3-3"
+      sampled_N: "250-250"
+      sampled_C: "250-250"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
+  timbarrel_si3_0833:
+    contigmap:
+      length: "833"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "3-3"
+      sampled_N: "300-300"
+      sampled_C: "300-300"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
+  timbarrel_si3_0933:
+    contigmap:
+      length: "933"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "3-3"
+      sampled_N: "350-350"
+      sampled_C: "350-350"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
