@@ -256,6 +256,28 @@ small:
       noise_scale_ca: 0.5
       noise_scale_frame: 0.5
 
+  # Adapted from design_macrocyclic_monomer.sh
+  macrocyclic_monomer:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["12"]
+      length: "12"
+
+  # Adapted from design_macrocyclic_binder.sh
+  macrocyclic_binder:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["12 A3-117/0"]
+      length: "12"
+    ppi:
+      hotspot_res: ["A51", "A52", "A50", "A48", "A62", "A65"]
+
 large:
   # Automatically generating longer partial diffusion configurations doesn't
   # really work, as you have to use a larger input pdb and that introduces new

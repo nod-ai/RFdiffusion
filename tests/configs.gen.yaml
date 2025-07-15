@@ -209,6 +209,24 @@ small:
     denoiser:
       noise_scale_ca: 0.5
       noise_scale_frame: 0.5
+  macrocyclic_monomer_0012:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["12"]
+      length: "12"
+  macrocyclic_binder_0012:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["12 A3-117/0"]
+      length: "12"
+    ppi:
+      hotspot_res: ["A51", "A52", "A50", "A48", "A62", "A65"]
 large:
   partialdiffusion_5an7_full_0242:
     inference:
@@ -1802,3 +1820,165 @@ large:
     denoiser:
       noise_scale_ca: 0.5
       noise_scale_frame: 0.5
+  macrocyclic_monomer_0112:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["112"]
+      length: "112"
+  macrocyclic_monomer_0212:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["212"]
+      length: "212"
+  macrocyclic_monomer_0312:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["312"]
+      length: "312"
+  macrocyclic_monomer_0412:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["412"]
+      length: "412"
+  macrocyclic_monomer_0512:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["512"]
+      length: "512"
+  macrocyclic_monomer_0612:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["612"]
+      length: "612"
+  macrocyclic_monomer_0712:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["712"]
+      length: "712"
+  macrocyclic_monomer_0812:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["812"]
+      length: "812"
+  macrocyclic_monomer_0912:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["912"]
+      length: "912"
+  macrocyclic_binder_0112:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["112 A3-117/0"]
+      length: "112"
+    ppi:
+      hotspot_res: ["A51", "A52", "A50", "A48", "A62", "A65"]
+  macrocyclic_binder_0212:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["212 A3-117/0"]
+      length: "212"
+    ppi:
+      hotspot_res: ["A51", "A52", "A50", "A48", "A62", "A65"]
+  macrocyclic_binder_0312:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["312 A3-117/0"]
+      length: "312"
+    ppi:
+      hotspot_res: ["A51", "A52", "A50", "A48", "A62", "A65"]
+  macrocyclic_binder_0412:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["412 A3-117/0"]
+      length: "412"
+    ppi:
+      hotspot_res: ["A51", "A52", "A50", "A48", "A62", "A65"]
+  macrocyclic_binder_0512:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["512 A3-117/0"]
+      length: "512"
+    ppi:
+      hotspot_res: ["A51", "A52", "A50", "A48", "A62", "A65"]
+  macrocyclic_binder_0612:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["612 A3-117/0"]
+      length: "612"
+    ppi:
+      hotspot_res: ["A51", "A52", "A50", "A48", "A62", "A65"]
+  macrocyclic_binder_0712:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["712 A3-117/0"]
+      length: "712"
+    ppi:
+      hotspot_res: ["A51", "A52", "A50", "A48", "A62", "A65"]
+  macrocyclic_binder_0812:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["812 A3-117/0"]
+      length: "812"
+    ppi:
+      hotspot_res: ["A51", "A52", "A50", "A48", "A62", "A65"]
+  macrocyclic_binder_0912:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["912 A3-117/0"]
+      length: "912"
+    ppi:
+      hotspot_res: ["A51", "A52", "A50", "A48", "A62", "A65"]
