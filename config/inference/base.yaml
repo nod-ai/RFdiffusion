@@ -26,7 +26,7 @@ inference:
   cyc_chains: 'a'
   compile: False
   compilation_mode: null
-  require_gpu: False
+  device: "auto"
 
 contigmap:
   contigs: null

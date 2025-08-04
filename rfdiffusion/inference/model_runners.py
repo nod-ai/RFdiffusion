@@ -48,10 +48,7 @@ class Sampler:
         """
         self._log = logging.getLogger(__name__)
         self._warned_hotspots = False
-        if torch.cuda.is_available():
-            self.device = torch.device('cuda')
-        else:
-            self.device = torch.device('cpu')
+        self.device = iu.get_device(conf.inference.device)
         needs_model_reload = not self.initialized or conf.inference.ckpt_override_path != self._conf.inference.ckpt_override_path
 
         # Assign config to Sampler

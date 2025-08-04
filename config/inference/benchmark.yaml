@@ -11,4 +11,4 @@ benchmark:
 
 inference:
   num_designs: 1
-  require_gpu: True
+  device: "cuda"

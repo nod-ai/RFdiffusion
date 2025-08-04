@@ -24,8 +24,6 @@ def benchmark_inference_step(conf: HydraConfig) -> None:
         conf.inference.random_seed = conf.inference.random_seed or 0
         iu.make_deterministic(conf.inference.random_seed)
 
-    iu.find_gpu(required=conf.inference.require_gpu)
-
     # Initialize sampler and target/contig.
     sampler = iu.sampler_selector(conf)
     total_steps = bench_conf.warmup_steps + bench_conf.benchmark_steps

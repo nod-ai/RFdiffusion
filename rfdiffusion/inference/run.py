@@ -16,8 +16,6 @@ def run_inference(conf: HydraConfig) -> None:
         conf.inference.random_seed = conf.inference.random_seed or 0
         iu.make_deterministic(conf.inference.random_seed)
 
-    iu.find_gpu(conf.inference.require_gpu)
-
     # Initialize sampler and target/contig.
     sampler = iu.sampler_selector(conf)
 
@@ -115,9 +113,9 @@ def run_inference(conf: HydraConfig) -> None:
         trb = dict(
             config=OmegaConf.to_container(sampler._conf, resolve=True),
             plddt=plddt_stack.cpu().numpy(),
-            device=torch.cuda.get_device_name(torch.cuda.current_device())
-            if torch.cuda.is_available()
-            else "CPU",
+            device=torch.cuda.get_device_name(sampler.device)
+            if sampler.device.type == "cuda"
+            else sampler.device.type,
             time=time.perf_counter() - start_time,
         )
         if hasattr(sampler, "contig_map"):
@@ -155,4 +153,4 @@ def run_inference(conf: HydraConfig) -> None:
                 chain_ids=sampler.chain_idx,
             )
 
-        log.info(f"Finished design in {(time.perf_counter()-start_time)/60:.2f} minutes")
+        log.info(f"Finished design in {(time.perf_counter()-start_time):.0f} seconds")

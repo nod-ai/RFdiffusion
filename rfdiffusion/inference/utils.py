@@ -1031,18 +1031,26 @@ def seed_rngs(seed=0):
     np.random.seed(seed)
     random.seed(seed)
 
-def find_gpu(required=False):
-    if torch.cuda.is_available():
-        logger.debug("GPU is available")
-        device_name = torch.cuda.get_device_name(torch.cuda.current_device())
+def get_device(device="auto"):
+    if device == "auto":
+        if torch.cuda.is_available():
+            logger.debug("GPU is available")
+            device = "cuda"
+        else:
+            logger.warning(
+                "////////////////////////////////////////////////"
+                "///// NO GPU DETECTED! Falling back to CPU /////"
+                "////////////////////////////////////////////////"
+            )
+            device = "cpu"
+
+    device = torch.device(device)
+
+    if device.type == "cpu":
+        logger.info("Will run RFdiffusion on CPU")
+    else:
+        device_name = torch.cuda.get_device_name(device)
         logger.info(
             f"Found GPU with device_name {device_name}. Will run RFdiffusion on {device_name}"
         )
-    elif required:
-        raise RuntimeError("No GPU detected. Aborting because GPU was marked required.")
-    else:
-        logger.info(
-            "////////////////////////////////////////////////"
-            "///// NO GPU DETECTED! Falling back to CPU /////"
-            "////////////////////////////////////////////////"
-        )
+    return device
