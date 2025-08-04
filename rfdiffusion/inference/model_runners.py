@@ -47,6 +47,7 @@ class Sampler:
 
         """
         self._log = logging.getLogger(__name__)
+        self._warned_hotspots = False
         if torch.cuda.is_available():
             self.device = torch.device('cuda')
         else:
@@ -65,12 +66,12 @@ class Sampler:
         else:
             model_directory = f"{SCRIPT_DIR}/../../models"
 
-        print(f"Reading models from {model_directory}")
+        self._log.info(f"Reading models from {model_directory}")
 
         # Initialize inference only helper objects to Sampler
         if conf.inference.ckpt_override_path is not None:
             self.ckpt_path = conf.inference.ckpt_override_path
-            print("WARNING: You're overriding the checkpoint path from the defaults. Check that the model you're providing can run with the inputs you're providing.")
+            self._log.warning("You're overriding the checkpoint path from the defaults. Check that the model you're providing can run with the inputs you're providing.")
         else:
             if conf.contigmap.inpaint_seq is not None or conf.contigmap.provide_seq is not None or conf.contigmap.inpaint_str:
                 # use model trained for inpaint_seq
@@ -164,6 +165,7 @@ class Sampler:
         else:
             self.t_step_input = int(self.diffuser_conf.T)
 
+
     @property
     def T(self):
         '''
@@ -178,8 +180,7 @@ class Sampler:
     def load_checkpoint(self) -> None:
         """Loads RF checkpoint, from which config can be generated."""
         self._log.info(f'Reading checkpoint from {self.ckpt_path}')
-        print('This is inf_conf.ckpt_path')
-        print(self.ckpt_path)
+        self._log.debug(f'inf_conf.ckpt_path={self.ckpt_path}')
         self.ckpt  = torch.load(
             self.ckpt_path, map_location=self.device, weights_only=True)
 
@@ -202,12 +203,12 @@ class Sampler:
         overrides = []
         if HydraConfig.initialized():
             overrides = HydraConfig.get().overrides.task
-        print("Assembling -model, -diffuser and -preprocess configs from checkpoint")
+        self._log.info("Assembling -model, -diffuser and -preprocess configs from checkpoint")
 
         for cat in ['model','diffuser','preprocess']:
             for key in self._conf[cat]:
                 try:
-                    print(f"USING MODEL CONFIG: self._conf[{cat}][{key}] = {self.ckpt['config_dict'][cat][key]}")
+                    self._log.debug(f"USING MODEL CONFIG: self._conf[{cat}][{key}] = {self.ckpt['config_dict'][cat][key]}")
                     self._conf[cat][key] = self.ckpt['config_dict'][cat][key]
                 except:
                     pass
@@ -215,7 +216,7 @@ class Sampler:
         # add overrides back in again
         for override in overrides:
             if override.split(".")[0] in ['model','diffuser','preprocess']:
-                print(f'WARNING: You are changing {override.split("=")[0]} from the value this model was trained with. Are you sure you know what you are doing?')
+                self._log.warning(f'You are changing {override.split("=")[0]} from the value this model was trained with. Are you sure you know what you are doing?')
                 mytype = type(self._conf[override.split(".")[0]][override.split(".")[1].split("=")[0]])
                 self._conf[override.split(".")[0]][override.split(".")[1].split("=")[0]] = mytype(override.split("=")[1])
 
@@ -553,8 +554,12 @@ class Sampler:
         if self.preprocess_conf.d_t1d >= 24: # add hotspot residues
             hotspot_tens = torch.zeros(L).float()
             if self.ppi_conf.hotspot_res is None:
-                print("WARNING: you're using a model trained on complexes and hotspot residues, without specifying hotspots.\
-                         If you're doing monomer diffusion this is fine")
+                if not self._warned_hotspots:
+                    self._log.warning(
+                        "You're using a model trained on complexes and hotspot residues, without"
+                         " specifying hotspots. If you're doing monomer diffusion this is fine"
+                    )
+                    self._warned_hotspots = True
                 hotspot_idx=[]
             else:
                 hotspots = [(i[0],int(i[1:])) for i in self.ppi_conf.hotspot_res]

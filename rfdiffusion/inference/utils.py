@@ -399,7 +399,7 @@ class Denoise:
 
         # check for NaN's
         if torch.isnan(Ca_grads).any():
-            print("WARNING: NaN in potential gradients, replacing with zero grad.")
+            self._log.warning("NaN in potential gradients, replacing with zero grad.")
             Ca_grads[:] = 0
 
         return Ca_grads
@@ -690,6 +690,7 @@ class BlockAdjacency:
              conf.inference.num_designs for sanity checking
         """
 
+        self._log = logging.getLogger(__name__)
         self.conf=conf
         # This is either a list or a path to .txt file with list of scaffolds
         # We need normal Python objects at this point. e.g. OmegaConf ListConfig
@@ -753,8 +754,8 @@ class BlockAdjacency:
         self.num_designs = conf.inference.num_designs
 
         if len(self.scaffold_list) > self.num_designs:
-            print(
-                "WARNING: Scaffold set is bigger than num_designs, so not every scaffold type will be sampled"
+            self._log.warning(
+                "Scaffold set is bigger than num_designs, so not every scaffold type will be sampled"
             )
 
         # for tracking number of designs
@@ -891,7 +892,7 @@ class BlockAdjacency:
             self.item_n += 1
         else:
             item = random.choice(self.scaffold_list)
-        print("Scaffold constrained based on file: ", item)
+        self._log.info(f"Scaffold constrained based on file: {item}")
         # load files
         ss, adj = self.get_ss_adj(item)
         adj_orig = torch.clone(adj)
@@ -1017,7 +1018,7 @@ def ss_from_contig(ss_masks: dict):
     return ss
 
 def make_deterministic(seed=0):
-    print(f"WARNING: Forcing deterministic algorithms. This may affect performance")
+    logger.warning(f"Forcing deterministic algorithms. This may affect performance")
     torch.use_deterministic_algorithms(True)
     torch._C._jit_set_profiling_executor(False)
     torch._C._jit_set_profiling_mode(False)
@@ -1032,7 +1033,7 @@ def seed_rngs(seed=0):
 
 def find_gpu(required=False):
     if torch.cuda.is_available():
-        logger.info("GPU is available")
+        logger.debug("GPU is available")
         device_name = torch.cuda.get_device_name(torch.cuda.current_device())
         logger.info(
             f"Found GPU with device_name {device_name}. Will run RFdiffusion on {device_name}"

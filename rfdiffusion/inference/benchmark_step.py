@@ -16,7 +16,7 @@ def benchmark_inference_step(conf: HydraConfig) -> None:
     whole thing. It expects a config as defined in
     config/inference/benchmark.yaml
     """
-    log = logging.getLogger(__name__)
+    logger = logging.getLogger(__name__)
 
     bench_conf = conf.benchmark
 
@@ -43,7 +43,7 @@ def benchmark_inference_step(conf: HydraConfig) -> None:
         if conf.inference.random_seed is not None:
             iu.seed_rngs(conf.inference.random_seed + i_des)
 
-        log.info(f"Making design {i_des}")
+        logger.info(f"Making design {i_des}")
 
         x_init, seq_init = sampler.sample_init()
 
@@ -68,7 +68,7 @@ def benchmark_inference_step(conf: HydraConfig) -> None:
         time_per_step = elapsed_time / bench_conf.benchmark_steps
 
         times.append(time_per_step)
-        print(f"Time per step: {time_per_step*1000:.0f}ms")
+        logger.info(f"Time per step: {time_per_step*1000:.0f}ms")
 
     times = times[bench_conf.warmup_designs :]
     times = sorted(times)
