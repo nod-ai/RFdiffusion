@@ -1,0 +1,341 @@
+small:
+  # Adapted from design_unconditional.sh
+  unconditional:
+    contigmap:
+      length: "100"
+      contigs: ["100"]
+
+  # Adapted from design_unconditional_w_contact_potential.sh
+  unconditional_w_contact_potential:
+    contigmap:
+      length: "100"
+      contigs: ["100"]
+    potentials:
+      guiding_potentials: ["type:monomer_contacts,weight:0.05"]
+
+
+  # Adapted from design_unconditional_w_monomer_ROG.sh
+  unconditional_w_monomer_ROG:
+    contigmap:
+      length: "100"
+      contigs: ["100"]
+    potentials:
+      guiding_potentials: ["type:monomer_ROG,weight:1,min_dist:5"]
+      guide_scale: 2
+      guide_decay: "quadratic"
+
+  # Adapted from design_motif_scaffolding.sh
+  motifscaffolding:
+    inference:
+      input_pdb: "input_pdbs/5TPN.pdb"
+    contigmap:
+      length: "39"
+      contigs: ["10/A163-181/10"]
+
+  # Adapted from design_motifscaffolding_with_target.sh
+  motifscaffolding_with_target:
+    inference:
+      input_pdb: "input_pdbs/1YCR.pdb"
+      ckpt_override_path: "../models/Complex_base_ckpt.pt"
+    contigmap:
+      length: "83"
+      contigs: ["A25-109/0 35/B17-29/35"]
+
+  # Adapted from design_motifscaffolding_inpaintseq.sh
+  motifscaffolding_inpaintseq:
+    inference:
+      input_pdb: "input_pdbs/5TPN.pdb"
+    contigmap:
+      length: "39"
+      contigs: ["10/A163-181/10"]
+      inpaint_seq: ["A163-168/A170-171/A179"]
+
+  # Adapted from design_partialdiffusion.sh
+  partialdiffusion_2KL8_full:
+    inference:
+      input_pdb: "input_pdbs/2KL8.pdb"
+    contigmap:
+      length: "79"
+      contigs: ["79"]
+    diffuser:
+      partial_T: 10
+
+  partialdiffusion_2KL8_half:
+    inference:
+      input_pdb: "input_pdbs/2KL8.pdb"
+    contigmap:
+      length: "79"
+      contigs: ["A1-39/40"] # Partially diffuse half the protein
+    diffuser:
+      partial_T: 10
+
+  # Adapted from design_partialdiffusion_withseq.sh
+  partialdiffusion_withseq:
+    inference:
+      input_pdb: "input_pdbs/peptide_complex_ideal_helix.pdb"
+    contigmap:
+      length: "206"
+      contigs: ["172/0 34"]
+      provide_seq: ["172-205"]
+    diffuser:
+      partial_T: 10
+
+  # Adapted from design_partialdiffusion_multipleseq.sh
+  partialdiffusion_multipleseq:
+    inference:
+      input_pdb: "input_pdbs/peptide_complex_ideal_helix.pdb"
+    contigmap:
+      length: "206"
+      contigs: ["172/0 34"]
+      provide_seq: ["172-177", "200-205"]
+    diffuser:
+      partial_T: 10
+
+  # Adapted from design_enzyme.sh
+  enzyme:
+    inference:
+      input_pdb: "input_pdbs/5an7.pdb"
+      ckpt_override_path: "../models/ActiveSite_ckpt.pt"
+    contigmap:
+      length: "43"
+      contigs: ["10/A1083-1083/10/A1051-1051/10/A1180-1180/10"]
+    potentials:
+      guide_scale: 1
+      guiding_potentials: ["type:substrate_contacts,s:1,r_0:8,rep_r_0:5.0,rep_s:2,rep_r_min:1"]
+      substrate: "LLK"
+
+  # Adapted from design_cyclic_oligos.sh
+  cyclic_oligos:
+    inference:
+      symmetry: "C6"
+    contigmap:
+      length: "120"
+      contigs: ["120"]
+    potentials:
+      guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+      olig_intra_all: true
+      olig_inter_all: true
+      guide_scale: 2.0
+      guide_decay: "quadratic"
+
+  # Adapted from design_dihedral_oligos.sh
+  dihedral_oligos:
+    inference:
+      symmetry: "D2"
+    contigmap:
+      length: "120"
+      contigs: ["120"]
+    potentials:
+      guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+      olig_intra_all: true
+      olig_inter_all: true
+      guide_scale: 2.0
+      guide_decay: "quadratic"
+
+  # Adapted from design_tetrahedral_oligos.sh
+  tetrahedral_oligos:
+    inference:
+      symmetry: "tetrahedral"
+    contigmap:
+      length: "120"
+      contigs: ["120"]
+    potentials:
+      guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.1"]
+      olig_intra_all: true
+      olig_inter_all: true
+      guide_scale: 2.0
+      guide_decay: "quadratic"
+
+  # Adapted from design_nickel.sh
+  nickel:
+    inference:
+      input_pdb: "input_pdbs/nickel_symmetric_motif.pdb"
+      symmetry: "C4"
+      ckpt_override_path: "../models/Base_epoch8_ckpt.pt"
+    contigmap:
+      length: "108"
+      contigs: ["12/A2-4/12/0 12/A7-9/12/0 12/A12-14/12/0 12/A17-19/12/0"]
+    potentials:
+      guiding_potentials: ["type:olig_contacts,weight_intra:1,weight_inter:0.06"]
+      olig_intra_all: true
+      olig_inter_all: true
+      guide_scale: 2
+      guide_decay: "quadratic"
+
+  ppi:
+    inference:
+      input_pdb: "input_pdbs/insulin_target.pdb"
+    contigmap:
+      length: "50"
+      contigs: ["A1-150/0 50"]
+    ppi:
+      hotspot_res: ["A59", "A83", "A91"]
+    denoiser:
+      noise_scale_ca: 0
+      noise_scale_frame: 0
+
+  # Adapted from design_ppi_flexible_peptide.sh
+  ppi_flexible_peptide:
+    inference:
+      input_pdb: "input_pdbs/3IOL.pdb"
+    contigmap:
+      length: "70"
+      contigs: ["B10-35/0 70"]
+      inpaint_str: ["B10-35"]
+    ppi:
+      hotspot_res: ["B28", "B29"]
+
+  # Adapted from design_ppi_flexible_peptide_with_secondarystructure_specification.sh
+  ppi_flexible_peptide_with_secondarystructure:
+    inference:
+      input_pdb: "input_pdbs/tau_peptide.pdb"
+    contigmap:
+      length: "70"
+      contigs: ["70/0 B165-178"]
+      inpaint_str: ["B165-178"]
+      inpaint_str_helix: ["B165-178"]
+    scaffoldguided:
+      scaffoldguided: true
+
+  # Adapted from design_ppi_scaffolded.sh
+  ppi_scaffolded:
+    contigmap:
+      length: "56"
+    scaffoldguided:
+      target_path: "input_pdbs/insulin_target.pdb"
+      scaffoldguided: true
+      target_pdb: true
+      target_ss: "target_folds/insulin_target_ss.pt"
+      target_adj: "target_folds/insulin_target_adj.pt"
+      scaffold_dir: "./ppi_scaffolds/"
+      # There are 1k different scaffolds here. This one is the first chosen by
+      # random.choice, but listed explicitly for clarity and so that multiple
+      # designs are all the same (e.g. for benchmarking).
+      scaffold_list: ["HHH_b2_06953"]
+      sampled_insertion: "0-0"
+      sampled_N: "0-0"
+      sampled_C: "0-0"
+    ppi:
+      hotspot_res: ["A59", "A83", "A91"]
+    denoiser:
+      noise_scale_ca: 0
+      noise_scale_frame: 0
+
+  # Adapted from design_timbarrel.sh
+  timbarrel:
+    contigmap:
+      length: "182"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      # This is the only scaffold in this directory, but listed explicitly for
+      # clarity.
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "0-0"
+      sampled_N: "0-0"
+      sampled_C: "0-0"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
+
+  timbarrel_si3:
+    contigmap:
+      length: "233"
+    scaffoldguided:
+      scaffoldguided: true
+      target_pdb: false
+      scaffold_dir: "tim_barrel_scaffold/"
+      # This is the only scaffold in this directory, but listed explicitly for
+      # clarity.
+      scaffold_list: ["6WVS"]
+      sampled_insertion: "3-3"
+      sampled_N: "0-0"
+      sampled_C: "0-0"
+    denoiser:
+      noise_scale_ca: 0.5
+      noise_scale_frame: 0.5
+
+  # Adapted from design_macrocyclic_monomer.sh
+  macrocyclic_monomer:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["12"]
+      length: "12"
+
+  # Adapted from design_macrocyclic_binder.sh
+  macrocyclic_binder:
+    inference:
+      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
+      cyclic: true
+      cyc_chains: "a"
+    contigmap:
+      contigs: ["12 A3-117/0"]
+      length: "12"
+    ppi:
+      hotspot_res: ["A51", "A52", "A50", "A48", "A62", "A65"]
+
+large:
+  # Automatically generating longer partial diffusion configurations doesn't
+  # really work, as you have to use a larger input pdb and that introduces new
+  # constraints. So instead, these are just written by hand
+  partialdiffusion_5an7_full_0242:
+    inference:
+      input_pdb: "input_pdbs/5an7.pdb"
+    contigmap:
+      length: "242"
+      contigs: ["242"]
+    diffuser:
+      partial_T: 10
+
+  partialdiffusion_5an7_half_0242:
+    inference:
+      input_pdb: "input_pdbs/5an7.pdb"
+    contigmap:
+      length: "242"
+      # There are missing residue numbers so we use this uninterrupted range in the middle
+      contigs: ["95/A1101-1221/26"]
+    diffuser:
+      partial_T: 10
+
+  partialdiffusion_5TPN_full_0916:
+    inference:
+      input_pdb: "input_pdbs/5TPN.pdb"
+    contigmap:
+      length: "916"
+      contigs: ["490/0 212/0 214/0"]
+    diffuser:
+      partial_T: 10
+
+  partialdiffusion_5TPN_half_0916:
+    inference:
+      input_pdb: "input_pdbs/5TPN.pdb"
+    contigmap:
+      length: "916"
+      # The residue numbering starts at 27 and 106-133 are missing
+      contigs: ["79/A134-544/0 212/0 214/0"]
+    diffuser:
+      partial_T: 10
+
+  partialdiffusion_5TPN_withseq_0916:
+    inference:
+      input_pdb: "input_pdbs/5TPN.pdb"
+    contigmap:
+      length: "916"
+      contigs: ["490/0 212/0 214/0"]
+      provide_seq: ["490-915"]
+    diffuser:
+      partial_T: 10
+
+  partialdiffusion_5TPN_multipleseq_0916:
+    inference:
+      input_pdb: "input_pdbs/5TPN.pdb"
+    contigmap:
+      length: "916"
+      contigs: ["490/0 212/0 214/0"]
+      provide_seq: ["490-495", "696-701", "702-707", "910-915"]
+    diffuser:
+      partial_T: 10

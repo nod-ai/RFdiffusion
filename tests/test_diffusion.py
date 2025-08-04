@@ -1,6 +1,5 @@
 import os
 import pathlib
-import shlex
 import shutil
 
 from Bio.PDB import PDBParser, Superimposer
@@ -30,18 +29,6 @@ def reference_dir():
     d = script_dir / "reference_outputs"
     d.mkdir(parents=True, exist_ok=True)
     return d
-
-
-@pytest.fixture(scope="module")
-def symlink_inputs():
-    # Make sure we have access to all the relevant files
-    exclude_dirs = ["outputs", "example_outputs"]
-    for p in example_dir.iterdir():
-        link = script_dir / p.name
-        if p.name not in exclude_dirs and p.is_dir() and not link.is_symlink():
-            print(f"Symlinking {link} -> {p}")
-            link.symlink_to(p)
-
 
 def calc_atom_rmsd(ref_atoms, test_atoms):
     # First do this the simple way and just take the RMSD between the
@@ -98,38 +85,42 @@ def handle_test_output(test_name, reference_dir, output_dir, request):
         request.node.user_properties.append(("reference_file", str(reference_file)))
         print(f"Updated reference file {reference_file}")
     else:
-        rmsd = calc_backbone_rmsd(reference_file, test_file)
+        ref_backbone = get_backbone(reference_file)
+        test_backbone = get_backbone(test_file)
+
+        assert len(test_backbone) == len(ref_backbone)
+
+        rmsd = calc_atom_rmsd(ref_backbone, test_backbone)
         request.node.user_properties.append(("rmsd", rmsd))
         print(f"RMSD={rmsd:.3}")
 
         assert rmsd == pytest.approx(0, rel=0, abs=0.01)
 
 
-@pytest.mark.usefixtures("set_torch_device", "symlink_inputs")
-@pytest.mark.parametrize(
-    "script", sorted(example_dir.glob("*.sh")), ids=lambda x: x.stem
-)
-def test_command(script, tmp_path, reference_dir, request):
-    # The pytest docs say you need to create this directory, but empirically it
-    # is already created.
-    output_dir = tmp_path
-    command_string = parse_bash_file(script)
+def get_config_params():
+    configs = yaml.safe_load((script_dir / "configs.gen.yaml").read_text())
 
-    command_overrides = shlex.split(command_string)
+    params = []
+    for name, config in configs["small"].items():
+        params.append(pytest.param(config, id=name, marks=pytest.mark.small))
 
-    config_name = "base"
-    # This has to be the first argument if it's present, as it changes the rest
-    # of the argument parsing, and for the same reason it has to be passed to
-    # hydra.compose explicitly rather than through overrides.
-    if command_overrides[0].startswith("--config-name="):
-        config_name = command_overrides.pop(0).removeprefix("--config-name=")
+    for name, config in configs["large"].items():
+        params.append(pytest.param(config, id=name, marks=pytest.mark.large))
 
-    os.chdir(script_dir)
+    return params
+
+
+@pytest.mark.usefixtures("set_torch_device")
+@pytest.mark.parametrize("conf", get_config_params())
+def test_config(conf, tmp_path, reference_dir, request):
+    os.chdir(example_dir)
 
     with hydra.initialize(config_path="../config/inference", version_base="1.2"):
-        conf = hydra.compose(config_name=config_name, overrides=command_overrides)
+        base_conf = hydra.compose(config_name="base")
         output_dir = tmp_path
         test_name = request.node.callspec.id.replace(" ", "_").replace("/", "_")
+        # First resolve the diffuser configuration
+        conf = OmegaConf.merge(base_conf, conf)
         start_step = conf.diffuser.partial_T or conf.diffuser.T
         overrides = {
             "inference": {
@@ -137,104 +128,10 @@ def test_command(script, tmp_path, reference_dir, request):
                 "output_prefix": output_dir / test_name,
                 "deterministic": True,
                 "final_step": start_step - 2,
+                "random_seed": 1337,
             }
         }
         conf = OmegaConf.merge(conf, overrides)
-
-        run_inference(conf)
-        handle_test_output(test_name, reference_dir, output_dir, request)
-
-
-def parse_bash_file(bash_file):
-    """Parses a bash file from the examples folder and extracts the command line passed to run_inference.py."""
-    with open(bash_file, "r") as f:
-        lines = f.readlines()
-
-    script_invocation = "../scripts/run_inference.py "
-    commands = []
-    for line in lines:
-        if line.startswith("#") or not line.strip():
-            continue
-        commands.append(line.strip())
-
-    if len(commands) != 1 or not commands[0].startswith(script_invocation):
-        raise ValueError(
-            f"Expected exactly one non-empty non-comment line starting with '{script_invocation}' in {bash_file}, found:\n"
-            + "\n".join(commands)
-        )
-
-    return commands[0].removeprefix(script_invocation).strip()
-
-
-def flatten_nested_dict(d, parent_key="", sep="."):
-    """Flatten a nested dictionary using dot notation for keys."""
-    items = []
-    for k, v in d.items():
-        new_key = f"{parent_key}{sep}{k}" if parent_key else k
-        if isinstance(v, dict):
-            items.extend(flatten_nested_dict(v, new_key, sep=sep).items())
-        else:
-            items.append((new_key, v))
-    return dict(items)
-
-
-def config_id(config):
-    if name := config.pop("name", None):
-        return name
-    flattened = flatten_nested_dict(config)
-
-    if "inference.input_pdb" in flattened:
-        flattened["inference.input_pdb"] = pathlib.Path(
-            flattened["inference.input_pdb"]
-        ).stem
-
-    if "inference.ckpt_override_path" in flattened:
-        flattened["inference.ckpt_override_path"] = pathlib.Path(
-            flattened["inference.ckpt_override_path"]
-        ).stem.removesuffix("_ckpt")
-
-    # This is not an exciting property of the test
-    flattened.pop("inference.random_seed", None)
-
-    fields = []
-    for v in flattened.values():
-        if isinstance(v, list):
-            fields.append("_".join(v))
-        else:
-            fields.append(str(v))
-
-    return "_".join(fields)
-
-
-@pytest.mark.usefixtures("set_torch_device", "symlink_inputs")
-@pytest.mark.parametrize(
-    "spec",
-    yaml.safe_load((script_dir / "configs.yaml").read_text())["tests"],
-    ids=config_id,
-)
-def test_config(spec, tmp_path, reference_dir, request):
-    os.chdir(script_dir)
-
-    with hydra.initialize(config_path="../config/inference", version_base="1.2"):
-        conf = hydra.compose(config_name="base")
-        # hydra.compose has an overrides argument but it only accepts
-        # dot-notation string syntax like
-        # "configmap.contigs=[A151-180/70-70/A251-300]" for some reason. It
-        # seems annoying and error-prone to convert our already structured input
-        # into that format (even though I already wrote a flatten function to
-        # construct test ids: that is far more appropriate when a string is the
-        # end goal)
-        output_dir = tmp_path
-        test_name = request.node.callspec.id.replace(" ", "_").replace("/", "_")
-        overrides = {
-            "inference": {
-                "num_designs": 1,
-                "output_prefix": output_dir / test_name,
-                "deterministic": True,
-            }
-        }
-        conf = OmegaConf.merge(conf, spec, overrides)
-        print(f"Running test {test_name} with config:\n{OmegaConf.to_yaml(conf)}")
         run_inference(conf)
         handle_test_output(test_name, reference_dir, output_dir, request)
 
