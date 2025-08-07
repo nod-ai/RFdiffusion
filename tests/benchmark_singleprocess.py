@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
 
 import argparse
-from collections import defaultdict
 import csv
 import logging
 import os
 import pathlib
 import statistics
 import sys
-import torch
 
 import hydra
 from omegaconf import OmegaConf
-import numpy as np
-import torch.multiprocessing as mp
 import yaml
 
 from rfdiffusion.inference import utils as iu
@@ -21,25 +17,17 @@ from rfdiffusion.inference.benchmark_step import benchmark_inference_step
 
 NUM_DESIGNS = 5
 
-def get_logger(name, log_dir):
-    pid = os.getpid()
-    worker_name = f"worker.{name}.{pid}"
-    log_path = log_dir / f"{worker_name}.log"
+script_dir = pathlib.Path(__file__).parent
+example_dir = script_dir.parent / "examples"
+
+def get_logger(log_path):
     logger = logging.getLogger()
-    if logger.handlers:
-        for handler in logger.handlers:
-            logger.removeHandler(handler)
     logger.setLevel(logging.INFO)
     formatter = logging.Formatter("{asctime} {levelname}: {message}", style="{")
     file_handler = logging.FileHandler(log_path)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
     return logger
-
-
-script_dir = pathlib.Path(__file__).parent
-example_dir = script_dir.parent / "examples"
-
 
 def benchmark_config(test_conf, compile=False, compilation_mode=None):
     os.chdir(example_dir)
@@ -78,7 +66,7 @@ def benchmark_configs(configs, csv_path, logger, compile=False, compilation_mode
                 times = benchmark_config(config, compile=compile, compilation_mode=compilation_mode)
                 log_times(name, times, logger)
                 csv_writer.writerow([name] + times)
-                csv_writer.flush()
+                csv_file.flush()
                 times_by_conf[name] = times
 
             except Exception as e:
@@ -89,33 +77,12 @@ def benchmark_configs(configs, csv_path, logger, compile=False, compilation_mode
     return times_by_conf, failures
 
 
-def benchmark_configs_by_rank(rank, ranks_to_configs, job_dir, q, compile=False, compilation_mode=None):
-    log_dir = job_dir / "logs"
-    logger = get_logger(rank, log_dir)
-    configs = ranks_to_configs[rank]
-    logger.info(f"Processing {len(configs)} configs")
-    if torch.cuda.is_available():
-        torch.cuda.set_device(rank)
-        current_device = torch.cuda.current_device()
-        device_name = torch.cuda.get_device_name(current_device)
-        logger.info(f"Using GPU {current_device} with device_name {device_name}.")
-    else:
-        raise RuntimeError("NO GPU DETECTED!")
-
-    result_dir = job_dir / "results"
-    result_dir.mkdir(exist_ok=True)
-    csv_path = job_dir / "results" / f"rank{rank}.csv"
-    times_by_conf, failures = benchmark_configs(configs, csv_path, logger, compile=compile, compilation_mode=compilation_mode)
-    q.put((times_by_conf, failures, csv_path))
-
-
-def main(world_size, job_name, output_dir, compile=False, compilation_mode=None):
+def main(job_name, output_dir, compile=False, compilation_mode=None):
     job_dir = output_dir / job_name
     job_dir.mkdir(parents=True)
     csv_path = job_dir / "results.csv"
-    log_dir = job_dir / "logs"
-    log_dir.mkdir(parents=True, exist_ok=True)
-    logger = get_logger("main", log_dir)
+    log_path = job_dir / "output.log"
+    logger = get_logger(log_path)
 
     times_by_conf = {}
     if csv_path.exists():
@@ -133,51 +100,7 @@ def main(world_size, job_name, output_dir, compile=False, compilation_mode=None)
     for name in times_by_conf.keys():
         configs.pop(name, None)
 
-    configs_by_type = defaultdict(dict)
-    for name, config in configs.items():
-        design_type, _, length = name.rpartition("_")
-        if len(length) != 4:
-            raise ValueError(f"Expected length to have 4 digits but got {len(length)}: '{length}'")
-
-        # check it parses as an int also
-        length = int(length.lstrip("0"))
-
-        configs_by_type[design_type][name] = config
-
-    ranks_to_configs = defaultdict(dict)
-    for i, (design_type, configs) in enumerate(configs_by_type.items()):
-        rank = i % world_size
-        logger.info(f"Assigning {len(configs)} {design_type} configs to rank {rank}")
-        ranks_to_configs[i % world_size].update(configs)
-
-    q = mp.Queue()
-    mp.spawn(
-        benchmark_configs_by_rank,
-        args=(ranks_to_configs, job_dir, q, compile, compilation_mode),
-        nprocs=world_size,
-        join=True,
-    )
-
-    failures = []
-    csv_paths = []
-    while not q.empty():
-        times_by_conf_rank, failures_rank, csv_path_rank = q.get()
-        times_by_conf.update(times_by_conf_rank)
-        failures.extend(failures_rank)
-        csv_paths.append(csv_path_rank)
-
-    for name, times in times_by_conf.items():
-        log_times(name, times, logger)
-
-    with open(csv_path, mode="w", newline="") as csv_file:
-        csv_writer = csv.writer(csv_file, dialect="unix")
-        for csv_path_rank in csv_paths:
-            with open(csv_path_rank, newline="") as csv_file_rank:
-                reader = csv.reader(csv_file_rank, dialect="unix")
-                for row in reader:
-                    csv_writer.writerow(row)
-
-    print(f"Results saved to {csv_path}")
+    times_by_conf, failures = benchmark_configs(configs, csv_path, logger, compile=compile, compilation_mode=compilation_mode)
 
     if failures:
         logger.error(f"{len(failures)} benchmarks failed: {failures}", file=sys.stderr)
@@ -188,7 +111,6 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("job_name")
     parser.add_argument("--output_dir", default="outputs")
-    parser.add_argument("--world_size", default=1, type=int)
     parser.add_argument("--compile", action="store_true")
     parser.add_argument("--compilation_mode")
     args = parser.parse_args()
@@ -202,5 +124,4 @@ def parse_args():
 
 
 if __name__ == "__main__":
-    mp.set_start_method('spawn')
     main(**vars(parse_args()))
