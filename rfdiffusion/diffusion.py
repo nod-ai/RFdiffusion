@@ -16,6 +16,7 @@ import time
 
 torch.set_printoptions(sci_mode=False)
 
+logger = logging.getLogger(__name__)
 
 def get_beta_schedule(T, b0, bT, schedule_type, schedule_params={}, inference=False):
     """
@@ -41,8 +42,9 @@ def get_beta_schedule(T, b0, bT, schedule_type, schedule_params={}, inference=Fa
     alphabar_t_schedule = torch.cumprod(alpha_schedule, dim=0)
 
     if inference:
-        print(
-            f"With this beta schedule ({schedule_type} schedule, beta_0 = {round(b0, 3)}, beta_T = {round(bT,3)}), alpha_bar_T = {alphabar_t_schedule[-1]}"
+        logger.info(
+            f"With this beta schedule ({schedule_type} schedule, beta_0 = {round(b0, 3)},"
+            f" beta_T = {round(bT,3)}), alpha_bar_T = {alphabar_t_schedule[-1]}"
         )
 
     return schedule, alpha_schedule, alphabar_t_schedule
@@ -569,6 +571,7 @@ class Diffuser:
             b_T (float, required): Ending variance for Euclidean schedule
 
         """
+        self._log = logging.getLogger(__name__)
         self.T = T
         self.b_0 = b_0
         self.b_T = b_T
@@ -595,7 +598,7 @@ class Diffuser:
             self.T, b_0, b_T, schedule_type=schedule_type, **schedule_kwargs
         )
 
-        print("Successful diffuser __init__")
+        self._log.debug("Successful diffuser __init__")
 
     def diffuse_pose(
         self,
