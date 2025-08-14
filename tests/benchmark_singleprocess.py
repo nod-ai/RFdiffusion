@@ -77,28 +77,36 @@ def benchmark_configs(configs, csv_path, logger, compile=False, compilation_mode
     return times_by_conf, failures
 
 
-def main(job_name, output_dir, compile=False, compilation_mode=None):
+def main(job_name, output_dir, compile=False, compilation_mode=None, resume=False):
     job_dir = output_dir / job_name
-    job_dir.mkdir(parents=True)
+    job_dir.mkdir(parents=True, exist_ok=resume)
     csv_path = job_dir / "results.csv"
     log_path = job_dir / "output.log"
     logger = get_logger(log_path)
 
-    times_by_conf = {}
-    if csv_path.exists():
-        with open(csv_path, newline="") as csv_file:
-            reader = csv.DictReader(
-                csv_file, dialect="unix", fieldnames=["name"], restkey="times"
-            )
-            for row in reader:
-                times_by_conf[row["name"]] = [float(t) for t in row["times"]]
-
     test_configs = yaml.safe_load((script_dir / "configs.gen.yaml").read_text())
-
     configs = dict(**test_configs["small"], **test_configs["large"])
 
-    for name in times_by_conf.keys():
-        configs.pop(name, None)
+    times_by_conf = {}
+    if resume:
+        logger.info("Resuming previous job")
+        if csv_path.exists():
+            logger.info(f"Reading existing results from {csv_path}")
+            with open(csv_path, newline="") as csv_file:
+                reader = csv.DictReader(
+                    csv_file, dialect="unix", fieldnames=["name"], restkey="times"
+                )
+                for row in reader:
+                    times_by_conf[row["name"]] = [float(t) for t in row["times"]]
+            logger.info(f"Found {len(times_by_conf)} existing results")
+
+            for name in times_by_conf.keys():
+                if configs.pop(name, None):
+                    logger.info(f"Skipping config {name} with existing results")
+                else:
+                    logger.warning(f"Found existing result for {name} which is not in configs")
+        else:
+            logger.warning(f"Found no existing results csv at {csv_path}")
 
     times_by_conf, failures = benchmark_configs(configs, csv_path, logger, compile=compile, compilation_mode=compilation_mode)
 
@@ -111,6 +119,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("job_name")
     parser.add_argument("--output_dir", default="outputs")
+    parser.add_argument("--resume", action="store_true")
     parser.add_argument("--compile", action="store_true")
     parser.add_argument("--compilation_mode")
     args = parser.parse_args()
