@@ -15,8 +15,10 @@ from datetime import datetime
 import pathlib
 
 
-INFO_LOG_REGEX = r"\s*(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) INFO:"
-
+INFO_LOG_PATTERN = r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) INFO:"
+INFO_LOG_REGEX = re.compile(INFO_LOG_PATTERN)
+LENGTH_LOG_REGEX = re.compile(INFO_LOG_PATTERN + r" Sampled contig .* with length (\d+)")
+COMPLETE_LOG_REGEX = re.compile(INFO_LOG_PATTERN + r" Finished design in (\d+) seconds")
 
 def parse_timestamp(timestamp_str: str) -> datetime:
     """Parse timestamp from log line format: 2025-08-13 17:44:38,802"""
@@ -32,15 +34,25 @@ def extract_completion_times(log_file) -> list[dict[str, datetime|int]]:
     completions = []
 
     with open(log_file, "r") as f:
+        length = None
         for line in f:
-            match = re.search(
-                rf"{INFO_LOG_REGEX} Finished design in (\d+) seconds", line
-            )
-            if match:
-                timestamp_str = match.group(1)
-                design_time = int(match.group(2))
+            line = line.strip()
+            match_length = LENGTH_LOG_REGEX.match(line)
+            if match_length:
+                if length is not None:
+                    print(f"ERROR: {log_file}: Expected length to be unset when parsing sampled contig line, but got '{length}' at line: {line}")
+                    sys.exit(1)
+                length = int(match_length.group(2))
+
+            match_complete = COMPLETE_LOG_REGEX.match(line)
+            if match_complete:
+                if length is None:
+                    print(f"ERROR: {log_file}: Expected length to be set when parsing design completion, but got None at line: {line}")
+                timestamp_str = match_complete.group(1)
+                design_time = int(match_complete.group(2))
                 timestamp = parse_timestamp(timestamp_str)
-                completions.append({"timestamp": timestamp, "design_time": design_time})
+                completions.append({"timestamp": timestamp, "design_time": design_time, "length": length})
+                length = None
 
     return completions
 
@@ -54,8 +66,8 @@ def find_start_time(log_dir) -> datetime:
     root_log = root_logs[0]
 
     with open(root_log) as f:
-        first_line = f.readline()
-        match = re.search(INFO_LOG_REGEX, first_line)
+        first_line = f.readline().strip()
+        match = INFO_LOG_REGEX.search(first_line)
         if not match:
             print(
                 f"ERROR: did not find timestamp in first line of root log {root_log}: {first_line}"
