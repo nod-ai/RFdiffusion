@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# Copyright (c) 2021, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -18,7 +18,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 #
-# SPDX-FileCopyrightText: Copyright (c) 2021-2022 NVIDIA CORPORATION & AFFILIATES
+# SPDX-FileCopyrightText: Copyright (c) 2021 NVIDIA CORPORATION & AFFILIATES
 # SPDX-License-Identifier: MIT
 
 import logging
@@ -82,7 +82,7 @@ def load_state(model: nn.Module, optimizer: Optimizer, path: pathlib.Path, callb
 
 
 def train_epoch(model, train_dataloader, loss_fn, epoch_idx, grad_scaler, optimizer, local_rank, callbacks, args):
-    loss_acc = torch.zeros((1,), device='cuda')
+    losses = []
     for i, batch in tqdm(enumerate(train_dataloader), total=len(train_dataloader), unit='batch',
                          desc=f'Epoch {epoch_idx}', disable=(args.silent or local_rank != 0)):
         *inputs, target = to_cuda(batch)
@@ -94,7 +94,6 @@ def train_epoch(model, train_dataloader, loss_fn, epoch_idx, grad_scaler, optimi
             pred = model(*inputs)
             loss = loss_fn(pred, target) / args.accumulate_grad_batches
 
-        loss_acc += loss.detach()
         grad_scaler.scale(loss).backward()
 
         # gradient accumulation
@@ -105,9 +104,11 @@ def train_epoch(model, train_dataloader, loss_fn, epoch_idx, grad_scaler, optimi
 
             grad_scaler.step(optimizer)
             grad_scaler.update()
-            model.zero_grad(set_to_none=True)
+            optimizer.zero_grad()
 
-    return loss_acc / (i + 1)
+        losses.append(loss.item())
+
+    return np.mean(losses)
 
 
 def train(model: nn.Module,
@@ -124,7 +125,6 @@ def train(model: nn.Module,
 
     if dist.is_initialized():
         model = DistributedDataParallel(model, device_ids=[local_rank], output_device=local_rank)
-        model._set_static_graph()
 
     model.train()
     grad_scaler = torch.amp.GradScaler('cuda', enabled=args.amp)
@@ -141,24 +141,20 @@ def train(model: nn.Module,
     epoch_start = load_state(model, optimizer, args.load_ckpt_path, callbacks) if args.load_ckpt_path else 0
 
     for callback in callbacks:
-        callback.on_fit_start(optimizer, args, epoch_start)
+        callback.on_fit_start(optimizer, args)
 
     for epoch_idx in range(epoch_start, args.epochs):
         if isinstance(train_dataloader.sampler, DistributedSampler):
             train_dataloader.sampler.set_epoch(epoch_idx)
 
-        loss = train_epoch(model, train_dataloader, loss_fn, epoch_idx, grad_scaler, optimizer, local_rank, callbacks,
-                           args)
+        loss = train_epoch(model, train_dataloader, loss_fn, epoch_idx, grad_scaler, optimizer, local_rank, callbacks, args)
         if dist.is_initialized():
+            loss = torch.tensor(loss, dtype=torch.float, device=device)
             torch.distributed.all_reduce(loss)
-            loss /= world_size
+            loss = (loss / world_size).item()
 
-        loss = loss.item()
         logging.info(f'Train loss: {loss}')
         logger.log_metrics({'train loss': loss}, epoch_idx)
-
-        if epoch_idx + 1 == args.epochs:
-            logger.log_metrics({'train loss': loss})
 
         for callback in callbacks:
             callback.on_epoch_end()
@@ -167,8 +163,7 @@ def train(model: nn.Module,
                 and (epoch_idx + 1) % args.ckpt_interval == 0:
             save_state(model, optimizer, epoch_idx, args.save_ckpt_path, callbacks)
 
-        if not args.benchmark and (
-                (args.eval_interval > 0 and (epoch_idx + 1) % args.eval_interval == 0) or epoch_idx + 1 == args.epochs):
+        if not args.benchmark and args.eval_interval > 0 and (epoch_idx + 1) % args.eval_interval == 0:
             evaluate(model, val_dataloader, callbacks, args)
             model.train()
 
@@ -202,10 +197,10 @@ if __name__ == '__main__':
         logging.info(f'Using seed {args.seed}')
         seed_everything(args.seed)
 
-    loggers = [DLLogger(save_dir=args.log_dir, filename=args.dllogger_name)]
-    if args.wandb:
-        loggers.append(WandbLogger(name=f'QM9({args.task})', save_dir=args.log_dir, project='se3-transformer'))
-    logger = LoggerCollection(loggers)
+    logger = LoggerCollection([
+        DLLogger(save_dir=args.log_dir, filename=args.dllogger_name),
+        WandbLogger(name=f'QM9({args.task})', save_dir=args.log_dir, project='se3-transformer')
+    ])
 
     datamodule = QM9DataModule(**vars(args))
     model = SE3TransformerPooled(
@@ -221,17 +216,14 @@ if __name__ == '__main__':
     if args.benchmark:
         logging.info('Running benchmark mode')
         world_size = dist.get_world_size() if dist.is_initialized() else 1
-        callbacks = [PerformanceCallback(
-            logger, args.batch_size * world_size, warmup_epochs=1 if args.epochs > 1 else 0
-        )]
+        callbacks = [PerformanceCallback(logger, args.batch_size * world_size)]
     else:
         callbacks = [QM9MetricCallback(logger, targets_std=datamodule.targets_std, prefix='validation'),
                      QM9LRSchedulerCallback(logger, epochs=args.epochs)]
 
     if is_distributed:
-        gpu_affinity.set_affinity(gpu_id=get_local_rank(), nproc_per_node=torch.cuda.device_count(), scope='socket')
+        gpu_affinity.set_affinity(gpu_id=get_local_rank(), nproc_per_node=torch.cuda.device_count())
 
-    torch.set_float32_matmul_precision('high')
     print_parameters_count(model)
     logger.log_hyperparams(vars(args))
     increase_l2_fetch_granularity()

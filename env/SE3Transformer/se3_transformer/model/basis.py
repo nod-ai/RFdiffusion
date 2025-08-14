@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# Copyright (c) 2021, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -18,7 +18,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 #
-# SPDX-FileCopyrightText: Copyright (c) 2021-2022 NVIDIA CORPORATION & AFFILIATES
+# SPDX-FileCopyrightText: Copyright (c) 2021 NVIDIA CORPORATION & AFFILIATES
 # SPDX-License-Identifier: MIT
 
 
@@ -32,9 +32,6 @@ from torch import Tensor
 from se3_transformer.model.profiling import maybe_nvtx_range
 
 from se3_transformer.runtime.utils import degree_to_dim
-
-torch._C._jit_set_profiling_executor(False)
-torch._C._jit_set_profiling_mode(False)
 
 
 @lru_cache(maxsize=None)
@@ -57,8 +54,9 @@ def get_all_clebsch_gordon(max_degree: int, device) -> List[List[Tensor]]:
 
 def get_spherical_harmonics(relative_pos: Tensor, max_degree: int) -> List[Tensor]:
     all_degrees = list(range(2 * max_degree + 1))
-    sh = o3.spherical_harmonics(all_degrees, relative_pos, normalize=True)
-    return torch.split(sh, [degree_to_dim(d) for d in all_degrees], dim=1)
+    with maybe_nvtx_range('spherical harmonics'):
+        sh = o3.spherical_harmonics(all_degrees, relative_pos, normalize=True)
+        return torch.split(sh, [degree_to_dim(d) for d in all_degrees], dim=1)
 
 
 @torch.jit.script
