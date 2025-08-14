@@ -21,10 +21,12 @@ import time
 
 import hydra
 from hydra.core.hydra_config import HydraConfig
+import torch
 import torch.multiprocessing as mp
 
 from rfdiffusion.inference.run import run_inference
 
+LOG_FORMATTER = logging.Formatter("{asctime} {levelname}: {message}", style="{")
 
 def get_logger(name, log_dir):
     pid = os.getpid()
@@ -35,9 +37,8 @@ def get_logger(name, log_dir):
         for handler in logger.handlers:
             logger.removeHandler(handler)
     logger.setLevel(logging.INFO)
-    formatter = logging.Formatter("{asctime} {levelname}: {message}", style="{")
     file_handler = logging.FileHandler(log_path)
-    file_handler.setFormatter(formatter)
+    file_handler.setFormatter(LOG_FORMATTER)
     logger.addHandler(file_handler)
     return logger
 
@@ -45,8 +46,16 @@ def run_worker(rank: int, world_size: int, conf: HydraConfig, output_dir):
     output_dir =  output_dir / str(rank)
     output_dir.mkdir(parents=True)
     logger = get_logger(rank, output_dir)
-    num_designs = conf.inference.num_designs
 
+    if torch.cuda.is_available():
+        torch.cuda.set_device(rank)
+        current_device = torch.cuda.current_device()
+        device_name = torch.cuda.get_device_name(current_device)
+        logger.info(f"Using GPU {current_device} with device_name {device_name}.")
+    else:
+        raise RuntimeError("NO GPU DETECTED!")
+
+    num_designs = conf.inference.num_designs
     designs_per_worker = num_designs // world_size
     extra_designs = num_designs % world_size
 
@@ -81,10 +90,21 @@ def run_worker(rank: int, world_size: int, conf: HydraConfig, output_dir):
 
 @hydra.main(version_base=None, config_path="../config/inference", config_name="base")
 def main(conf: HydraConfig):
+    logger = logging.getLogger()
+    if logger.handlers:
+        for handler in logger.handlers:
+            handler.setFormatter(LOG_FORMATTER)
+    logger.info("Beginning distributed inference run")
+
+
+    start = time.perf_counter()
     # TODO: figure out how to pass world size and just generally make hydra play nicely with multiprocessing
     world_size = 8
     output_dir = pathlib.Path(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir)
+    logger.info(f"Will save to {output_dir}")
     mp.spawn(run_worker, args=(world_size, conf, output_dir), nprocs=world_size, join=True)
+    elapsed = time.perf_counter() - start
+    logger.info(f"Whole job took {elapsed:.0f} seconds to create {conf.inference.num_designs} designs")
 
 
 if __name__ == "__main__":
