@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from opt_einsum import contract as einsum
 import torch.utils.checkpoint as checkpoint
 from rfdiffusion.util import get_tips
 from rfdiffusion.util_module import Dropout, create_custom_forward, rbf, init_lecun_normal, find_breaks
