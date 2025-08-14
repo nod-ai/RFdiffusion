@@ -24,8 +24,6 @@ inference:
   model_directory_path: null
   cyclic: False
   cyc_chains: 'a'
-  compile: False
-  compilation_mode: null
   device: "auto"
 
 contigmap:
