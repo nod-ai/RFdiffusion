@@ -12,28 +12,28 @@ from rfdiffusion.SE3_network import SE3TransformerWrapper
 # Update MSA with biased self-attention. bias from Pair & Str
 class MSAPairStr2MSA(nn.Module):
     def __init__(self, d_msa=256, d_pair=128, n_head=8, d_state=16,
-                 d_hidden=32, p_drop=0.15, use_global_attn=False, device=None):
+                 d_hidden=32, p_drop=0.15, use_global_attn=False):
         super(MSAPairStr2MSA, self).__init__()
-        self.norm_pair = nn.LayerNorm(d_pair, device=device)
-        self.proj_pair = nn.Linear(d_pair+36, d_pair, device=device)
-        self.norm_state = nn.LayerNorm(d_state, device=device)
-        self.proj_state = nn.Linear(d_state, d_msa, device=device)
-        self.drop_row = Dropout(broadcast_dim=1, p_drop=p_drop, device=device)
+        self.norm_pair = nn.LayerNorm(d_pair)
+        self.proj_pair = nn.Linear(d_pair+36, d_pair)
+        self.norm_state = nn.LayerNorm(d_state)
+        self.proj_state = nn.Linear(d_state, d_msa)
+        self.drop_row = Dropout(broadcast_dim=1, p_drop=p_drop)
         self.row_attn = MSARowAttentionWithBias(d_msa=d_msa, d_pair=d_pair,
-                                                n_head=n_head, d_hidden=d_hidden, device=device)
+                                                n_head=n_head, d_hidden=d_hidden)
         if use_global_attn:
-            self.col_attn = MSAColGlobalAttention(d_msa=d_msa, n_head=n_head, d_hidden=d_hidden, device=device)
+            self.col_attn = MSAColGlobalAttention(d_msa=d_msa, n_head=n_head, d_hidden=d_hidden)
         else:
-            self.col_attn = MSAColAttention(d_msa=d_msa, n_head=n_head, d_hidden=d_hidden, device=device)
-        self.ff = FeedForwardLayer(d_msa, 4, p_drop=p_drop, device=device)
+            self.col_attn = MSAColAttention(d_msa=d_msa, n_head=n_head, d_hidden=d_hidden)
+        self.ff = FeedForwardLayer(d_msa, 4, p_drop=p_drop)
 
         # Do proper initialization
-        self.reset_parameter(device)
+        self.reset_parameter()
 
-    def reset_parameter(self, device=None):
+    def reset_parameter(self):
         # initialize weights to normal distrib
-        self.proj_pair = init_lecun_normal(self.proj_pair, device=device)
-        self.proj_state = init_lecun_normal(self.proj_state, device=device)
+        self.proj_pair = init_lecun_normal(self.proj_pair)
+        self.proj_state = init_lecun_normal(self.proj_state)
 
         # initialize bias to zeros
         nn.init.zeros_(self.proj_pair.bias)
@@ -70,27 +70,27 @@ class MSAPairStr2MSA(nn.Module):
         return msa
 
 class PairStr2Pair(nn.Module):
-    def __init__(self, d_pair=128, n_head=4, d_hidden=32, d_rbf=36, p_drop=0.15, device=None):
+    def __init__(self, d_pair=128, n_head=4, d_hidden=32, d_rbf=36, p_drop=0.15):
         super(PairStr2Pair, self).__init__()
 
-        self.emb_rbf = nn.Linear(d_rbf, d_hidden, device=device)
-        self.proj_rbf = nn.Linear(d_hidden, d_pair, device=device)
+        self.emb_rbf = nn.Linear(d_rbf, d_hidden)
+        self.proj_rbf = nn.Linear(d_hidden, d_pair)
 
-        self.drop_row = Dropout(broadcast_dim=1, p_drop=p_drop, device=device)
-        self.drop_col = Dropout(broadcast_dim=2, p_drop=p_drop, device=device)
+        self.drop_row = Dropout(broadcast_dim=1, p_drop=p_drop)
+        self.drop_col = Dropout(broadcast_dim=2, p_drop=p_drop)
 
-        self.row_attn = BiasedAxialAttention(d_pair, d_pair, n_head, d_hidden, p_drop=p_drop, is_row=True, device=device)
-        self.col_attn = BiasedAxialAttention(d_pair, d_pair, n_head, d_hidden, p_drop=p_drop, is_row=False, device=device)
+        self.row_attn = BiasedAxialAttention(d_pair, d_pair, n_head, d_hidden, p_drop=p_drop, is_row=True)
+        self.col_attn = BiasedAxialAttention(d_pair, d_pair, n_head, d_hidden, p_drop=p_drop, is_row=False)
 
-        self.ff = FeedForwardLayer(d_pair, 2, device=device)
+        self.ff = FeedForwardLayer(d_pair, 2)
 
-        self.reset_parameter(device)
+        self.reset_parameter()
 
-    def reset_parameter(self, device=None):
+    def reset_parameter(self):
         nn.init.kaiming_normal_(self.emb_rbf.weight, nonlinearity='relu')
         nn.init.zeros_(self.emb_rbf.bias)
 
-        self.proj_rbf = init_lecun_normal(self.proj_rbf, device=device)
+        self.proj_rbf = init_lecun_normal(self.proj_rbf)
         nn.init.zeros_(self.proj_rbf.bias)
 
     def forward(self, pair, rbf_feat):
@@ -104,19 +104,19 @@ class PairStr2Pair(nn.Module):
         return pair
 
 class MSA2Pair(nn.Module):
-    def __init__(self, d_msa=256, d_pair=128, d_hidden=32, p_drop=0.15, device=None):
+    def __init__(self, d_msa=256, d_pair=128, d_hidden=32, p_drop=0.15):
         super(MSA2Pair, self).__init__()
-        self.norm = nn.LayerNorm(d_msa, device=device)
-        self.proj_left = nn.Linear(d_msa, d_hidden, device=device)
-        self.proj_right = nn.Linear(d_msa, d_hidden, device=device)
-        self.proj_out = nn.Linear(d_hidden*d_hidden, d_pair, device=device)
+        self.norm = nn.LayerNorm(d_msa)
+        self.proj_left = nn.Linear(d_msa, d_hidden)
+        self.proj_right = nn.Linear(d_msa, d_hidden)
+        self.proj_out = nn.Linear(d_hidden*d_hidden, d_pair)
 
-        self.reset_parameter(device)
+        self.reset_parameter()
 
-    def reset_parameter(self, device=None):
+    def reset_parameter(self):
         # normal initialization
-        self.proj_left = init_lecun_normal(self.proj_left, device=device)
-        self.proj_right = init_lecun_normal(self.proj_right, device=device)
+        self.proj_left = init_lecun_normal(self.proj_left)
+        self.proj_right = init_lecun_normal(self.proj_right)
         nn.init.zeros_(self.proj_left.bias)
         nn.init.zeros_(self.proj_right.bias)
 
@@ -138,29 +138,29 @@ class MSA2Pair(nn.Module):
         return pair
 
 class SCPred(nn.Module):
-    def __init__(self, d_msa=256, d_state=32, d_hidden=128, p_drop=0.15, device=None):
+    def __init__(self, d_msa=256, d_state=32, d_hidden=128, p_drop=0.15):
         super(SCPred, self).__init__()
-        self.norm_s0 = nn.LayerNorm(d_msa, device=device)
-        self.norm_si = nn.LayerNorm(d_state, device=device)
-        self.linear_s0 = nn.Linear(d_msa, d_hidden, device=device)
-        self.linear_si = nn.Linear(d_state, d_hidden, device=device)
+        self.norm_s0 = nn.LayerNorm(d_msa)
+        self.norm_si = nn.LayerNorm(d_state)
+        self.linear_s0 = nn.Linear(d_msa, d_hidden)
+        self.linear_si = nn.Linear(d_state, d_hidden)
 
         # ResNet layers
-        self.linear_1 = nn.Linear(d_hidden, d_hidden, device=device)
-        self.linear_2 = nn.Linear(d_hidden, d_hidden, device=device)
-        self.linear_3 = nn.Linear(d_hidden, d_hidden, device=device)
-        self.linear_4 = nn.Linear(d_hidden, d_hidden, device=device)
+        self.linear_1 = nn.Linear(d_hidden, d_hidden)
+        self.linear_2 = nn.Linear(d_hidden, d_hidden)
+        self.linear_3 = nn.Linear(d_hidden, d_hidden)
+        self.linear_4 = nn.Linear(d_hidden, d_hidden)
 
         # Final outputs
-        self.linear_out = nn.Linear(d_hidden, 20, device=device)
+        self.linear_out = nn.Linear(d_hidden, 20)
 
-        self.reset_parameter(device)
+        self.reset_parameter()
 
-    def reset_parameter(self, device=None):
+    def reset_parameter(self):
         # normal initialization
-        self.linear_s0 = init_lecun_normal(self.linear_s0, device=device)
-        self.linear_si = init_lecun_normal(self.linear_si, device=device)
-        self.linear_out = init_lecun_normal(self.linear_out, device=device)
+        self.linear_s0 = init_lecun_normal(self.linear_s0)
+        self.linear_si = init_lecun_normal(self.linear_si)
+        self.linear_out = init_lecun_normal(self.linear_out)
         nn.init.zeros_(self.linear_s0.bias)
         nn.init.zeros_(self.linear_si.bias)
         nn.init.zeros_(self.linear_out.bias)
@@ -200,33 +200,33 @@ class SCPred(nn.Module):
 
 class Str2Str(nn.Module):
     def __init__(self, d_msa=256, d_pair=128, d_state=16,
-            SE3_param={'l0_in_features':32, 'l0_out_features':16, 'num_edge_features':32}, p_drop=0.1, device=None):
+            SE3_param={'l0_in_features':32, 'l0_out_features':16, 'num_edge_features':32}, p_drop=0.1):
         super(Str2Str, self).__init__()
 
         # initial node & pair feature process
-        self.norm_msa = nn.LayerNorm(d_msa, device=device)
-        self.norm_pair = nn.LayerNorm(d_pair, device=device)
-        self.norm_state = nn.LayerNorm(d_state, device=device)
+        self.norm_msa = nn.LayerNorm(d_msa)
+        self.norm_pair = nn.LayerNorm(d_pair)
+        self.norm_state = nn.LayerNorm(d_state)
 
-        self.embed_x = nn.Linear(d_msa+d_state, SE3_param['l0_in_features'], device=device)
-        self.embed_e1 = nn.Linear(d_pair, SE3_param['num_edge_features'], device=device)
-        self.embed_e2 = nn.Linear(SE3_param['num_edge_features']+36+1, SE3_param['num_edge_features'], device=device)
+        self.embed_x = nn.Linear(d_msa+d_state, SE3_param['l0_in_features'])
+        self.embed_e1 = nn.Linear(d_pair, SE3_param['num_edge_features'])
+        self.embed_e2 = nn.Linear(SE3_param['num_edge_features']+36+1, SE3_param['num_edge_features'])
 
-        self.norm_node = nn.LayerNorm(SE3_param['l0_in_features'], device=device)
-        self.norm_edge1 = nn.LayerNorm(SE3_param['num_edge_features'], device=device)
-        self.norm_edge2 = nn.LayerNorm(SE3_param['num_edge_features'], device=device)
+        self.norm_node = nn.LayerNorm(SE3_param['l0_in_features'])
+        self.norm_edge1 = nn.LayerNorm(SE3_param['num_edge_features'])
+        self.norm_edge2 = nn.LayerNorm(SE3_param['num_edge_features'])
 
-        self.se3 = SE3TransformerWrapper(**SE3_param, device=device)
+        self.se3 = SE3TransformerWrapper(**SE3_param)
         self.sc_predictor = SCPred(d_msa=d_msa, d_state=SE3_param['l0_out_features'],
-                                   p_drop=p_drop, device=device)
+                                   p_drop=p_drop)
 
-        self.reset_parameter(device)
+        self.reset_parameter()
 
-    def reset_parameter(self, device=None):
+    def reset_parameter(self):
         # initialize weights to normal distribution
-        self.embed_x = init_lecun_normal(self.embed_x, device=device)
-        self.embed_e1 = init_lecun_normal(self.embed_e1, device=device)
-        self.embed_e2 = init_lecun_normal(self.embed_e2, device=device)
+        self.embed_x = init_lecun_normal(self.embed_x)
+        self.embed_e1 = init_lecun_normal(self.embed_e1)
+        self.embed_e2 = init_lecun_normal(self.embed_e2)
 
         # initialize bias to zeros
         nn.init.zeros_(self.embed_x.bias)
@@ -298,8 +298,7 @@ class IterBlock(nn.Module):
                  n_head_msa=8, n_head_pair=4,
                  use_global_attn=False,
                  d_hidden=32, d_hidden_msa=None, p_drop=0.15,
-                 SE3_param={'l0_in_features':32, 'l0_out_features':16, 'num_edge_features':32},
-                 device=None):
+                 SE3_param={'l0_in_features':32, 'l0_out_features':16, 'num_edge_features':32}):
         super(IterBlock, self).__init__()
         if d_hidden_msa == None:
             d_hidden_msa = d_hidden
@@ -308,20 +307,16 @@ class IterBlock(nn.Module):
                                       n_head=n_head_msa,
                                       d_state=SE3_param['l0_out_features'],
                                       use_global_attn=use_global_attn,
-                                      d_hidden=d_hidden_msa, p_drop=p_drop,
-                                      device=device)
+                                      d_hidden=d_hidden_msa, p_drop=p_drop)
         self.msa2pair = MSA2Pair(d_msa=d_msa, d_pair=d_pair,
-                                 d_hidden=d_hidden//2, p_drop=p_drop,
-                                 device=device)
+                                 d_hidden=d_hidden//2, p_drop=p_drop)
                                  #d_hidden=d_hidden, p_drop=p_drop)
         self.pair2pair = PairStr2Pair(d_pair=d_pair, n_head=n_head_pair,
-                                      d_hidden=d_hidden, p_drop=p_drop,
-                                      device=device)
+                                      d_hidden=d_hidden, p_drop=p_drop)
         self.str2str = Str2Str(d_msa=d_msa, d_pair=d_pair,
                                d_state=SE3_param['l0_out_features'],
                                SE3_param=SE3_param,
-                               p_drop=p_drop,
-                               device=device)
+                               p_drop=p_drop)
 
     def forward(self, msa, pair, R_in, T_in, xyz, state, idx, motif_mask, use_checkpoint=False, cyclic_reses=None):
         rbf_feat = rbf(torch.cdist(xyz[:,:,1,:], xyz[:,:,1,:]))
@@ -344,13 +339,13 @@ class IterativeSimulator(nn.Module):
                  n_head_msa=8, n_head_pair=4,
                  SE3_param_full={'l0_in_features':32, 'l0_out_features':16, 'num_edge_features':32},
                  SE3_param_topk={'l0_in_features':32, 'l0_out_features':16, 'num_edge_features':32},
-                 p_drop=0.15, device=None):
+                 p_drop=0.15):
         super(IterativeSimulator, self).__init__()
         self.n_extra_block = n_extra_block
         self.n_main_block = n_main_block
         self.n_ref_block = n_ref_block
 
-        self.proj_state = nn.Linear(SE3_param_topk['l0_out_features'], SE3_param_full['l0_out_features'], device=device)
+        self.proj_state = nn.Linear(SE3_param_topk['l0_out_features'], SE3_param_full['l0_out_features'])
         # Update with extra sequences
         if n_extra_block > 0:
             self.extra_block = nn.ModuleList([IterBlock(d_msa=d_msa_full, d_pair=d_pair,
@@ -360,7 +355,7 @@ class IterativeSimulator(nn.Module):
                                                         d_hidden=d_hidden,
                                                         p_drop=p_drop,
                                                         use_global_attn=True,
-                                                        SE3_param=SE3_param_full, device=device)
+                                                        SE3_param=SE3_param_full)
                                                         for i in range(n_extra_block)])
 
         # Update with seed sequences
@@ -371,23 +366,22 @@ class IterativeSimulator(nn.Module):
                                                        d_hidden=d_hidden,
                                                        p_drop=p_drop,
                                                        use_global_attn=False,
-                                                       SE3_param=SE3_param_full, device=device)
+                                                       SE3_param=SE3_param_full)
                                                        for i in range(n_main_block)])
 
-        self.proj_state2 = nn.Linear(SE3_param_full['l0_out_features'], SE3_param_topk['l0_out_features'], device=device)
+        self.proj_state2 = nn.Linear(SE3_param_full['l0_out_features'], SE3_param_topk['l0_out_features'])
         # Final SE(3) refinement
         if n_ref_block > 0:
             self.str_refiner = Str2Str(d_msa=d_msa, d_pair=d_pair,
                                        d_state=SE3_param_topk['l0_out_features'],
                                        SE3_param=SE3_param_topk,
-                                       p_drop=p_drop, device=device)
+                                       p_drop=p_drop)
 
-        self.reset_parameter(device)
-
-    def reset_parameter(self, device=None):
-        self.proj_state = init_lecun_normal(self.proj_state, device=device)
+        self.reset_parameter()
+    def reset_parameter(self):
+        self.proj_state = init_lecun_normal(self.proj_state)
         nn.init.zeros_(self.proj_state.bias)
-        self.proj_state2 = init_lecun_normal(self.proj_state2, device=device)
+        self.proj_state2 = init_lecun_normal(self.proj_state2)
         nn.init.zeros_(self.proj_state2.bias)
 
     def forward(self, seq, msa, msa_full, pair, xyz_in, state, idx, cyclic_reses=None, use_checkpoint=False, motif_mask=None):

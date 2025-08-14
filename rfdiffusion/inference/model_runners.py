@@ -223,16 +223,13 @@ class Sampler:
         # Read input dimensions from checkpoint.
         self.d_t1d=self._conf.preprocess.d_t1d
         self.d_t2d=self._conf.preprocess.d_t2d
-        self._log.info('Creating model...')
-        model = RoseTTAFoldModule(**self._conf.model, d_t1d=self.d_t1d, d_t2d=self.d_t2d, T=self._conf.diffuser.T, device=self.device)
-        self._log.info('...model created')
+        model = RoseTTAFoldModule(**self._conf.model, d_t1d=self.d_t1d, d_t2d=self.d_t2d, T=self._conf.diffuser.T).to(self.device)
         if self._conf.logging.inputs:
             pickle_dir = pickle_function_call(model, 'forward', 'inference')
             print(f'pickle_dir: {pickle_dir}')
         model = model.eval()
-        self._log.info('Loading checkpoint...')
+        self._log.info(f'Loading checkpoint.')
         model.load_state_dict(self.ckpt['model_state_dict'], strict=True)
-        self._log.info('...checkpoint loaded')
         return model
 
     def construct_contig(self, target_feats):

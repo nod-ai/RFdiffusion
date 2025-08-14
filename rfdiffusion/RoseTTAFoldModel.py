@@ -28,7 +28,6 @@ class RoseTTAFoldModule(nn.Module):
                  SE3_param_full={'l0_in_features':32, 'l0_out_features':16, 'num_edge_features':32},
                  SE3_param_topk={'l0_in_features':32, 'l0_out_features':16, 'num_edge_features':32},
                  input_seq_onehot=False,     # For continuous vs. discrete sequence
-                 device=None,
                  ):
 
         super(RoseTTAFoldModule, self).__init__()
@@ -38,16 +37,16 @@ class RoseTTAFoldModule(nn.Module):
         # Input Embeddings
         d_state = SE3_param_topk['l0_out_features']
         self.latent_emb = MSA_emb(d_msa=d_msa, d_pair=d_pair, d_state=d_state,
-                p_drop=p_drop, input_seq_onehot=input_seq_onehot, device=device) # Allowed to take onehotseq
+                p_drop=p_drop, input_seq_onehot=input_seq_onehot) # Allowed to take onehotseq
         self.full_emb = Extra_emb(d_msa=d_msa_full, d_init=25,
-                p_drop=p_drop, input_seq_onehot=input_seq_onehot, device=device) # Allowed to take onehotseq
+                p_drop=p_drop, input_seq_onehot=input_seq_onehot) # Allowed to take onehotseq
         self.templ_emb = Templ_emb(d_pair=d_pair, d_templ=d_templ, d_state=d_state,
                                    n_head=n_head_templ,
-                                   d_hidden=d_hidden_templ, p_drop=0.25, d_t1d=d_t1d, d_t2d=d_t2d, device=device)
+                                   d_hidden=d_hidden_templ, p_drop=0.25, d_t1d=d_t1d, d_t2d=d_t2d)
 
 
         # Update inputs with outputs from previous round
-        self.recycle = Recycling(d_msa=d_msa, d_pair=d_pair, d_state=d_state, device=device)
+        self.recycle = Recycling(d_msa=d_msa, d_pair=d_pair, d_state=d_state)
         #
         self.simulator = IterativeSimulator(n_extra_block=n_extra_block,
                                             n_main_block=n_main_block,
@@ -58,13 +57,13 @@ class RoseTTAFoldModule(nn.Module):
                                             n_head_pair=n_head_pair,
                                             SE3_param_full=SE3_param_full,
                                             SE3_param_topk=SE3_param_topk,
-                                            p_drop=p_drop, device=device)
+                                            p_drop=p_drop)
         ##
-        self.c6d_pred = DistanceNetwork(d_pair, p_drop=p_drop, device=device)
-        self.aa_pred = MaskedTokenNetwork(d_msa, device=device)
-        self.lddt_pred = LDDTNetwork(d_state, device=device)
+        self.c6d_pred = DistanceNetwork(d_pair, p_drop=p_drop)
+        self.aa_pred = MaskedTokenNetwork(d_msa)
+        self.lddt_pred = LDDTNetwork(d_state)
 
-        self.exp_pred = ExpResolvedNetwork(d_msa, d_state, device=device)
+        self.exp_pred = ExpResolvedNetwork(d_msa, d_state)
 
     def forward(self, msa_latent, msa_full, seq, xyz, idx, t,
                 t1d=None, t2d=None, xyz_t=None, alpha_t=None,

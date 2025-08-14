@@ -14,7 +14,7 @@ class SE3TransformerWrapper(nn.Module):
     def __init__(self, num_layers=2, num_channels=32, num_degrees=3, n_heads=4, div=4,
                  l0_in_features=32, l0_out_features=32,
                  l1_in_features=3, l1_out_features=2,
-                 num_edge_features=32, device=None):
+                 num_edge_features=32):
         super().__init__()
         # Build the network
         self.l1_in = l1_in_features
@@ -46,13 +46,12 @@ class SE3TransformerWrapper(nn.Module):
                                   num_heads=n_heads,
                                   channels_div=div,
                                   fiber_edge=fiber_edge,
-                                  use_layer_norm=True,
-                                  device=device)
+                                  use_layer_norm=True)
                                   #use_layer_norm=False)
 
-        self.reset_parameter(device)
+        self.reset_parameter()
 
-    def reset_parameter(self, device=None):
+    def reset_parameter(self):
 
         # make sure linear layer before ReLu are initialized with kaiming_normal_
         for n, p in self.se3.named_parameters():
@@ -62,7 +61,7 @@ class SE3TransformerWrapper(nn.Module):
                 continue
             else:
                 if "radial_func" not in n:
-                    p = init_lecun_normal_param(p, device=device)
+                    p = init_lecun_normal_param(p)
                 else:
                     if "net.6" in n:
                         nn.init.zeros_(p)

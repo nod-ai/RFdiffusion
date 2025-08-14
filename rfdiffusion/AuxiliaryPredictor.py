@@ -2,11 +2,11 @@ import torch
 import torch.nn as nn
 
 class DistanceNetwork(nn.Module):
-    def __init__(self, n_feat, p_drop=0.1, device=None):
+    def __init__(self, n_feat, p_drop=0.1):
         super(DistanceNetwork, self).__init__()
         #
-        self.proj_symm = nn.Linear(n_feat, 37*2, device=device)
-        self.proj_asymm = nn.Linear(n_feat, 37+19, device=device)
+        self.proj_symm = nn.Linear(n_feat, 37*2)
+        self.proj_asymm = nn.Linear(n_feat, 37+19)
 
         self.reset_parameter()
 
@@ -34,9 +34,9 @@ class DistanceNetwork(nn.Module):
         return logits_dist, logits_omega, logits_theta, logits_phi
 
 class MaskedTokenNetwork(nn.Module):
-    def __init__(self, n_feat, device=None):
+    def __init__(self, n_feat):
         super(MaskedTokenNetwork, self).__init__()
-        self.proj = nn.Linear(n_feat, 21, device=device)
+        self.proj = nn.Linear(n_feat, 21)
 
         self.reset_parameter()
 
@@ -51,9 +51,9 @@ class MaskedTokenNetwork(nn.Module):
         return logits
 
 class LDDTNetwork(nn.Module):
-    def __init__(self, n_feat, n_bin_lddt=50, device=None):
+    def __init__(self, n_feat, n_bin_lddt=50):
         super(LDDTNetwork, self).__init__()
-        self.proj = nn.Linear(n_feat, n_bin_lddt, device=device)
+        self.proj = nn.Linear(n_feat, n_bin_lddt)
 
         self.reset_parameter()
 
@@ -67,11 +67,11 @@ class LDDTNetwork(nn.Module):
         return logits.permute(0,2,1)
 
 class ExpResolvedNetwork(nn.Module):
-    def __init__(self, d_msa, d_state, p_drop=0.1, device=None):
+    def __init__(self, d_msa, d_state, p_drop=0.1):
         super(ExpResolvedNetwork, self).__init__()
-        self.norm_msa = nn.LayerNorm(d_msa, device=device)
-        self.norm_state = nn.LayerNorm(d_state, device=device)
-        self.proj = nn.Linear(d_msa+d_state, 1, device=device)
+        self.norm_msa = nn.LayerNorm(d_msa)
+        self.norm_state = nn.LayerNorm(d_state)
+        self.proj = nn.Linear(d_msa+d_state, 1)
 
         self.reset_parameter()
 
