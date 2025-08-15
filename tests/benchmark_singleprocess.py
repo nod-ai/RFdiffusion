@@ -37,8 +37,8 @@ def benchmark_config(test_conf, compile=False, compilation_mode=None):
         overrides = {
             "inference": {
                 "num_designs": NUM_DESIGNS,
-                "compile": compile,
-                "compilation_mode": compilation_mode,
+                # "compile": compile,
+                # "compilation_mode": compilation_mode,
             }
         }
 
@@ -111,7 +111,7 @@ def main(job_name, output_dir, compile=False, compilation_mode=None, resume=Fals
     times_by_conf, failures = benchmark_configs(configs, csv_path, logger, compile=compile, compilation_mode=compilation_mode)
 
     if failures:
-        logger.error(f"{len(failures)} benchmarks failed: {failures}", file=sys.stderr)
+        logger.error(f"{len(failures)} benchmarks failed: {failures}")
         sys.exit(1)
 
 
