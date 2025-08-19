@@ -259,7 +259,6 @@ small:
   # Adapted from design_macrocyclic_monomer.sh
   macrocyclic_monomer:
     inference:
-      input_pdb: "input_pdbs/7zkr_GABARAP.pdb"
       cyclic: true
       cyc_chains: "a"
     contigmap:
