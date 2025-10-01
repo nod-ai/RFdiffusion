@@ -3,9 +3,9 @@
 Script to process RFdiffusion worker log files and create a CSV tracking
 design completion over elapsed time.
 
-Usage: python process_design_logs.py <log_directory>
+Usage: python process_distributed_logs.py <log_directory>
 
-Example: python process_design_logs.py outputs/2025-08-13/17-44-24
+Example: python process_distributed_logs.py outputs/2025-08-13/17-44-24
 """
 
 import sys
@@ -140,9 +140,10 @@ def write_csv(data: list[dict[str, float]], output_file: str):
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python process_design_logs.py <log_directory>")
-        print("Example: python process_design_logs.py outputs/2025-08-13/17-44-24")
+    fn = pathlib.Path(__file__).name
+    if len(sys.argv) != 2 or sys.argv[1] in ("-h", "--help"):
+        print(f"Usage: python {fn} <log_directory>")
+        print(f"Example: python {fn} outputs/2025-08-13/17-44-24")
         sys.exit(1)
 
     log_directory = pathlib.Path(sys.argv[1])
