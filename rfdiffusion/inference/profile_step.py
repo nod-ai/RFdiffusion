@@ -85,6 +85,6 @@ def profile_inference_step(conf: HydraConfig) -> None:
 
         if prof is not None:
             os.makedirs(os.path.dirname(trace_path), exist_ok=True)
-            print(f"Exporting trace to {trace_path}...", end="")
+            print(f"Exporting trace to {trace_path} ...", end="")
             prof.export_chrome_trace(trace_path)
             print(f"done")
