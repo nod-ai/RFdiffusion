@@ -111,15 +111,14 @@ def get_seqsep(idx, cyclic=None):
     neigh[neigh > 1] = 0.0 # if bonded -- 1.0 / else 0.0
     neigh = sign * neigh
 
-    # add cyclic edges
-    breaks = find_breaks(idx.squeeze().cpu().numpy())
-    chainids = np.zeros_like(idx.squeeze().cpu().numpy())
-    for i, b in enumerate(breaks):
-        chainids[b:] = i+1
-    chainids = torch.from_numpy(chainids).to(device=idx.device)
-
     # add cyclic edges with multiple chains
     if (cyclic is not None):
+        # add cyclic edges
+        breaks = find_breaks(idx.squeeze().cpu().numpy())
+        chainids = np.zeros_like(idx.squeeze().cpu().numpy())
+        for i, b in enumerate(breaks):
+            chainids[b:] = i+1
+        chainids = torch.from_numpy(chainids).to(device=idx.device)
         for chid in torch.unique(chainids):
             is_chid = chainids==chid
             cur_cyclic = cyclic*is_chid

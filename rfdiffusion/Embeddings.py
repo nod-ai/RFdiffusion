@@ -26,20 +26,19 @@ class PositionalEncoding2D(nn.Module):
         seqsep = idx[:,None,:] - idx[:,:,None] # (B, L, L)
         #
 
-
-        # adding support for multi-chain cyclic
-        # find chain breaks and label chain ids
-        breaks = find_breaks(idx.squeeze().cpu().numpy(), thresh=35)  # NOTE: Hard coded threshold for defining chain breaks here
-                                                                      #       Typical jump for chainbreaks is +200
-                                                                      #       Assumes monotonically increasing absolute IDX
-
-        chainids = np.zeros_like(idx.squeeze().cpu().numpy())
-        for i, b in enumerate(breaks):
-            chainids[b:] = i+1
-        chainids = torch.from_numpy(chainids).to(device=idx.device)
-
         # cyclic peptide
         if cyclize is not None:
+            # adding support for multi-chain cyclic
+            # find chain breaks and label chain ids
+            breaks = find_breaks(idx.squeeze().cpu().numpy(), thresh=35)  # NOTE: Hard coded threshold for defining chain breaks here
+                                                                        #       Typical jump for chainbreaks is +200
+                                                                        #       Assumes monotonically increasing absolute IDX
+
+            chainids = np.zeros_like(idx.squeeze().cpu().numpy())
+            for i, b in enumerate(breaks):
+                chainids[b:] = i+1
+            chainids = torch.from_numpy(chainids).to(device=idx.device)
+
             for chid in torch.unique(chainids):
                 is_chid = chainids==chid
                 cur_cyclize = cyclize*is_chid
