@@ -6,6 +6,3 @@ defaults:
 
 profile:
   wait_steps: 1
-
-inference:
-  output_prefix: test_outputs/profiles/trace
