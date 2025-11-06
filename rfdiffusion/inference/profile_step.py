@@ -1,9 +1,12 @@
 import contextlib
-import torch
 import logging
-from rfdiffusion.inference import utils as iu
-from hydra.core.hydra_config import HydraConfig
 import os
+
+import hydra
+from hydra.core.hydra_config import HydraConfig
+import torch
+
+from rfdiffusion.inference import utils as iu
 
 
 def profile_inference_step(conf: HydraConfig) -> None:
@@ -38,17 +41,15 @@ def profile_inference_step(conf: HydraConfig) -> None:
     design_startnum = sampler.inf_conf.design_startnum
     total_designs = sampler.inf_conf.num_designs + bench_conf.warmup_designs
 
+    output_dir = hydra.core.hydra_config.HydraConfig.get().runtime.output_dir
+
+
     for i_des in range(design_startnum, design_startnum + total_designs):
         if conf.inference.random_seed is not None:
             iu.seed_rngs(conf.inference.random_seed + i_des)
 
-        trace_path = f"{sampler.inf_conf.output_prefix}_{i_des}.json"
+
         log.info(f"Making design {i_des}")
-        if sampler.inf_conf.cautious and os.path.exists(trace_path):
-            log.warning(
-                f"(cautious mode) Skipping this design because {trace_path} already exists."
-            )
-            continue
 
         x_init, seq_init = sampler.sample_init()
 
@@ -56,24 +57,26 @@ def profile_inference_step(conf: HydraConfig) -> None:
         seq_t = torch.clone(seq_init)
         start_step = int(sampler.t_step_input)
 
-        cm = torch.profiler.profile(
-            activities=[
-                torch.profiler.ProfilerActivity.CPU,
-                torch.profiler.ProfilerActivity.CUDA,
-            ],
-            record_shapes=True,
-            profile_memory=True,
-            with_stack=True,
-            schedule=torch.profiler.schedule(
-                wait=conf.profile.wait_steps,
-                warmup=bench_conf.warmup_steps,
-                active=bench_conf.benchmark_steps,
-                repeat=1,
-            ),
-        )
+        cm = contextlib.nullcontext()
         if i_des < design_startnum + bench_conf.warmup_designs:
             print("Skipping profiling on this warmup design")
-            cm = contextlib.nullcontext()
+        else:
+            cm = torch.profiler.profile(
+                activities=[
+                    torch.profiler.ProfilerActivity.CPU,
+                    torch.profiler.ProfilerActivity.CUDA,
+                ],
+                record_shapes=True,
+                profile_memory=True,
+                with_stack=True,
+                schedule=torch.profiler.schedule(
+                    wait=conf.profile.wait_steps,
+                    warmup=bench_conf.warmup_steps,
+                    active=bench_conf.benchmark_steps,
+                    repeat=1,
+                ),
+            )
+            # torch.cuda.memory._record_memory_history()
 
         with cm as prof:
             for t in range(start_step, start_step - total_steps - 1, -1):
@@ -84,7 +87,12 @@ def profile_inference_step(conf: HydraConfig) -> None:
                     prof.step()
 
         if prof is not None:
-            os.makedirs(os.path.dirname(trace_path), exist_ok=True)
-            print(f"Exporting trace to {trace_path} ...", end="")
+            trace_path = os.path.join(output_dir, f"trace_{i_des}.json")
+            # mem_dump_path = os.path.join(output_dir, f"memdump_{i_des}.pkl")
+            print(f"Exporting trace to {trace_path} ...", end="", flush=True)
             prof.export_chrome_trace(trace_path)
             print(f"done")
+            # print(f"Exporting memory dump to {mem_dump_path} ...", end="", flush=True)
+            # torch.cuda.memory._dump_snapshot(mem_dump_path)
+            # print("done")
+
