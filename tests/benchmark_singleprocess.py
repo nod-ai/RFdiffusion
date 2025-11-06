@@ -15,7 +15,7 @@ import yaml
 from rfdiffusion.inference import utils as iu
 from rfdiffusion.inference.benchmark_step import benchmark_inference_step
 
-NUM_DESIGNS = 5
+NUM_DESIGNS = 3
 
 script_dir = pathlib.Path(__file__).parent
 example_dir = script_dir.parent / "examples"
