@@ -283,7 +283,7 @@ class ComputeAllAtomCoords(nn.Module):
 
         Rs, Ts = rigid_from_3_points(xyz[...,0,:],xyz[...,1,:],xyz[...,2,:], non_ideal=non_ideal)
 
-        RTF0 = torch.eye(4).repeat(B,L,1,1).to(device=Rs.device)
+        RTF0 = torch.eye(4, device=Rs.device).repeat(B,L,1,1)
 
         # bb
         RTF0[:,:,:3,:3] = Rs
