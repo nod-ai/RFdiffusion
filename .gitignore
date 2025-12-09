@@ -1,4 +1,6 @@
 *.py[cod]
+*.venv/
+*.vscode/
 rfdiffusion.egg-info
 __pycache__/
 
