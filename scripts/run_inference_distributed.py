@@ -19,6 +19,8 @@ import os
 import pathlib
 import time
 
+logging.captureWarnings(True)
+
 import hydra
 from hydra.core.hydra_config import HydraConfig
 import torch
@@ -43,8 +45,6 @@ def get_logger(name, log_dir):
     return logger
 
 def run_worker(rank: int, world_size: int, conf: HydraConfig, output_dir):
-    output_dir =  output_dir / str(rank)
-    output_dir.mkdir(parents=True)
     logger = get_logger(rank, output_dir)
 
     if torch.cuda.is_available():
@@ -104,7 +104,7 @@ def main(conf: HydraConfig):
     logger.info(f"Will save to {output_dir}")
     mp.spawn(run_worker, args=(world_size, conf, output_dir), nprocs=world_size, join=True)
     elapsed = time.perf_counter() - start
-    logger.info(f"Whole job took {elapsed:.0f} seconds to create {conf.inference.num_designs} designs")
+    logger.info(f"Whole job took {elapsed:.0f} seconds to create {conf.inference.num_designs} designs. {elapsed/conf.inference.num_designs:.0f}s per design")
 
 
 if __name__ == "__main__":

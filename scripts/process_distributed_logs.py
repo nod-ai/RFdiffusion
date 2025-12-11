@@ -58,12 +58,7 @@ def extract_completion_times(log_file) -> list[dict[str, datetime|int]]:
 
 
 def find_start_time(log_dir) -> datetime:
-    root_logs = list(log_dir.glob("*.log"))
-    if len(root_logs) != 1:
-        print(
-            f"ERROR: Expected exactly one root log, but got {len(root_logs)}: root_logs"
-        )
-    root_log = root_logs[0]
+    root_log = log_dir / "run_inference_distributed.log"
 
     with open(root_log) as f:
         first_line = f.readline().strip()
@@ -87,31 +82,24 @@ def process_all_logs(log_directory: str) -> list[tuple[float, int]]:
 
     log_dir = pathlib.Path(log_directory)
 
-    for subdir in log_dir.iterdir():
-        if subdir.is_dir() and subdir.name.isdigit():
-            worker = int(subdir.name)
+    # worker.<worker>.<pid>.log
+    for log_file in log_dir.glob("**/worker.*.log"):
+        match = re.match(r"worker\.(.+?)\.\d+\.log", log_file.name)
+        if not match:
+            raise ValueError(f"Unexpected worker log filename: {log_file.name}")
+        worker = match.group(1)
 
-            log_files = list(subdir.glob(f"worker.{worker}.*.log"))
-            if len(log_files) != 1:
-                print(f"Found multiple log files in {subdir}", file=sys.stderr)
-                sys.exit(1)
-
-            log_file = log_files[0]
-            print(f"Processing {log_file}")
-            completions = extract_completion_times(log_file)
-            for c in completions:
-                c["worker"] = worker
-            all_completions.extend(completions)
+        print(f"Processing {log_file}")
+        completions = extract_completion_times(log_file)
+        for c in completions:
+            c["worker"] = worker
+        all_completions.extend(completions)
 
     if not all_completions:
         print("Error: No design completions found in any log files", file=sys.stderr)
         sys.exit(1)
 
-    # Find start time
     start_time = find_start_time(log_directory)
-    if start_time is None:
-        print("Error: Could not determine start time")
-        return []
 
     print(f"Start time: {start_time}")
     print(f"Found {len(all_completions)} design completions")
@@ -161,8 +149,8 @@ def main():
     write_csv(data, log_directory / "design_completion_times.csv")
 
     print(f"\nSummary:")
-    print(f"Total designs completed: {len(data)}")
-    print(f"Time range: {data[0]["timestamp"]} to {data[-1]["timestamp"]}")
+    print(f"Total designs completed: {data[-1]['completed_designs']}")
+    print(f"Time range: {data[0]['timestamp']} to {data[-1]['timestamp']}")
     total_elapsed_s = data[-1]["elapsed_s"]
     print(f"Total elapsed time: {total_elapsed_s:.1f}s ({total_elapsed_s/60:.1f} minutes)")
 
