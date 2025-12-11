@@ -46,6 +46,7 @@ def get_logger(name, log_dir):
 
 def run_worker(rank: int, world_size: int, conf: HydraConfig, output_dir):
     logger = get_logger(rank, output_dir)
+    torch.set_num_threads(os.cpu_count() // world_size)
 
     if torch.cuda.is_available():
         torch.cuda.set_device(rank)
