@@ -191,6 +191,7 @@ if __name__ == '__main__':
     is_distributed = init_distributed()
     local_rank = get_local_rank()
     args = PARSER.parse_args()
+    print(args)
 
     logging.getLogger().setLevel(logging.CRITICAL if local_rank != 0 or args.silent else logging.INFO)
 
@@ -201,8 +202,15 @@ if __name__ == '__main__':
     if args.seed is not None:
         logging.info(f'Using seed {args.seed}')
         seed_everything(args.seed)
-
-    loggers = [DLLogger(save_dir=args.log_dir, filename=args.dllogger_name)]
+    name_id = str(args.batch_size)+'_'
+    if args.amp:
+        amp_str = 'amp'
+    else:
+        amp_str = ''
+    if is_distributed:
+        loggers = [DLLogger(save_dir=args.log_dir, filename='multi_gpu_train_'+name_id+amp_str+args.dllogger_name)]
+    else:
+        loggers = [DLLogger(save_dir=args.log_dir, filename='single_gpu_train_'+name_id+amp_str+args.dllogger_name)]
     if args.wandb:
         loggers.append(WandbLogger(name=f'QM9({args.task})', save_dir=args.log_dir, project='se3-transformer'))
     logger = LoggerCollection(loggers)
@@ -234,7 +242,7 @@ if __name__ == '__main__':
     torch.set_float32_matmul_precision('high')
     print_parameters_count(model)
     logger.log_hyperparams(vars(args))
-    increase_l2_fetch_granularity()
+    #increase_l2_fetch_granularity()
     train(model,
           loss_fn,
           datamodule.train_dataloader(),

@@ -68,6 +68,7 @@ if __name__ == '__main__':
     is_distributed = init_distributed()
     local_rank = get_local_rank()
     args = PARSER.parse_args()
+    print(args)
 
     logging.getLogger().setLevel(logging.CRITICAL if local_rank != 0 or args.silent else logging.INFO)
 
@@ -87,7 +88,12 @@ if __name__ == '__main__':
 
     major_cc, minor_cc = torch.cuda.get_device_capability()
 
-    loggers = [DLLogger(save_dir=args.log_dir, filename=args.dllogger_name)]
+    if args.amp:
+        amp_str = 'amp_'
+    else:
+        amp_str = ''
+
+    loggers = [DLLogger(save_dir=args.log_dir, filename='single_gpu_inference_'+amp_str+args.dllogger_name)]
     if args.wandb:
         loggers.append(WandbLogger(name=f'QM9({args.task})', save_dir=args.log_dir, project='se3-transformer'))
     logger = LoggerCollection(loggers)
