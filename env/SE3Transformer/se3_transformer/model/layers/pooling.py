@@ -23,10 +23,13 @@
 
 from typing import Dict, Literal
 
+import torch
 import torch.nn as nn
-from dgl import DGLGraph
 from dgl.nn.pytorch import AvgPooling, MaxPooling
 from torch import Tensor
+from torch_geometric.nn import global_max_pool, global_mean_pool
+
+from se3_transformer.model.graph import SE3Graph, DGLGraphWrapper
 
 
 class GPooling(nn.Module):
@@ -46,8 +49,34 @@ class GPooling(nn.Module):
         assert pool in ['max', 'avg'], f'Unknown pooling: {pool}'
         assert feat_type == 0 or pool == 'avg', 'Max pooling on type > 0 features will break equivariance'
         self.feat_type = feat_type
-        self.pool = MaxPooling() if pool == 'max' else AvgPooling()
+        self.pool_type = pool
+        # DGL pooling modules for DGLGraphWrapper
+        self._dgl_pool = MaxPooling() if pool == 'max' else AvgPooling()
 
-    def forward(self, features: Dict[str, Tensor], graph: DGLGraph, **kwargs) -> Tensor:
-        pooled = self.pool(graph, features[str(self.feat_type)])
+    def forward(self, features: Dict[str, Tensor], graph: SE3Graph, **kwargs) -> Tensor:
+        feat = features[str(self.feat_type)]
+
+        if isinstance(graph, DGLGraphWrapper):
+            pooled = self._dgl_pool(graph._graph, feat)
+        else:
+            # PyTorch Geometric pooling for PyTorchGraph
+            # PyG pooling expects [num_nodes, num_features], so flatten extra dims
+            orig_shape = feat.shape
+            feat_flat = feat.flatten()
+
+            # Create batch assignment tensor from batch_num_nodes
+            batch_num_nodes = graph.batch_num_nodes()
+            batch = torch.repeat_interleave(
+                torch.arange(batch_num_nodes.shape[0], device=feat.device),
+                batch_num_nodes
+            )
+
+            if self.pool_type == 'max':
+                pooled = global_max_pool(feat_flat, batch)
+            else:
+                pooled = global_mean_pool(feat_flat, batch)
+
+            # Restore shape: [batch_size, *orig_shape[1:]]
+            pooled = pooled.view(pooled.shape[0], *orig_shape[1:])
+
         return pooled.squeeze(dim=-1)

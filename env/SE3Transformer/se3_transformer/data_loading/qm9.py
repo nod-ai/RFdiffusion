@@ -33,6 +33,7 @@ from tqdm import tqdm
 
 from se3_transformer.data_loading.data_module import DataModule
 from se3_transformer.model.basis import get_basis
+from se3_transformer.model.graph import from_dgl_graph
 from se3_transformer.runtime.utils import get_local_rank, str2bool, using_tensor_cores
 
 
@@ -104,6 +105,9 @@ class QM9DataModule(DataModule):
         # get node features
         node_feats = {'0': batched_graph.ndata['attr'][:, :self.NODE_FEATURE_DIM, None]}
         targets = (torch.cat(y) - self.targets_mean) / self.targets_std
+
+        # Convert to the SE3Graph interface
+        batched_graph = from_dgl_graph(batched_graph)
 
         if bases:
             # collate bases

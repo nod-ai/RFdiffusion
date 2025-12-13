@@ -26,16 +26,17 @@ from typing import Optional, Literal, Dict
 
 import torch
 import torch.nn as nn
-from dgl import DGLGraph
 from torch import Tensor
 
 from se3_transformer.model.basis import get_basis, update_basis_with_fused
+from se3_transformer.model.graph import SE3Graph
 from se3_transformer.model.layers.attention import AttentionBlockSE3
 from se3_transformer.model.layers.convolution import ConvSE3, ConvSE3FuseLevel
 from se3_transformer.model.layers.norm import NormSE3
 from se3_transformer.model.layers.pooling import GPooling
 from se3_transformer.runtime.utils import str2bool
 from se3_transformer.model.fiber import Fiber
+
 
 
 class Sequential(nn.Sequential):
@@ -137,9 +138,9 @@ class SE3Transformer(nn.Module):
 
         if pooling is not None:
             assert return_type is not None, 'return_type must be specified when pooling'
-            self.pooling_module = GPooling(pool=pooling, feat_type=return_type, device=device)
+            self.pooling_module = GPooling(pool=pooling, feat_type=return_type)
 
-    def forward(self, graph: DGLGraph, node_feats: Dict[str, Tensor],
+    def forward(self, graph: SE3Graph, node_feats: Dict[str, Tensor],
                 edge_feats: Optional[Dict[str, Tensor]] = None,
                 basis: Optional[Dict[str, Tensor]] = None):
         # Compute bases in case they weren't precomputed as part of the data loading

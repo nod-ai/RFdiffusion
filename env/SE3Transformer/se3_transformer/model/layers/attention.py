@@ -21,16 +21,14 @@
 # SPDX-FileCopyrightText: Copyright (c) 2021-2022 NVIDIA CORPORATION & AFFILIATES
 # SPDX-License-Identifier: MIT
 
-import dgl
 import numpy as np
 import torch
 import torch.nn as nn
-from dgl import DGLGraph
-from dgl.ops import edge_softmax
 from torch import Tensor
 from typing import Dict, Optional, Union
 
 from se3_transformer.model.fiber import Fiber
+from se3_transformer.model.graph import SE3Graph
 from se3_transformer.model.layers.convolution import ConvSE3, ConvSE3FuseLevel
 from se3_transformer.model.layers.linear import LinearSE3
 from se3_transformer.runtime.utils import degree_to_dim, aggregate_residual, unfuse_features
@@ -62,7 +60,7 @@ class AttentionSE3(nn.Module):
             value: Union[Tensor, Dict[str, Tensor]],  # edge features (may be fused)
             key: Union[Tensor, Dict[str, Tensor]],  # edge features (may be fused)
             query: Dict[str, Tensor],  # node features
-            graph: DGLGraph
+            graph: SE3Graph,
     ):
         with maybe_nvtx_range('AttentionSE3'):
             with maybe_nvtx_range('reshape keys and queries'):
@@ -79,9 +77,9 @@ class AttentionSE3(nn.Module):
 
             with maybe_nvtx_range('attention dot product + softmax'):
                 # Compute attention weights (softmax of inner product between key and query)
-                edge_weights = dgl.ops.e_dot_v(graph, key, query).squeeze(-1)
+                edge_weights = graph.e_dot_v(key, query).squeeze(-1)
                 edge_weights = edge_weights / np.sqrt(self.key_fiber.num_features)
-                edge_weights = edge_softmax(graph, edge_weights)
+                edge_weights = graph.edge_softmax(edge_weights)
                 edge_weights = edge_weights[..., None, None]
 
             with maybe_nvtx_range('weighted sum'):
@@ -89,7 +87,7 @@ class AttentionSE3(nn.Module):
                     # features of all types are fused
                     v = value.view(value.shape[0], self.num_heads, -1, value.shape[-1])
                     weights = edge_weights * v
-                    feat_out = dgl.ops.copy_e_sum(graph, weights)
+                    feat_out = graph.copy_e_sum(weights)
                     feat_out = feat_out.view(feat_out.shape[0], -1, feat_out.shape[-1])  # merge heads
                     out = unfuse_features(feat_out, self.value_fiber.degrees)
                 else:
@@ -98,7 +96,7 @@ class AttentionSE3(nn.Module):
                         v = value[str(degree)].view(-1, self.num_heads, channels // self.num_heads,
                                                     degree_to_dim(degree))
                         weights = edge_weights * v
-                        res = dgl.ops.copy_e_sum(graph, weights)
+                        res = graph.copy_e_sum(weights)
                         out[str(degree)] = res.view(-1, channels, degree_to_dim(degree))  # merge heads
 
                 return out
@@ -152,8 +150,8 @@ class AttentionBlockSE3(nn.Module):
             self,
             node_features: Dict[str, Tensor],
             edge_features: Dict[str, Tensor],
-            graph: DGLGraph,
-            basis: Dict[str, Tensor]
+            graph: SE3Graph,
+            basis: Dict[str, Tensor],
     ):
         with maybe_nvtx_range('AttentionBlockSE3'):
             with maybe_nvtx_range('keys / values'):

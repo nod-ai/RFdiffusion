@@ -157,7 +157,6 @@ def update_basis_with_fused(basis: Dict[str, Tensor],
     del basis['0,0']  # We know that the basis for l = k = 0 is filled with a constant
     return basis
 
-
 @torch.compiler.disable(recursive=False)
 def get_basis(relative_pos: Tensor,
               max_degree: int = 4,

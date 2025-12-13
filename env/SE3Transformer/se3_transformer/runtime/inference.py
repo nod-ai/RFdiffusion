@@ -113,6 +113,9 @@ if __name__ == '__main__':
         checkpoint = torch.load(str(args.load_ckpt_path), map_location={'cuda:0': f'cuda:{local_rank}'}, weights_only=True)
         model.load_state_dict(checkpoint['state_dict'])
 
+    if args.compile:
+        model.compile()
+
     if is_distributed:
         nproc_per_node = torch.cuda.device_count()
         affinity = gpu_affinity.set_affinity(local_rank, nproc_per_node, scope='socket')

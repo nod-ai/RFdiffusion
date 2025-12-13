@@ -191,7 +191,6 @@ if __name__ == '__main__':
     is_distributed = init_distributed()
     local_rank = get_local_rank()
     args = PARSER.parse_args()
-    print(args)
 
     logging.getLogger().setLevel(logging.CRITICAL if local_rank != 0 or args.silent else logging.INFO)
 
@@ -224,6 +223,8 @@ if __name__ == '__main__':
         tensor_cores=using_tensor_cores(args.amp),  # use Tensor Cores more effectively
         **vars(args)
     )
+    if args.compile:
+        model.compile()
     loss_fn = nn.L1Loss()
 
     if args.benchmark:

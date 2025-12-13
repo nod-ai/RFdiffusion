@@ -24,13 +24,18 @@
 import dgl
 import torch
 
+from se3_transformer.model.graph import SE3Graph, from_dgl_graph
 
-def get_random_graph(N, num_edges_factor=18):
+
+def get_random_graph(N, num_edges_factor=18) -> SE3Graph:
     graph = dgl.remove_self_loop(dgl.rand_graph(N, N * num_edges_factor))
-    return graph
+    # Need to set rel_pos before wrapping if using PyTorch backend
+    # For random graphs in tests, we set it to zeros initially
+    graph.edata['rel_pos'] = torch.zeros(graph.num_edges(), 3)
+    return from_dgl_graph(graph)
 
 
-def assign_relative_pos(graph, coords):
+def assign_relative_pos(graph: SE3Graph, coords) -> SE3Graph:
     src, dst = graph.edges()
     graph.edata['rel_pos'] = coords[src] - coords[dst]
     return graph

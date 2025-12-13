@@ -25,16 +25,15 @@ from enum import Enum
 from itertools import product
 from typing import Dict
 
-import dgl
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.utils.checkpoint
-from dgl import DGLGraph
 from torch import Tensor
 from se3_transformer.model.profiling import maybe_nvtx_range
 
 from se3_transformer.model.fiber import Fiber
+from se3_transformer.model.graph import SE3Graph
 from se3_transformer.runtime.utils import degree_to_dim, unfuse_features
 
 
@@ -287,12 +286,14 @@ class ConvSE3(nn.Module):
             self,
             node_feats: Dict[str, Tensor],
             edge_feats: Dict[str, Tensor],
-            graph: DGLGraph,
-            basis: Dict[str, Tensor]
+            graph: SE3Graph,
+            basis: Dict[str, Tensor],
     ):
         with maybe_nvtx_range(f'ConvSE3'):
             invariant_edge_feats = edge_feats['0'].squeeze(-1)
+
             src, dst = graph.edges()
+
             out = {}
             in_features = []
 
@@ -353,7 +354,7 @@ class ConvSE3(nn.Module):
                 if self.pool:
                     with maybe_nvtx_range(f'pooling'):
                         if isinstance(out, dict):
-                            out[str(degree_out)] = dgl.ops.copy_e_sum(graph, out[str(degree_out)])
+                            out[str(degree_out)] = graph.copy_e_sum(out[str(degree_out)])
                         else:
-                            out = dgl.ops.copy_e_sum(graph, out)
+                            out = graph.copy_e_sum(out)
             return out

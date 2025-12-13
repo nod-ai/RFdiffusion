@@ -55,6 +55,7 @@ PARSER.add_argument('--seed', type=int, default=None, help='Set a seed globally'
 PARSER.add_argument('--num_workers', type=int, default=8, help='Number of dataloading workers')
 
 PARSER.add_argument('--amp', type=str2bool, nargs='?', const=True, default=False, help='Use Automatic Mixed Precision')
+PARSER.add_argument('--compile', type=str2bool, nargs='?', const=True, default=False, help='Use Torch Compile')
 PARSER.add_argument('--gradient_clip', type=float, default=None, help='Clipping of the gradient norms')
 PARSER.add_argument('--accumulate_grad_batches', type=int, default=1, help='Gradient accumulation')
 PARSER.add_argument('--ckpt_interval', type=int, default=-1, help='Save a checkpoint every N epochs')
